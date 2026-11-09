@@ -208,6 +208,8 @@
   .grid-2 { display: grid; grid-template-columns: 1.12fr .88fr; gap: 26px; flex: 1; min-height: 0; }
   .col { display: flex; flex-direction: column; gap: 26px; min-height: 0; }
   .btn-row { display: flex; gap: 12px; }
+  .btn-row.hug { flex-wrap: wrap; }
+  .btn-row.hug > .btn { flex: 0 0 auto; }
   .btn-row > .btn { flex: 1; }
   .kv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 28px; margin-top: 4px; }
   .kv .label { display: block; margin-bottom: 6px; }
@@ -692,7 +694,7 @@
                   <div class="step"><span class="n">4</span><div class="t">Press Disney+ and talk.<small>OK sends, Back cancels</small></div></div>
                   <div class="sep"></div>
                   <div class="code-chip"><span class="muted">Check from the Mac</span><span class="mono">curl 192.168.4.58:8765/ping</span></div>
-                  <div class="btn-row" style="margin-top:18px">
+                  <div class="btn-row hug" style="margin-top:18px">
                     <button class="btn dark"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span class="lbl">Pair another TV</span></button>
                     <button class="btn dark"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span class="lbl">Test the mic</span></button>
                   </div>
