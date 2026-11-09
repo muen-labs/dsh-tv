@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A1020"/><stop offset="1" stop-color="#172542"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="40%" r="58%">
+      <stop offset="0" stop-color="#4D6BFE" stop-opacity=".30"/><stop offset="1" stop-color="#4D6BFE" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="body" x1="100" y1="250" x2="420" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4D6BFE"/><stop offset=".5" stop-color="#35A8FF"/><stop offset="1" stop-color="#2DE2C5"/>
+    </linearGradient>
+    <linearGradient id="arc" x1="190" y1="150" x2="300" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B7D4FF"/><stop offset="1" stop-color="#35D0FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="116" fill="url(#halo)"/>
+  <rect x="2" y="2" width="508" height="508" rx="114" fill="none" stroke="#4D6BFE" stroke-opacity=".30" stroke-width="3"/>
+
+  <!-- whale body -->
+  <path fill="url(#body)" d="M86 318
+      C86 274 124 246 178 243
+      C242 239 298 258 326 290
+      C336 301 342 312 344 322
+      C346 344 324 360 292 362
+      L172 362
+      C120 362 86 346 86 318 Z"/>
+  <!-- tail flukes -->
+  <path fill="url(#body)" d="M334 322
+      C360 314 386 292 396 264
+      C400 253 413 254 414 266
+      C414 292 403 314 386 328
+      C404 340 412 362 403 374
+      C397 383 386 379 380 368
+      C368 344 352 330 334 330 Z"/>
+  <!-- pectoral fin -->
+  <path fill="#2B7FE0" opacity=".92" d="M206 352 C214 380 242 388 260 368 C244 356 224 350 206 352 Z"/>
+  <!-- belly highlight -->
+  <path d="M150 344 C194 356 240 356 282 344" stroke="#D6F7FF" stroke-opacity=".55" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <!-- eye + smile -->
+  <circle cx="150" cy="300" r="7.5" fill="#04101E"/>
+  <path d="M126 322 q 18 12 40 4" stroke="#04101E" stroke-opacity=".42" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <!-- listening arcs -->
+  <ellipse cx="206" cy="250" rx="9" ry="4.5" fill="#0B2A46" opacity=".4"/>
+  <g stroke="url(#arc)" stroke-linecap="round" fill="none">
+    <path d="M 186 232 A 22 22 0 0 1 226 232" stroke-width="9"/>
+    <path d="M 172 214 A 38 38 0 0 1 240 214" stroke-width="8" opacity=".7"/>
+  </g>
+  <!-- head highlight -->
+  <path d="M120 282 C 132 258 158 246 186 245" stroke="#DCEBFF" stroke-opacity=".35" stroke-width="8" stroke-linecap="round" fill="none"/>
+</svg>

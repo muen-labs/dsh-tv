@@ -41,6 +41,13 @@ Typography (EVA text styles, TV-scaled): **H1** 32sp bold · **H2** 20sp medium
 Android resources: [`android/tv-assistant/res/values/theme_eva.xml`](android/tv-assistant/res/values/theme_eva.xml).
 Web pane: `evaTheme` CSS variables in [`plugin/ui/src/ui.tsx`](plugin/ui/src/ui.tsx).
 
+## App icon
+
+The launcher icon is the whale emblem on a white rounded tile (`512 → 128`),
+with a 320×180 Leanback banner: emblem + “DeepSeek TV Assistant”. The original
+project-owned mark is kept at `brand/deepseek-tv-whale.svg` (MIT) as an
+alternative for release builds.
+
 ## Colour system (glows)
 
 Two chromatic glows sit behind the device scene, picked with a split-complementary

@@ -34,14 +34,13 @@ and `mlx-community/whisper-base.en-mlx`.
   marks, or assets.
 
 
-## App icon — DeepSeek Harness Whale Girl
+## App icon — DeepSeek whale emblem
 
-- Source: <https://github.com/fornarwhal/deepseek-whale-girl-icon>
-- Files: `docs/ui-assets/app-icon*.png` derived from `whale-girl-transparent.png`
-- Characters: 上善无形 (OC「溟月」), DeepSeek elements by ZipZipPipe, restoration by QYQCAMIAO
-- License: **CC BY-NC-SA 4.0** (attribution, non-commercial, share-alike)
-
-This icon is used in the UI mockup and as the proposed app icon. It is **not
-MIT-compatible** and must not be redistributed in the MIT-licensed APK/release
-without permission from the rights holders. A project-owned or permissively
-licensed icon should be used for release builds until then.
+- The app icon and Leanback banner use the **DeepSeek whale emblem** supplied by
+  the project owner (`docs/ui-assets/app-icon*.png`, `banner.png`).
+- The emblem is DeepSeek's brand mark; it is used here as the app identity with
+  the owner's direction. It is not covered by this project's MIT licence, and
+  should be replaced or cleared for redistribution if the project is published
+  as a general third-party app.
+- An original project-owned alternative lives at `brand/deepseek-tv-whale.svg`
+  (MIT): a whale silhouette with a sonar arc in the DeepSeek blue gradient.
