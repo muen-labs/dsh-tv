@@ -1,7 +1,7 @@
 # Brand
 
-- **App icon**: white tile + whale silhouette + “TV”, DeepSeek deep blue `#576BB2`.
-  Minimal, no gradients. SVG source for the whale mark: `deepseek-tv-whale.svg`
-  (original project-owned, MIT) — the shipped whale shape comes from the
-  DeepSeek emblem with the owner's direction.
-- The mascot character (animated pet) is separate from the product mark.
+- **App icon**: white tile with the DeepSeek whale and lowercase **tv**
+  (Poppins Medium), both DeepSeek blue `#4D6BFF`; white 320×180 Leanback banner.
+- The whale shape comes from the DeepSeek emblem with the owner's direction;
+  the wordmark is a raster render using Poppins (OFL, no font files shipped).
+- Mascot character (animated pet) is separate from the product mark.

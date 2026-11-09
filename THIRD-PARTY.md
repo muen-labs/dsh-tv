@@ -44,3 +44,9 @@ and `mlx-community/whisper-base.en-mlx`.
   as a general third-party app.
 - An original project-owned alternative lives at `brand/deepseek-tv-whale.svg`
   (MIT): a whale silhouette with a sonar arc in the DeepSeek blue gradient.
+
+## Wordmark font
+
+The lowercase `tv` in the app icon is rendered with **Poppins Medium**
+(SIL Open Font License 1.1). No font files are redistributed — only rasterised
+glyphs in `docs/ui-assets/app-icon*.png`.

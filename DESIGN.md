@@ -43,10 +43,10 @@ Web pane: `evaTheme` CSS variables in [`plugin/ui/src/ui.tsx`](plugin/ui/src/ui.
 
 ## App icon
 
-Minimal: a white tile, the whale silhouette and **TV** next to it in the
-DeepSeek deep blue sampled from the emblem (`#576BB2`). No gradients, no extra
-artwork. Sizes 512/256/192/128, plus a white 320×180 Leanback banner with the
-same mark. The launcher label is **DeepSeek TV**.
+Minimal DeepSeek TV lockup: white tile, the DeepSeek whale, and lowercase
+**tv** in Poppins Medium, both in DeepSeek blue `#4D6BFF`. No gradients or
+extra artwork. Sizes 512/256/192/128, plus a white 320×180 Leanback banner.
+Launcher label: **DeepSeek TV**.
 
 ![icon](docs/ui-assets/icon-preview.png)
 
