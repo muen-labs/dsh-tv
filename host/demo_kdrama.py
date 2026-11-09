@@ -27,10 +27,14 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "host"))
 import tv_memory  # noqa: E402
 
+# Source-scoped first (the user's trusted set), then a general freshness query.
 TITLE_QUERIES = [
-    "what kdramas are people watching this week reddit r/kdrama {month} {year}",
-    "kdrama viewership ratings this week {month} {year}",
-    "most popular airing kdramas {month} {year}",
+    ("reddit", "site:reddit.com/r/kdrama what are you watching {month} {year} kdrama"),
+    ("mydramalist", "site:mydramalist.com currently airing kdramas {month} {year}"),
+    ("tmdb", "site:themoviedb.org kdrama airing {month} {year}"),
+    ("rottentomatoes", "site:rottentomatoes.com best kdrama {month} {year}"),
+    ("imdb", "site:imdb.com kdrama trending {month} {year}"),
+    ("general", "kdrama viewership ratings this week {month} {year}"),
 ]
 
 
@@ -75,9 +79,12 @@ def research() -> dict:
     results = []
     today = time.localtime()
     month, year = time.strftime("%B", today), today.tm_year
-    for q in TITLE_QUERIES:
+    for label, q in TITLE_QUERIES:
         try:
-            results += search(q.format(month=month, year=year))
+            hits = search(q.format(month=month, year=year))
+            for hit in hits:
+                hit["_source"] = label
+            results += hits
         except Exception as exc:  # noqa: BLE001
             print(f"search failed: {exc}", file=sys.stderr)
     seen, ctx = set(), []
@@ -86,7 +93,7 @@ def research() -> dict:
         if not url or url in seen:
             continue
         seen.add(url)
-        ctx.append(f"- {r.get('title')} ({r.get('site_name')}, {r.get('date','')})\n"
+        ctx.append(f"- [{r.get('_source','')}] {r.get('title')} ({r.get('site_name')}, {r.get('date','')})\n"
                    f"  {r.get('summary','')[:280]}\n  {url}")
     taste = tv_memory.taste_text()
     prompt = f"""You are the TV concierge for this household. Taste: {taste}
@@ -95,6 +102,9 @@ Return JSON only:
 {{"top3":[{{"title":"...","why":"max 12 words"}}],"pick":{{"title":"...","reason":"max 28 words","runtime":"..."}},
   "question":"Want to watch it here?",
   "services":["Stremio with Torrentio"], "source":"https://..."}}
+Use this trusted source set where possible: r/kdrama, MyDramaList, TMDB,
+Rotten Tomatoes, IMDb. Prefer a title corroborated by at least two distinct
+sources; cite the strongest URL and list which sources agreed.
 Recency is mandatory: only consider titles that are currently airing, released in
 the last 30 days, or topping this week's ratings/buzz lists. Ignore "best of the
 year so far" articles and anything older than ~6 weeks unless the sources are all
