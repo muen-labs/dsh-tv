@@ -119,6 +119,11 @@ def mdblist_lists(only=("korean", "asia", "japan")) -> list[dict]:
             title = item.get("title") or item.get("name") or ""
             if not title:
                 continue
+            year = item.get("release_year")
+            # hard recency guard: old catalogue titles (e.g. Vincenzo) must not
+            # leak into "what's trending now" recommendations
+            if isinstance(year, int) and year < 2025:
+                continue
             ids = item.get("ids") or {}
             tmdb = ids.get("tmdb") or ids.get("tmdbid")
             out.append({
@@ -251,7 +256,8 @@ Return JSON only:
 Use this trusted source set where possible: Trakt (trending/popular),
 r/kdrama, MyDramaList, TMDB, Rotten Tomatoes, IMDb. Prefer a title corroborated by at least two distinct
 sources; cite the strongest URL and list which sources agreed.
-Recency is mandatory: only consider titles that are currently airing, released in
+Current year is 2026. NEVER pick a title released before 2025, even if it is in
+a curated list. Recency is mandatory: only consider titles that are currently airing, released in
 the last 30 days, or topping this week's ratings/buzz lists. Ignore "best of the
 year so far" articles and anything older than ~6 weeks unless the sources are all
 from this week. Prefer titles from sources dated within the last 10 days and say

@@ -14,7 +14,7 @@ Target narrative:
 
 ```bash
 python3 host/demo_kdrama.py --recommend --reveal   # research + FOR YOU overlay
-python3 host/demo_kdrama.py --play "Vincenzo"      # catalog-first -> search -> streams
+python3 host/demo_kdrama.py --play "Doctor X: Age of the White Mafia"      # catalog-first -> search -> streams
 ```
 
 Screen record the TV while running:
