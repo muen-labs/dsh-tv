@@ -1,0 +1,315 @@
+{
+ "device": {
+  "model": "onn. Streaming Device 4K pro",
+  "android": "14",
+  "host": "192.168.4.58",
+  "bridge_port": 8765
+ },
+ "navigation": {
+  "keys": "up/down/left/right/ok/back/home/recents/menu/playpause/next/prev/rewind/fastforward/volup/voldown/mute",
+  "text": "keyboard-aware; use `text \"...\"` then `key enter`",
+  "verify": "python3 host/dshtv.py state  and  python3 host/dshtv.py ui",
+  "rule": "Never assume an app is open; launch, wait, then check state/ui. Screenshots can be black on DRM playback."
+ },
+ "apps": [
+  {
+   "package": "com.neilturner.aerialviews",
+   "label": "Aerial Views",
+   "component": "com.neilturner.aerialviews/.ui.MainActivity",
+   "category": "ambient",
+   "notes": "Aerial screensaver; launch to test dreams/screensaver behaviour."
+  },
+  {
+   "package": "com.tduk.scrmgr",
+   "label": "TDUK Screensaver Manager",
+   "component": "com.tduk.scrmgr/dev.vodik7.tdukscrmng.MainActivity",
+   "category": "ambient",
+   "notes": "TDUK Screensaver Manager: force/disable screensavers."
+  },
+  {
+   "package": "com.cbs.ott",
+   "label": "Projector OSD (Paramount app)",
+   "component": "com.cbs.ott/com.paramount.android.pplus.features.splash.tv.SplashMediatorActivity",
+   "category": "app"
+  },
+  {
+   "package": "com.google.android.youtube.tvmusic",
+   "label": "YouTube Music",
+   "component": "com.google.android.youtube.tvmusic/com.google.android.apps.youtube.tvmusic.activity.MainActivity",
+   "category": "app"
+  },
+  {
+   "package": "com.jp.dshtv",
+   "label": "DeepSeek TV",
+   "component": "com.jp.dshtv/.MainActivity",
+   "category": "assistant",
+   "notes": "This app: bridge + Whale-chan overlay + pairing. MainActivity = control panel."
+  },
+  {
+   "package": "com.disney.disneyplus",
+   "label": "Whale-chan (assistant shortcut)",
+   "component": "com.disney.disneyplus/.MainActivity",
+   "category": "assistant",
+   "notes": "Whale-chan shortcut shim (claims the Disney+ button package). Opens com.jp.dshtv/.WhaleActivity."
+  },
+  {
+   "package": "com.spocky.projengmenu",
+   "label": "Projectivy Launcher",
+   "component": "com.spocky.projengmenu/.ui.home.MainActivity",
+   "category": "launcher",
+   "notes": "Projectivy home. HOME should open Google TV; launch Projectivy explicitly when needed. It caches icons/labels.",
+   "playbook": "host/playbooks/projectivy.md"
+  },
+  {
+   "package": "com.danielkorgel.projectivy.plugin.cinemaglow",
+   "label": "Movie Art for Projectivy",
+   "component": "com.danielkorgel.projectivy.plugin.cinemaglow/.SettingsActivity",
+   "category": "launcher plugin",
+   "notes": "Projectivy movie-art add-on."
+  },
+  {
+   "package": "tv.projectivy.plugin.wallpaperprovider.overflight",
+   "label": "Projectivy Wallpaper : Overflight",
+   "component": "tv.projectivy.plugin.wallpaperprovider.overflight/.SettingsActivity",
+   "category": "launcher plugin",
+   "notes": "Projectivy wallpaper provider."
+  },
+  {
+   "package": "app.japantv",
+   "label": "JapanTV",
+   "component": "app.japantv/.MainActivity",
+   "category": "live TV",
+   "notes": "Japanese channels; browsing is list-based.",
+   "playbook": "host/playbooks/japantv.md"
+  },
+  {
+   "package": "tv.own.owntv",
+   "label": "OwnTV",
+   "component": "tv.own.owntv/.MainActivityCobalt",
+   "category": "live TV",
+   "notes": "Cobalt web app; use ui to read the page, D-pad to move.",
+   "playbook": "host/playbooks/owntv.md"
+  },
+  {
+   "package": "ar.tvplayer.tv",
+   "label": "TiviMate",
+   "component": "ar.tvplayer.tv/.ui.MainActivity",
+   "category": "live TV",
+   "notes": "TiviMate: channel lists + EPG. Use MENU for playback options; favourites are fastest to navigate.",
+   "playbook": "host/playbooks/tivimate.md"
+  },
+  {
+   "package": "com.lagradost.cloudstream3",
+   "label": "CloudStream",
+   "component": "com.lagradost.cloudstream3/.ui.account.AccountSelectActivity",
+   "category": "movies & series",
+   "search": {
+    "verified": false,
+    "steps": [
+     "launch cloudstream",
+     "key left",
+     "key up",
+     "key ok",
+     "text \"{query}\"",
+     "key enter",
+     "wait 2"
+    ],
+    "note": "Search icon in the left sidebar; account-select screen may appear first."
+   },
+   "notes": "Multiple providers; results need a provider pick before playback.",
+   "playbook": "host/playbooks/cloudstream.md"
+  },
+  {
+   "package": "com.netflix.ninja",
+   "label": "Netflix",
+   "component": "com.netflix.ninja/.MainActivity",
+   "category": "movies & series",
+   "search": {
+    "verified": false,
+    "steps": [
+     "launch netflix",
+     "key left",
+     "key up",
+     "key ok",
+     "text \"{query}\"",
+     "key enter",
+     "wait 3"
+    ],
+    "note": "Sidebar Search is above Home; confirm with ui if the focus order differs."
+   },
+   "notes": "DRM: screenshots are black in playback. Use ui/state, not screenshots, to verify playback.",
+   "playbook": "host/playbooks/netflix.md"
+  },
+  {
+   "package": "com.nuvio.tv",
+   "label": "Nuvio",
+   "component": "com.nuvio.tv/.launcher.AppIconDefault",
+   "category": "movies & series",
+   "search": {
+    "verified": false,
+    "steps": [
+     "launch nuvio",
+     "key left",
+     "key up",
+     "key ok",
+     "text \"{query}\"",
+     "key enter",
+     "wait 2"
+    ]
+   },
+   "playbook": "host/playbooks/nuvio.md"
+  },
+  {
+   "package": "com.amazon.amazonvideo.livingroom",
+   "label": "Prime Video",
+   "component": "com.amazon.amazonvideo.livingroom/com.amazon.ignition.IgnitionActivity",
+   "category": "movies & series",
+   "search": {
+    "verified": false,
+    "steps": [
+     "launch prime",
+     "key up",
+     "key right",
+     "key ok",
+     "text \"{query}\"",
+     "key enter",
+     "wait 3"
+    ],
+    "note": "Search lives in the top nav; navigate up then across; verify with ui."
+   },
+   "notes": "DRM playback; screenshots black.",
+   "playbook": "host/playbooks/prime.md"
+  },
+  {
+   "package": "com.stremio.one",
+   "label": "Stremio",
+   "component": "com.stremio.one/com.stremio.tv.MainActivity",
+   "category": "movies & series",
+   "search": {
+    "verified": true,
+    "steps": [
+     "launch stremio",
+     "key left",
+     "key up",
+     "key ok",
+     "text \"{query}\"",
+     "key enter",
+     "wait 2"
+    ],
+    "note": "LEFT opens the sidebar (focus lands on Home), UP moves to Search, OK opens the keyboard; typing + ENTER shows Series/AI search sections."
+   },
+   "deep_links": [
+    "stremio://"
+   ],
+   "notes": "Primary player for anime/K-drama; addons can load slowly — wait and use ui after ENTER.",
+   "playbook": "host/playbooks/stremio.md"
+  },
+  {
+   "package": "com.amazon.music.tv",
+   "label": "Amazon Music",
+   "component": "com.amazon.music.tv/com.amazon.music.MainActivity",
+   "category": "music",
+   "notes": "Music; search via the top bar."
+  },
+  {
+   "package": "com.surfshark.vpnclient.android",
+   "label": "Surfshark",
+   "component": "com.surfshark.vpnclient.android/.StartActivity",
+   "category": "network",
+   "notes": "VPN; check connection state before geo-restricted apps."
+  },
+  {
+   "package": "com.haystack.android",
+   "label": "Haystack News",
+   "component": "com.haystack.android/.tv.ui.activities.LoadingActivity",
+   "category": "news",
+   "notes": "News clips; linear list."
+  },
+  {
+   "package": "com.google.android.play.games",
+   "label": "Play Games",
+   "component": "com.google.android.play.games/com.google.android.apps.play.games.app.atv.features.home.HomeActivity",
+   "category": "system",
+   "notes": "Play Games overlay."
+  },
+  {
+   "package": "com.android.vending",
+   "label": "Play Store",
+   "component": "com.android.vending/com.google.android.finsky.tvmainactivity.TvMainActivity",
+   "category": "system",
+   "notes": "Play Store; use only when the user asks to install/update."
+  },
+  {
+   "package": "com.jp.osdtrigger",
+   "label": "Projector OSD",
+   "component": "com.jp.osdtrigger/.MainActivity",
+   "category": "system",
+   "notes": "Projector OSD remote; accessibility filter-key capability."
+  },
+  {
+   "package": "com.android.tv.settings",
+   "label": "Settings",
+   "component": "com.android.tv.settings/.MainSettings",
+   "category": "system",
+   "notes": "TV settings; accessibility, network, apps."
+  },
+  {
+   "package": "dev.vodik7.tvquickactions",
+   "label": "tvQuickActions Pro",
+   "component": "dev.vodik7.tvquickactions/.MainActivity",
+   "category": "system",
+   "notes": "Button remapper. Its accessibility service can filter keys (it once hijacked HOME → Stremio via Button HOME mapping). Check Mappings before blaming the remote."
+  },
+  {
+   "package": "com.internet.tvbrowser",
+   "label": "BROWSER",
+   "component": "com.internet.tvbrowser/.MainActivity",
+   "category": "tools",
+   "notes": "Browser; D-pad + on-screen keyboard. Use ui to read page text."
+  },
+  {
+   "package": "com.esaba.downloader",
+   "label": "Downloader",
+   "component": "com.esaba.downloader/.ui.main.MainActivity",
+   "category": "tools",
+   "notes": "URL downloader; type an address into the field then Download.",
+   "playbook": "host/playbooks/downloader.md"
+  },
+  {
+   "package": "com.mixplorer.silver",
+   "label": "MiX",
+   "component": "com.mixplorer.silver/com.mixplorer.activities.BrowseActivity",
+   "category": "tools",
+   "notes": "File manager; useful for APK sideloading."
+  },
+  {
+   "package": "com.yablio.sendfilestotv",
+   "label": "Send Files To TV",
+   "component": "com.yablio.sendfilestotv/.ui.MainActivity",
+   "category": "tools",
+   "notes": "LAN file transfer; sender/receiver roles."
+  },
+  {
+   "package": "com.google.android.youtube.tv",
+   "label": "YouTube",
+   "component": "com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.ShellActivity",
+   "category": "video",
+   "search": {
+    "verified": false,
+    "steps": [
+     "launch youtube",
+     "key up",
+     "key right",
+     "key ok",
+     "text \"{query}\"",
+     "key enter",
+     "wait 2"
+    ],
+    "note": "Top bar search; navigate up then toward the magnifier; verify with ui."
+   },
+   "notes": "Long ads; DRM may black out captures.",
+   "playbook": "host/playbooks/youtube.md"
+  }
+ ],
+ "playbooks_index": "host/playbooks/README.md"
+}

@@ -39,6 +39,9 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import tv_memory  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 DSH_HOME = ROOT / ".dsh-voice"
 KEY_FILE = ROOT / ".auth" / "deepseek.key"
@@ -70,6 +73,11 @@ BRIEF = (
     "The device is the onn 4K Pro at 192.168.4.58. "
     "Work out the shortest key sequence, run it, check `state` when you need to "
     "know what happened, and never assume an app is open. "
+    "Before driving an app you have not used this turn, read its playbook from "
+    "host/playbooks/ (index: host/playbooks/README.md) and the app catalog "
+    "host/tv-apps.json; prefer their key steps over guessing. Use "
+    "`python3 host/dshtv.py ui` to read on-screen labels/focus before and after "
+    "a step. "
     "The user's request below is a speech transcript and may contain recognition "
     "errors; use judgment. Then reply with ONE short spoken sentence (no lists, "
     "no tool narration). If the request is unclear or dangerous, ask a short "
@@ -293,7 +301,24 @@ class DshVoice:
         os.chmod(SESSION_FILE, 0o600)
 
     def ask(self, utterance: str) -> dict:
-        prompt = f"{BRIEF}\n\nTranscript: {utterance}"
+        try:
+            tv_memory.log_event("command", query=utterance)
+        except Exception:
+            pass
+        habits = ""
+        try:
+            habits = tv_memory.taste_text()
+        except Exception:
+            pass
+        context = ""
+        try:
+            context = (Path(__file__).resolve().parent / "tv-apps.json").read_text(encoding="utf-8")
+            context = context[:6000]
+        except Exception:
+            pass
+        prompt = (f"{BRIEF}\n\n## Household taste (learned locally)\n{habits}\n\n"
+                  f"## App catalog (truncated JSON; full file host/tv-apps.json)\n{context}\n\n"
+                  f"Transcript: {utterance}")
         cmd = ["dsh", "--profile", "headless", "--json"]
         if self.session_id:
             cmd += ["--session-id", self.session_id]
@@ -435,6 +460,23 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.startswith("/health"):
             return self._json(200, {"ok": True, "sessionId": self.brain.session_id,
                                     "tv": tv_health(), "now": int(time.time() * 1000)})
+        if path == "/apps":
+            try:
+                catalog = json.loads((Path(__file__).resolve().parent / "tv-apps.json")
+                                     .read_text(encoding="utf-8"))
+                return self._json(200, {"ok": True, **catalog})
+            except Exception as exc:  # noqa: BLE001
+                return self._json(500, {"ok": False, "error": str(exc)})
+        if path == "/memory/summary":
+            try:
+                return self._json(200, {"ok": True, "summary": tv_memory.summary()})
+            except Exception as exc:  # noqa: BLE001
+                return self._json(500, {"ok": False, "error": str(exc)})
+        if path == "/suggest":
+            try:
+                return self._json(200, {"ok": True, "suggestion": tv_memory.latest_suggestion()})
+            except Exception as exc:  # noqa: BLE001
+                return self._json(500, {"ok": False, "error": str(exc)})
         return self._json(404, {"ok": False, "error": "not found"})
 
     def do_POST(self):
@@ -443,6 +485,34 @@ class Handler(BaseHTTPRequestHandler):
             return self._pair_approve()
         if not self._auth():
             return self._json(401, {"ok": False, "error": "unauthorized"})
+        if path == "/feedback":
+            length = int(self.headers.get("Content-Length") or 0)
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8"))
+                subject = str(body.get("subject") or "").strip()
+                verdict = str(body.get("verdict") or "").strip()
+            except Exception:
+                return self._json(400, {"ok": False, "error": "bad json"})
+            if not subject or verdict not in ("like", "dislike", "not_interested", "watched"):
+                return self._json(400, {"ok": False, "error": "subject/verdict required"})
+            tv_memory.feedback(subject, verdict, body.get("detail"))
+            return self._json(200, {"ok": True})
+        if path == "/suggest/generate":
+            length = int(self.headers.get("Content-Length") or 0)
+            try:
+                body = json.loads(self.rfile.read(length).decode("utf-8"))
+            except Exception:
+                body = {}
+            topic = str(body.get("topic") or "something new and talked about this week")
+            proc = subprocess.run(
+                [sys.executable, str(Path(__file__).resolve().parent / "suggest.py"),
+                 "--topic", topic],
+                capture_output=True, text=True, cwd=str(ROOT), timeout=240)
+            try:
+                out = json.loads(proc.stdout.strip().splitlines()[-1])
+            except Exception:
+                out = {"ok": False, "error": proc.stderr[-400:] or "suggest failed"}
+            return self._json(200 if out.get("ok") else 502, out)
         if self.path.startswith("/ask"):
             length = int(self.headers.get("Content-Length") or 0)
             try:

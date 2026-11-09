@@ -195,6 +195,15 @@ public final class WhaleUi {
         });
     }
 
+    /** Render a proactive suggestion (no transcript). */
+    public void suggest(String title, String reason) {
+        pet.play(R.raw.whale_celebrate);
+        String line = ((reason == null ? "" : reason.trim()) + " "
+                + (title == null || title.length() == 0 ? "" : "Want to watch “" + title + "”?")).trim();
+        setBubble("FOR YOU", DOT_OK, "", line);
+        showCloseButton();
+    }
+
     /** QA-only: render a completed exchange without capture. */
     public void demo(String heard, String reply) {
         transcript = heard == null ? "" : heard;

@@ -101,9 +101,10 @@ def adb_bin() -> str:
     found = shutil.which("adb")
     if found:
         return found
-    local = ROOT / ".tools" / "platform-tools" / "adb"
-    if local.exists():
-        return str(local)
+    for base in (ROOT, ROOT.parent):
+        local = base / ".tools" / "platform-tools" / "adb"
+        if local.exists():
+            return str(local)
     found = shutil.which("adb")
     if not found:
         raise DshtvError(
@@ -640,6 +641,32 @@ def cmd_info(args: argparse.Namespace) -> dict:
         return adb_info(cfg["serial"])
 
 
+def cmd_ui(args: argparse.Namespace) -> dict:
+    """Dump visible nodes (text / focused / bounds) via adb uiautomator."""
+    import xml.etree.ElementTree as ET
+    cfg = resolve_target(load_config())
+    serial = cfg["serial"]
+    run_adb(["shell", "uiautomator", "dump", "/sdcard/dshtv-ui.xml"],
+            serial=serial, timeout=30)
+    raw = adb_text(["shell", "cat", "/sdcard/dshtv-ui.xml"], serial=serial, timeout=30)
+    nodes = []
+    try:
+        root = ET.fromstring(raw)
+    except Exception as exc:
+        return {"ok": False, "error": f"uiautomator parse: {exc}", "raw": raw[:200]}
+    def walk(node):
+        a = node.attrib
+        text = (a.get("text") or a.get("content-desc") or "").strip()
+        focused = a.get("focused") == "true"
+        if text or focused:
+            nodes.append({"text": text, "focused": focused,
+                          "bounds": a.get("bounds"), "class": a.get("class")})
+        for child in node:
+            walk(child)
+    walk(root)
+    return {"ok": True, "via": "adb", "nodes": nodes[:100],
+            "focused": next((n for n in nodes if n["focused"]), None)}
+
 def cmd_state(args: argparse.Namespace) -> dict:
     return make_client(args).state()
 
@@ -936,6 +963,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("state", parents=[common], help="foreground app and volume state")
     p.set_defaults(func=cmd_state)
+
+    p = sub.add_parser("ui", parents=[common], help="dump visible text/focus (uiautomator)")
+    p.set_defaults(func=cmd_ui)
 
     p = sub.add_parser("key", parents=[common], help="inject a remote key")
     p.add_argument("code", help="up|down|left|right|ok|back|home|recents|menu|"

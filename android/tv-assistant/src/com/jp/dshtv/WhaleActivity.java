@@ -77,6 +77,11 @@ public class WhaleActivity extends Activity {
                 finish();
             }
         });
+        if (getIntent() != null && getIntent().getBooleanExtra("suggest", false)) {
+            ui.suggest(getIntent().getStringExtra("suggest_title"),
+                    getIntent().getStringExtra("suggest_reason"));
+            return;
+        }
         if (getIntent() != null && getIntent().getBooleanExtra("demo", false)) {
             ui.demo("Open Stremio and search for anime",
                     "Opening Stremio and searching for “anime”, one moment.");

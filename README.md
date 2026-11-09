@@ -129,6 +129,14 @@ Open [`docs/ui-mockup.html`](docs/ui-mockup.html) in a browser — it is fully s
 Use the sidebar (or `#bridge`, `#pairing`, `#assistant`, `#components`) and the
 "Show focus rings" toggle to review focus treatment.
 
+## TV knowledge & personalisation
+
+- [`docs/APP-KNOWLEDGE.md`](docs/APP-KNOWLEDGE.md) — app catalog, per-app
+  playbooks, `dshtv ui`, and the rules DSH uses to drive the box.
+- [`docs/PERSONALIZATION.md`](docs/PERSONALIZATION.md) — local taste memory and
+  the proactive suggestion pipeline.
+- [`host/tv-apps.json`](host/tv-apps.json) · [`host/playbooks/`](host/playbooks)
+
 ## Agent skill
 
 [`skills/android-tv/SKILL.md`](skills/android-tv/SKILL.md) is a reusable
