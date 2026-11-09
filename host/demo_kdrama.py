@@ -148,6 +148,25 @@ def stremio_catalog_first(title: str) -> bool:
     return False
 
 
+def select_debrid_stream() -> None:
+    """Prefer the debrid addon tabs (Torrentio | PM / TB, Comet | PM + TB).
+
+    PM+/TB+ streams are already cached on the debrid service, so they play
+    without any sign-in; plain torrent cards can fail on this box.
+    """
+    dshtv("key", "up"); time.sleep(0.6)
+    for _ in range(8):
+        d = ui()
+        focus = ((d.get("focused") or {}).get("text") or "").upper()
+        if "PM" in focus or "TB" in focus:
+            dshtv("key", "ok")
+            time.sleep(4)
+            break
+        dshtv("key", "right"); time.sleep(0.4)
+    dshtv("key", "down"); time.sleep(0.7)
+    dshtv("key", "ok")
+
+
 def play(title: str) -> dict:
     found = stremio_catalog_first(title)
     if not found:
@@ -157,7 +176,9 @@ def play(title: str) -> dict:
             return {"ok": False, "error": "title not found in catalogs or search"}
         dshtv("key", "ok"); time.sleep(4)
         found = True
-    # detail page -> stream list -> first Torrentio/yastream stream
+    # detail page -> debrid tab (PM+/TB+ cached) -> first stream
+    select_debrid_stream()
+    return {"ok": True, "state": dshtv("state")}
     dshtv("key", "down"); time.sleep(1)
     for _ in range(6):
         data = ui()
