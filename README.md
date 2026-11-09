@@ -43,6 +43,22 @@ Android TV box                            Mac mini (or any LAN host)
   SenseVoice runtime, and DSH with a valid model credential.
 - Build machine with JDK 8+ and Android SDK build-tools + platform 33.
 
+## Install from a release
+
+Download the latest `TVAssistant.apk` (and optionally `DisneyShim.apk`) from
+[Releases](https://github.com/thuyqpham/whale-chan/releases), then:
+
+```bash
+adb connect <tv-ip>:5555
+adb install -r -g TVAssistant.apk
+adb shell pm grant com.jp.dshtv android.permission.RECORD_AUDIO
+# enable the bridge accessibility service once in the TV's settings
+```
+
+The release APK is debug-signed and baked with `WHALE_TOKEN=pair-me`; the QR
+pairing replaces that placeholder with the real token. Build from source for your
+own signing key (see below).
+
 ## Quick start
 
 ### 1. Host

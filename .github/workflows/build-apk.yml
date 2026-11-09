@@ -1,0 +1,29 @@
+name: build-apk
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Build the single TV APK
+        env:
+          WHALE_TOKEN: pair-me
+        run: bash android/tv-assistant/build.sh
+      - name: Build the Disney+ button shim
+        run: bash android/disney-shim/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whale-chan-apks
+          path: |
+            android/tv-assistant/TVAssistant.apk
+            android/disney-shim/DisneyShim.apk
