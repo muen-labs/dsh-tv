@@ -102,7 +102,7 @@ public final class WhaleUi {
                                             return;
                                         }
                                         transcript = said;
-                                        setBubble("WHALE-CHAN", DOT_ACCENT, "“" + said + "”", "");
+                                        setBubble("ASSISTANT", DOT_ACCENT, "“" + said + "”", "");
                                         new Thread(new Runnable() {
                                             @Override
                                             public void run() {
@@ -184,7 +184,7 @@ public final class WhaleUi {
             reply = "(no reply)";
         }
         pet.play(R.raw.whale_celebrate);
-        setBubble("WHALE-CHAN", DOT_OK,
+        setBubble("ASSISTANT", DOT_OK,
                 transcript.length() > 0 ? "“" + transcript + "”" : "", reply);
         speak(reply);
         scheduleClose(12000);

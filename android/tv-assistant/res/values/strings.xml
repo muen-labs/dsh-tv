@@ -5,7 +5,7 @@
     <string name="accessibility_description">Lets the DSH bridge running on your computer drive this TV over the local network: D-pad, Back, Home and media keys, text entry, screenshots and app launching. Used only while the bridge service is running and, if configured, the request token matches.</string>
 
     <!-- Whale-chan assistant -->
-    <string name="credit">Whale-chan art © 1tryout (MIT) · Er1c0v0 (CC BY 4.0)</string>
+    <string name="credit">Character art © 1tryout (MIT) · Er1c0v0 (CC BY 4.0)</string>
     <string name="listening">Listening… press OK to send</string>
     <string name="thinking">Thinking…</string>
     <string name="idle">Press the mic button and tell me what to do.</string>

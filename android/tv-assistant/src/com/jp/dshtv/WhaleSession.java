@@ -2,6 +2,7 @@ package com.jp.dshtv;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.service.voice.VoiceInteractionSession;
 import android.graphics.Color;
@@ -37,7 +38,13 @@ public class WhaleSession extends VoiceInteractionSession {
                 window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
-                window.setDimAmount(0.28f);
+                window.setDimAmount(0.20f);
+                if (Build.VERSION.SDK_INT >= 31) {
+                    WindowManager.LayoutParams lp = window.getAttributes();
+                    lp.flags |= WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
+                    lp.setBlurBehindRadius(dp(40));
+                    window.setAttributes(lp);
+                }
             }
         } catch (Throwable ignored) {
             // window tweaks are best-effort; the transparent theme is the main lever
@@ -54,6 +61,10 @@ public class WhaleSession extends VoiceInteractionSession {
             });
         }
         ui.listen();
+    }
+
+    private int dp(int value) {
+        return (int) Math.round(value * getContext().getResources().getDisplayMetrics().density);
     }
 
     @Override

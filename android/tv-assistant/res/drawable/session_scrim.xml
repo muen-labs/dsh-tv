@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Soft blur-scrim: a gentle overall dim, a bottom-right focus pool and a
+     bottom fade so the bubble/pet always sit on contrast. Replaces the
+     hardware blur on TVs without background-blur support. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#3304060D" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:centerX="0.8"
+                android:centerY="0.86"
+                android:gradientRadius="760dp"
+                android:startColor="#CC04060D"
+                android:centerColor="#6604060D"
+                android:endColor="#0004060D" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="270"
+                android:startColor="#00000000"
+                android:centerColor="#33000000"
+                android:endColor="#99000000" />
+        </shape>
+    </item>
+</layer-list>
