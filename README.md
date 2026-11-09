@@ -1,6 +1,8 @@
-# DeepSeek Whale-chan — Android TV Assistant
+# DeepSeek TV Assistant
 
 `https://github.com/thuyqpham/dsh-tv` · MIT
+
+**Whale-chan** — the animated assistant character — turns an Android TV box into a voice terminal for DeepSeek Harness.
 
 ![Whale-chan](docs/screenshots/pet.jpg)
 
