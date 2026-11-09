@@ -128,11 +128,11 @@
                     android:id="@+id/whale_you"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:lineSpacingExtra="2dp"
+                    android:layout_marginTop="12dp"
+                    android:lineSpacingExtra="3dp"
                     android:maxLines="3"
-                    android:textColor="@color/muted_foreground"
-                    android:textSize="15sp"
+                    android:textColor="#C9D6E8"
+                    android:textSize="20sp"
                     android:visibility="gone" />
 
                 <TextView
