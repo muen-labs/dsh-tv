@@ -129,6 +129,13 @@ Open [`docs/ui-mockup.html`](docs/ui-mockup.html) in a browser — it is fully s
 Use the sidebar (or `#bridge`, `#pairing`, `#assistant`, `#components`) and the
 "Show focus rings" toggle to review focus treatment.
 
+## Agent skill
+
+[`skills/android-tv/SKILL.md`](skills/android-tv/SKILL.md) is a reusable
+DSH/agent skill for native Android TV work: 10-foot UI and D-pad focus, the
+transparent voice overlay pattern, icon/banner specs, ADB build→install→
+screenshot verification, and the input/launcher pitfalls this project hit.
+
 ## Design system
 
 Every screen follows **EVA design tokens exposed as shadcn/ui primitives**
