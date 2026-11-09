@@ -1,4 +1,8 @@
 import * as React from 'react'
+import {
+  Alert, AlertDescription, AlertTitle, Badge, Button, Card, CardContent, CardDescription,
+  CardHeader, CardTitle, Input, Separator, evaTheme,
+} from './ui'
 
 export const NS = 'whale-tv'
 
@@ -53,54 +57,37 @@ export const zh = {
 type Key = keyof typeof en
 type Device = { host: string; port: number; model?: string; label?: string }
 type PairInfo = { id: string; code: string; qr?: string | null; url: string }
+type Preview = { phase?: 'loading' | 'error' | 'empty' | 'ready'; devices?: Device[]; pair?: PairInfo | null; pairState?: 'idle' | 'pending' | 'approved'; error?: string }
 
 function translatorOf(props: { t?: (key: Key) => string }) {
   return (key: Key) => (props && typeof props.t === 'function' ? props.t(key) : en[key] ?? key)
 }
 
-const T = (name: string) => `var(--dsw-alias-${name})`
-
-const card: React.CSSProperties = {
-  background: T('bg-layer-2'),
-  border: `1px solid ${T('border-l3')}`,
-  borderRadius: 12,
-  padding: 14,
+function DeviceRow(props: { device: Device; active: boolean; label: string; onSelect: () => void }) {
+  const { device, active, label, onSelect } = props
+  return (
+    <button
+      role="radio"
+      aria-checked={active}
+      onClick={onSelect}
+      style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+        width: '100%', textAlign: 'left', cursor: 'pointer', font: 'inherit',
+        background: active ? 'var(--secondary)' : 'transparent',
+        border: '1px solid ' + (active ? 'var(--ring)' : 'var(--border)'),
+        borderRadius: 'var(--radius)', padding: '10px 12px', color: 'var(--foreground)',
+      }}
+    >
+      <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <strong style={{ fontSize: 13 }}>{device.label || device.model || label}</strong>
+        <span style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>
+          {device.host}:{device.port}
+        </span>
+      </span>
+      {active && <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--ring)' }} />}
+    </button>
+  )
 }
-
-const row = (active: boolean): React.CSSProperties => ({
-  display: 'flex',
-  flexWrap: 'wrap',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: 8,
-  width: '100%',
-  textAlign: 'left',
-  cursor: 'pointer',
-  background: active ? T('bg-layer-3') : 'transparent',
-  border: `1px solid ${active ? T('brand-primary') : T('border-l2')}`,
-  borderRadius: 10,
-  padding: '10px 12px',
-  color: T('label-primary'),
-})
-
-const button: React.CSSProperties = {
-  background: T('button-primary-fill'),
-  color: T('label-primary-foreground'),
-  border: 'none',
-  borderRadius: 8,
-  padding: '8px 14px',
-  cursor: 'pointer',
-  fontSize: 13,
-}
-
-const ghost: React.CSSProperties = {
-  ...button,
-  background: 'transparent',
-  border: `1px solid ${T('border-l2')}`,
-  color: T('label-primary'),
-}
-
-type Preview = { phase?: 'loading' | 'error' | 'empty' | 'ready'; devices?: Device[]; pair?: PairInfo | null; pairState?: 'idle' | 'pending' | 'approved'; error?: string }
 
 export function WhaleTvSection(props: { t?: (key: Key) => string; preview?: Preview }) {
   const t = translatorOf(props)
@@ -164,114 +151,104 @@ export function WhaleTvSection(props: { t?: (key: Key) => string; preview?: Prev
         const state = await fetch('/whale-chan/pair/status?id=' + encodeURIComponent(pair.id)).then((r) => r.json())
         if (state && state.approved) setPairState('approved')
       } catch {
-        /* keep waiting; the daemon may be starting */
+        /* keep waiting */
       }
     }, 1500)
     return () => clearInterval(timer)
   }, [pair, pairState, preview])
 
-  const statusLabel = phase === 'error' ? t('stopped') : t('running')
-  const statusColor = phase === 'error' ? T('label-error') : T('brand-primary')
-
   return (
-    <section style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: 4, color: T('label-primary') }}>
-      <header>
-        <h2 style={{ margin: 0, fontSize: 16 }}>{t('title')}</h2>
-        <p style={{ margin: '4px 0 0', color: T('label-caption'), fontSize: 12 }}>{t('subtitle')}</p>
-        <p style={{ margin: '6px 0 0', color: statusColor, fontSize: 12 }} aria-live="polite">
-          ● {statusLabel}
-        </p>
+    <section style={{ ...evaTheme, display: 'flex', flexDirection: 'column', gap: 12, padding: 4, background: 'transparent', color: 'var(--foreground)' }}>
+      <header style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, letterSpacing: '-.01em' }}>{t('title')}</h2>
+        <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: 12.5 }}>{t('subtitle')}</p>
+        <div style={{ marginTop: 2 }}>
+          <Badge variant={phase === 'error' ? 'destructive' : 'success'}>{phase === 'error' ? t('stopped') : t('running')}</Badge>
+        </div>
       </header>
 
-      <div style={card}>
-        <h3 style={{ margin: '0 0 8px', fontSize: 13, color: T('label-caption') }}>{t('sectionTvs')}</h3>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('sectionTvs')}</CardTitle>
+          <CardDescription>{phase === 'ready' ? `${devices.length} found` : ''}</CardDescription>
+        </CardHeader>
+        <CardContent style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {phase === 'loading' && (
+            <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: 13 }} aria-live="polite">{t('scanning')}</p>
+          )}
 
-        {phase === 'loading' && (
-          <p style={{ margin: 0, color: T('label-caption'), fontSize: 13 }} aria-live="polite">{t('scanning')}</p>
-        )}
+          {phase === 'error' && (
+            <Alert variant="destructive">
+              <AlertTitle>{t('daemonDown')}</AlertTitle>
+              <AlertDescription>
+                {error ? error + ' — ' : ''}{t('daemonDownHint')}
+              </AlertDescription>
+            </Alert>
+          )}
 
-        {phase === 'error' && (
-          <div role="alert">
-            <p style={{ margin: 0, color: T('label-error'), fontSize: 13 }}>{t('daemonDown')}</p>
-            <p style={{ margin: '4px 0 10px', color: T('label-caption'), fontSize: 12 }}>
-              {error ? error + ' — ' : ''}{t('daemonDownHint')}
-            </p>
-            <button style={ghost} onClick={() => void scan()}>{t('scanAgain')}</button>
-          </div>
-        )}
+          {phase === 'empty' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <p style={{ margin: 0, fontSize: 13 }}>{t('noTvs')}</p>
+              <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: 12.5 }}>{t('noTvsHint')}</p>
+            </div>
+          )}
 
-        {phase === 'empty' && (
-          <div>
-            <p style={{ margin: 0, fontSize: 13 }}>{t('noTvs')}</p>
-            <p style={{ margin: '4px 0 10px', color: T('label-caption'), fontSize: 12 }}>{t('noTvsHint')}</p>
-            <button style={ghost} onClick={() => void scan()}>{t('scanAgain')}</button>
-          </div>
-        )}
-
-        {phase === 'ready' && (
-          <>
+          {phase === 'ready' && (
             <div role="radiogroup" aria-label={t('sectionTvs')} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {devices.map((device) => {
-                const active = selected === device.host
-                return (
-                  <button
-                    key={device.host}
-                    role="radio"
-                    aria-checked={active}
-                    style={row(active)}
-                    onClick={() => setSelected(device.host)}
-                  >
-                    <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <strong style={{ fontSize: 13 }}>{device.label || device.model || t('tvUnknown')}</strong>
-                      <span style={{ color: T('label-caption'), fontSize: 12 }}>{device.host}:{device.port}</span>
-                    </span>
-                    {active && <span aria-hidden="true" style={{ color: T('brand-primary') }}>●</span>}
-                  </button>
-                )
-              })}
+              {devices.map((device) => (
+                <DeviceRow
+                  key={device.host}
+                  device={device}
+                  active={selected === device.host}
+                  label={t('tvUnknown')}
+                  onSelect={() => setSelected(device.host)}
+                />
+              ))}
             </div>
-            <div style={{ marginTop: 10 }}>
-              <button style={ghost} onClick={() => void scan()}>{t('scanAgain')}</button>
-            </div>
-          </>
-        )}
-      </div>
+          )}
 
-      <div style={card}>
-        <h3 style={{ margin: '0 0 8px', fontSize: 13, color: T('label-caption') }}>{t('sectionPair')}</h3>
-        <button style={button} onClick={() => void generate()} disabled={!selected}>
-          {t('generateQr')}
-        </button>
-        {error && pair === null && <p style={{ margin: '8px 0 0', color: T('label-error'), fontSize: 12 }}>{error}</p>}
+          {(phase === 'ready' || phase === 'empty') && (
+            <Button variant="outline" size="sm" onClick={() => void scan()}>{t('scanAgain')}</Button>
+          )}
+        </CardContent>
+      </Card>
 
-        {pair && (
-          <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'flex-start' }}>
-            {pair.qr ? (
-              <img
-                src={'data:image/png;base64,' + pair.qr}
-                alt={t('generateQr')}
-                width={190}
-                height={190}
-                style={{ background: '#fff', borderRadius: 8, padding: 8 }}
-              />
-            ) : (
-              <code style={{ fontSize: 12, wordBreak: 'break-all', color: T('label-caption') }}>{pair.url}</code>
-            )}
-            <div style={{ flex: '1 1 200px', minWidth: 180 }}>
-              <p style={{ margin: 0, fontSize: 12, color: T('label-caption') }}>{t('qrHint')}</p>
-              <p style={{ margin: '8px 0 0', fontSize: 13 }}>
-                {t('codeLabel')}: <strong style={{ letterSpacing: 2 }}>{pair.code}</strong>
-              </p>
-              <p style={{ margin: '4px 0 0', fontSize: 12, color: T('label-caption'), wordBreak: 'break-all' }}>
-                {t('urlLabel')} <a href={pair.url} style={{ color: T('brand-primary') }}>{pair.url}</a>
-              </p>
-              <p style={{ margin: '8px 0 0', fontSize: 12 }} aria-live="polite">
-                {pairState === 'approved' ? t('approved') : t('waiting')}
-              </p>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('sectionPair')}</CardTitle>
+          <CardDescription>{t('qrHint')}</CardDescription>
+        </CardHeader>
+        <CardContent style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Button onClick={() => void generate()} disabled={!selected}>{t('generateQr')}</Button>
+
+          {pair && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'flex-start' }}>
+              {pair.qr ? (
+                <img
+                  src={'data:image/png;base64,' + pair.qr}
+                  alt={t('generateQr')}
+                  width={190}
+                  height={190}
+                  style={{ background: '#fff', borderRadius: 8, padding: 8 }}
+                />
+              ) : (
+                <code style={{ fontSize: 12, wordBreak: 'break-all', color: 'var(--muted-foreground)' }}>{pair.url}</code>
+              )}
+              <div style={{ flex: '1 1 180px', minWidth: 160, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                  <span style={{ fontSize: 11, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--muted-foreground)' }}>{t('codeLabel')}</span>
+                  <strong style={{ fontFamily: 'ui-monospace, monospace', fontSize: 22, letterSpacing: '.22em' }}>{pair.code}</strong>
+                </div>
+                <a href={pair.url} style={{ fontSize: 12, color: 'var(--ring)', wordBreak: 'break-all' }}>{pair.url}</a>
+                <Separator />
+                <p style={{ margin: 0, fontSize: 12.5 }} aria-live="polite">
+                  {pairState === 'approved' ? t('approved') : t('waiting')}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </CardContent>
+      </Card>
     </section>
   )
 }

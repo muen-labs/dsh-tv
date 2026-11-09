@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_screen"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/space_7"
+        android:paddingRight="@dimen/space_7"
+        android:paddingTop="@dimen/space_6"
+        android:paddingBottom="@dimen/space_6">
+
+        <!-- Brand header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/Shadcn.H1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Whale-chan TV" />
+
+                <TextView
+                    style="@style/Shadcn.Muted"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_1"
+                    android:text="Android TV assistant · LAN control bridge" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/version_pill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/pill"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="v2.0"
+                android:textColor="@color/primary"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
+
+        <!-- Status -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_5"
+            android:background="@drawable/card"
+            android:orientation="vertical"
+            android:padding="@dimen/space_5">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/Shadcn.Label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="STATUS" />
+
+                <View
+                    android:id="@+id/status_dot"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_marginRight="8dp"
+                    android:background="@drawable/dot_off" />
+
+                <TextView
+                    android:id="@+id/status_text"
+                    style="@style/Shadcn.BodyMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/muted_foreground"
+                    android:text="STOPPED" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="@dimen/space_4"
+                android:layout_marginBottom="@dimen/space_4"
+                android:background="@color/border" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView style="@style/Shadcn.Label" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="ADDRESS" />
+                    <TextView android:id="@+id/value_address" style="@style/Shadcn.BodyMedium"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="—" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView style="@style/Shadcn.Label" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="MICROPHONE" />
+                    <TextView android:id="@+id/value_mic" style="@style/Shadcn.BodyMedium"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="—" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_4"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView style="@style/Shadcn.Label" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="ACCESSIBILITY" />
+                    <TextView android:id="@+id/value_accessibility" style="@style/Shadcn.BodyMedium"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="—" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView style="@style/Shadcn.Label" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="FOREGROUND" />
+                    <TextView android:id="@+id/value_foreground" style="@style/Shadcn.BodyMedium"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="—" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Pair + controls -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_4"
+            android:background="@drawable/card"
+            android:orientation="vertical"
+            android:padding="@dimen/space_5">
+
+            <TextView style="@style/Shadcn.Label" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="GET STARTED" />
+
+            <Button
+                android:id="@+id/btn_pair"
+                style="@style/Shadcn.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_4"
+                android:text="Pair this TV with Whale-chan" />
+
+            <TextView style="@style/Shadcn.Muted" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_2"
+                android:text="Shows a QR code — scan it with your phone to connect this TV to DSH." />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="@dimen/space_4"
+                android:layout_marginBottom="@dimen/space_4"
+                android:background="@color/border" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_start"
+                    style="@style/Shadcn.Button.Secondary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Start service" />
+
+                <Button
+                    android:id="@+id/btn_stop"
+                    style="@style/Shadcn.Button.Secondary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/space_3"
+                    android:layout_weight="1"
+                    android:text="Stop service" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_3"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_accessibility"
+                    style="@style/Shadcn.Button.Outline"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Accessibility settings" />
+
+                <Button
+                    android:id="@+id/btn_mic"
+                    style="@style/Shadcn.Button.Outline"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/space_3"
+                    android:layout_weight="1"
+                    android:text="Grant microphone" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_refresh"
+                style="@style/Shadcn.Button.Outline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_3"
+                android:text="Refresh status" />
+        </LinearLayout>
+
+        <!-- Setup steps -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_4"
+            android:background="@drawable/card"
+            android:orientation="vertical"
+            android:padding="@dimen/space_5">
+
+            <TextView style="@style/Shadcn.Label" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="FIRST-TIME SETUP" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_4" android:orientation="horizontal">
+                <TextView android:layout_width="30dp" android:layout_height="30dp"
+                    android:background="@drawable/step_num" android:gravity="center"
+                    android:text="1" android:textColor="@color/primary" android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium" />
+                <TextView style="@style/Shadcn.Body" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_marginLeft="@dimen/space_3"
+                    android:layout_weight="1" android:text="Enable “DSH TV Bridge” in Accessibility settings." />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_3" android:orientation="horizontal">
+                <TextView android:layout_width="30dp" android:layout_height="30dp"
+                    android:background="@drawable/step_num" android:gravity="center"
+                    android:text="2" android:textColor="@color/primary" android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium" />
+                <TextView style="@style/Shadcn.Body" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_marginLeft="@dimen/space_3"
+                    android:layout_weight="1" android:text="Grant the microphone (needed for the voice assistant)." />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_3" android:orientation="horizontal">
+                <TextView android:layout_width="30dp" android:layout_height="30dp"
+                    android:background="@drawable/step_num" android:gravity="center"
+                    android:text="3" android:textColor="@color/primary" android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium" />
+                <TextView style="@style/Shadcn.Body" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_marginLeft="@dimen/space_3"
+                    android:layout_weight="1" android:text="Pair the TV with your Mac using the QR code above." />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_3" android:orientation="horizontal">
+                <TextView android:layout_width="30dp" android:layout_height="30dp"
+                    android:background="@drawable/step_num" android:gravity="center"
+                    android:text="4" android:textColor="@color/primary" android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium" />
+                <TextView style="@style/Shadcn.Body" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_marginLeft="@dimen/space_3"
+                    android:layout_weight="1" android:text="Press the Disney+ button on the remote and talk." />
+            </LinearLayout>
+
+            <TextView
+                style="@style/Shadcn.Mono"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_4"
+                android:background="@drawable/card_inset"
+                android:padding="14dp"
+                android:text="curl http://TV-IP:8765/ping"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <TextView style="@style/Shadcn.Muted" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_5"
+            android:text="LAN only · keep ports 8765 and 8766 inside your home network." />
+    </LinearLayout>
+</ScrollView>

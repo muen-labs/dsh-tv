@@ -37,10 +37,11 @@ const cards = cases.map(([name, preview]) => `
 
 const html = `<!doctype html><meta charset="utf-8"><title>Whale-chan pane preview</title>
 <style>
-  :root { --dsw-alias-bg-layer-2:#171a21; --dsw-alias-bg-layer-3:#232735; --dsw-alias-border-l2:#2c3140;
-          --dsw-alias-border-l3:#394052; --dsw-alias-brand-primary:#4fc3f7; --dsw-alias-label-primary:#e8eef7;
-          --dsw-alias-label-caption:#8b98ab; --dsw-alias-label-error:#ff7b72; --dsw-alias-label-primary-foreground:#0b1017;
-          --dsw-alias-button-primary-fill:#4fc3f7; }
+  :root { --background:#101426; --foreground:#FFFFFF; --card:#1A2138; --card-foreground:#FFFFFF;
+          --popover:#222B45; --primary:#3366FF; --primary-foreground:#FFFFFF; --secondary:#222B45;
+          --secondary-foreground:#FFFFFF; --muted:#151A30; --muted-foreground:#8F9BB3;
+          --destructive:#FF3D71; --success:#00E096; --warning:#FFAA00; --border:#2E3A59;
+          --input:#2E3A59; --ring:#598BFF; --radius:8px; }
   body { background:#0b0e14; color:#e8eef7; font:14px/1.45 system-ui, sans-serif; margin:0; padding:24px; }
   h1 { font-size:16px; font-weight:600; margin:0 0 16px; color:#8b98ab; }
   .grid { display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start; }

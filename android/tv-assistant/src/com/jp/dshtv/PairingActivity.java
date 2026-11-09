@@ -32,12 +32,15 @@ public class PairingActivity extends Activity {
     private static final String TAG = "WhalePairing";
     private final Handler main = new Handler(Looper.getMainLooper());
     private TextView status;
+    private TextView hint;
+    private View stateDot;
     private TextView codeView;
     private ImageView qrView;
     private EditText ipView;
     private Button pairButton;
     private String pairId;
     private boolean polling;
+    private String pendingHost = "";
 
     @Override
     protected void onCreate(Bundle state) {
@@ -49,6 +52,8 @@ public class PairingActivity extends Activity {
         } catch (Throwable ignored) {
         }
         status = (TextView) findViewById(R.id.pair_status);
+        hint = (TextView) findViewById(R.id.pair_hint);
+        stateDot = findViewById(R.id.pair_dot);
         codeView = (TextView) findViewById(R.id.pair_code);
         qrView = (ImageView) findViewById(R.id.pair_qr);
         ipView = (EditText) findViewById(R.id.pair_ip);
@@ -56,6 +61,14 @@ public class PairingActivity extends Activity {
         ipView.setText(WhaleConfig.host(this));
         ipView.clearFocus();
         pairButton.requestFocus();
+        pairButton.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                v.animate().scaleX(hasFocus ? 1.03f : 1f).scaleY(hasFocus ? 1.03f : 1f)
+                        .setDuration(120).start();
+                v.setElevation(hasFocus ? 8 * getResources().getDisplayMetrics().density : 0);
+            }
+        });
         pairButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -63,17 +76,31 @@ public class PairingActivity extends Activity {
             }
         });
         if (WhaleConfig.paired(this)) {
-            status.setText("Already paired. Re-pairing will replace the current Mac.");
+            setState("PAIRED", "Already paired — re-pairing replaces the current Mac.", true);
         }
         beginPairing(WhaleConfig.host(this));
     }
 
+    private void setState(String pill, String message, boolean ok) {
+        if (status != null) {
+            status.setText(pill);
+        }
+        if (hint != null) {
+            hint.setText(message);
+            hint.setTextColor(ok ? 0xFF35D0FF : 0xFFFF6B6B);
+        }
+        if (stateDot != null) {
+            stateDot.setBackgroundResource(ok ? R.drawable.dot_accent : R.drawable.dot_off);
+        }
+    }
+
     private void beginPairing(final String host) {
         if (host == null || host.isEmpty()) {
-            status.setText("Enter the Mac mini's IP address first.");
+            setState("SETUP", "Enter the Mac mini's IP address first.", false);
             return;
         }
-        status.setText("Contacting " + host + "…");
+        pendingHost = host;
+        setState("SCANNING", "Contacting " + host + "…", true);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -89,7 +116,7 @@ public class PairingActivity extends Activity {
                     main.post(new Runnable() {
                         @Override
                         public void run() {
-                            status.setText("Could not reach the Mac: " + t.getMessage());
+                            setState("ERROR", "Could not reach the Mac: " + t.getMessage(), false);
                             Log.w(TAG, "pair/new failed", t);
                         }
                     });
@@ -103,8 +130,8 @@ public class PairingActivity extends Activity {
             pairId = reply.getString("id");
             String code = reply.getString("code");
             Log.i(TAG, "pair id=" + pairId + " code=" + code);
-            codeView.setText("Code: " + code);
-            status.setText("Scan the QR with your phone to approve this TV.");
+            codeView.setText(code);
+            setState("WAITING", "Scan the QR with your phone and approve the code.", true);
             String qr = reply.optString("qr", "");
             if (!qr.isEmpty()) {
                 byte[] png = Base64.decode(qr, Base64.DEFAULT);
@@ -113,7 +140,7 @@ public class PairingActivity extends Activity {
             }
             startPolling(host);
         } catch (Throwable t) {
-            status.setText("Bad pairing reply: " + t.getMessage());
+            setState("ERROR", "Bad pairing reply: " + t.getMessage(), false);
         }
     }
 
@@ -174,12 +201,12 @@ public class PairingActivity extends Activity {
             String t = config != null ? config.optString("token", "") : "";
             WhaleConfig.save(this, h, p, t);
             Log.i(TAG, "paired with " + h + ":" + p);
-            status.setText("Paired. Opening Whale-chan…");
+            setState("PAIRED", "Paired. Opening Whale-chan…", true);
             Intent whale = new Intent(this, WhaleActivity.class);
             startActivity(whale);
             finish();
         } catch (Throwable t) {
-            status.setText("Pairing approved but saving failed: " + t.getMessage());
+            setState("ERROR", "Pairing approved but saving failed: " + t.getMessage(), false);
         }
     }
 

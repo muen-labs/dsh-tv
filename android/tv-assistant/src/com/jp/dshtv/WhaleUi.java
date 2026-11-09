@@ -12,14 +12,21 @@ import android.widget.TextView;
 import java.util.Locale;
 
 /**
- * Whale-chan state machine shared by the assistant session window and the
- * launcher activity: animated transparent pet + speech bubble.
+ * Whale-chan state machine shared by the assistant activity and the session:
+ * animated transparent pet, a three-line bubble (state / what was heard /
+ * what DSH says) and TTS.
  */
 public final class WhaleUi {
 
+    private static final int DOT_ACCENT = R.drawable.dot_accent;
+    private static final int DOT_OK = R.drawable.dot_on;
+    private static final int DOT_ERROR = R.drawable.dot_off;
+
     private final Context ctx;
     private final WhalePet pet;
-    private final TextView state;
+    private final View dot;
+    private final TextView eyebrow;
+    private final TextView you;
     private final TextView text;
     private final Runnable onFinished;
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -28,15 +35,17 @@ public final class WhaleUi {
     private TextToSpeech tts;
     private boolean ttsReady;
     private Runnable closeTask;
+    private Runnable busyTask;
     private String transcript = "";
     private boolean listening;
-    private Runnable busyTask;
 
     public WhaleUi(Context ctx, View root, Runnable onFinished) {
         this.ctx = ctx;
         this.onFinished = onFinished;
         this.pet = new WhalePet((ImageView) root.findViewById(R.id.whale_art));
-        this.state = (TextView) root.findViewById(R.id.whale_state);
+        this.dot = root.findViewById(R.id.whale_dot);
+        this.eyebrow = (TextView) root.findViewById(R.id.whale_eyebrow);
+        this.you = (TextView) root.findViewById(R.id.whale_you);
         this.text = (TextView) root.findViewById(R.id.whale_text);
         try {
             tts = new TextToSpeech(ctx, new TextToSpeech.OnInitListener() {
@@ -56,13 +65,12 @@ public final class WhaleUi {
         pet.play(R.raw.whale_idle);
     }
 
-    /** Start listening immediately; ends itself via onFinished when done. */
     public void listen() {
         Log.i("WhaleUi", "listen()");
         cancelClose();
         listening = true;
         pet.play(R.raw.whale_wave);
-        bubble(ctx.getString(R.string.listening), "");
+        setBubble("LISTENING", DOT_ACCENT, "", ctx.getString(R.string.listening));
         mic.start(new MicCapture.Callback() {
             @Override
             public void onDone(final byte[] wav, final boolean heard) {
@@ -75,12 +83,11 @@ public final class WhaleUi {
                             return;
                         }
                         pet.play(R.raw.whale_think);
-                        bubble(ctx.getString(R.string.thinking), "");
+                        setBubble("THINKING", DOT_ACCENT, "", "DSH is working on it…");
                         scheduleBusyPose();
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                // Step 1: show what was spoken as soon as STT returns.
                                 final WhaleClient.Stt stt = WhaleClient.transcribe(ctx, wav);
                                 main.post(new Runnable() {
                                     @Override
@@ -95,8 +102,7 @@ public final class WhaleUi {
                                             return;
                                         }
                                         transcript = said;
-                                        bubble("You said", said);
-                                        // Step 2: hand the text to DSH.
+                                        setBubble("WHALE-CHAN", DOT_ACCENT, "“" + said + "”", "");
                                         new Thread(new Runnable() {
                                             @Override
                                             public void run() {
@@ -122,6 +128,7 @@ public final class WhaleUi {
                 main.post(new Runnable() {
                     @Override
                     public void run() {
+                        listening = false;
                         fail(message);
                     }
                 });
@@ -142,8 +149,8 @@ public final class WhaleUi {
 
     public void stop() {
         cancelClose();
-        mic.stop();
         cancelBusyPose();
+        mic.stop();
         pet.stop();
         try {
             if (tts != null) {
@@ -167,6 +174,7 @@ public final class WhaleUi {
 
     private void deliver(WhaleClient.Answer answer) {
         Log.i("WhaleUi", "deliver err=" + answer.error + " reply=" + answer.reply);
+        cancelBusyPose();
         if (answer.error != null) {
             fail(ctx.getString(R.string.offline) + "\n" + answer.error);
             return;
@@ -175,14 +183,9 @@ public final class WhaleUi {
         if (reply.length() == 0) {
             reply = "(no reply)";
         }
-        StringBuilder bubble = new StringBuilder();
-        if (transcript.length() > 0) {
-            bubble.append("You: ").append(transcript).append("\n");
-        }
-        bubble.append(reply);
-        cancelBusyPose();
         pet.play(R.raw.whale_celebrate);
-        bubble("Whale-chan", bubble.toString());
+        setBubble("WHALE-CHAN", DOT_OK,
+                transcript.length() > 0 ? "“" + transcript + "”" : "", reply);
         speak(reply);
         scheduleClose(12000);
     }
@@ -191,20 +194,30 @@ public final class WhaleUi {
         Log.i("WhaleUi", "fail: " + message);
         cancelBusyPose();
         pet.play(R.raw.whale_wilt);
-        bubble("Oops", message);
+        setBubble("TRY AGAIN", DOT_ERROR, "", message);
         scheduleClose(7000);
     }
 
-    private void bubble(String stateText, String body) {
+    /** state / transcript / reply are three distinct lines, each optional. */
+    private void setBubble(String state, int dotRes, String heard, String says) {
         try {
-            state.setText(stateText);
-            if (body == null || body.length() == 0) {
+            eyebrow.setText(state);
+            dot.setBackgroundResource(dotRes);
+            if (heard == null || heard.length() == 0) {
+                you.setText("");
+                you.setVisibility(View.GONE);
+            } else {
+                you.setText(heard);
+                you.setVisibility(View.VISIBLE);
+            }
+            if (says == null || says.length() == 0) {
                 text.setText("");
                 text.setVisibility(View.GONE);
             } else {
-                text.setText(body);
+                text.setText(says);
                 text.setVisibility(View.VISIBLE);
             }
+            eyebrow.announceForAccessibility(state + ". " + (says == null ? "" : says));
         } catch (Throwable ignored) {
         }
     }
@@ -218,20 +231,6 @@ public final class WhaleUi {
             tts.speak(trimmed, TextToSpeech.QUEUE_FLUSH, null, "whale");
         } catch (Throwable ignored) {
         }
-    }
-
-    private void scheduleClose(long millis) {
-        cancelClose();
-        if (onFinished == null) {
-            return;
-        }
-        closeTask = new Runnable() {
-            @Override
-            public void run() {
-                onFinished.run();
-            }
-        };
-        main.postDelayed(closeTask, millis);
     }
 
     private void scheduleBusyPose() {
@@ -250,6 +249,20 @@ public final class WhaleUi {
             main.removeCallbacks(busyTask);
             busyTask = null;
         }
+    }
+
+    private void scheduleClose(long millis) {
+        cancelClose();
+        if (onFinished == null) {
+            return;
+        }
+        closeTask = new Runnable() {
+            @Override
+            public void run() {
+                onFinished.run();
+            }
+        };
+        main.postDelayed(closeTask, millis);
     }
 
     private void cancelClose() {

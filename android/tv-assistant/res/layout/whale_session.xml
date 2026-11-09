@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Transparent voice-interaction overlay: the app behind keeps playing. Only
-     the animated pet and its speech bubble are drawn. -->
+<!-- Transparent voice-interaction overlay: the app behind keeps playing. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/whale_session_root"
     android:layout_width="match_parent"
@@ -8,61 +7,126 @@
     android:background="@android:color/transparent">
 
     <LinearLayout
-        android:id="@+id/whale_bubble_box"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginRight="56dp"
         android:layout_marginBottom="36dp"
-        android:orientation="vertical"
-        android:gravity="end">
+        android:gravity="end"
+        android:orientation="vertical">
 
+        <!-- Speech bubble: accent rule + three-line content -->
         <LinearLayout
-            android:layout_width="560dp"
+            android:layout_width="660dp"
             android:layout_height="wrap_content"
             android:background="@drawable/bubble"
-            android:orientation="vertical"
-            android:paddingLeft="32dp"
-            android:paddingRight="32dp"
-            android:paddingTop="18dp"
-            android:paddingBottom="18dp">
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/whale_state"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/listening"
-                android:textColor="#7FD3FF"
-                android:textSize="18sp" />
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:layout_marginLeft="0dp"
+                android:background="@drawable/accent_bar" />
 
-            <TextView
-                android:id="@+id/whale_text"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:maxLines="6"
-                android:textColor="#FFFFFF"
-                android:textSize="26sp" />
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="34dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="22dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:id="@+id/whale_dot"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_marginRight="9dp"
+                        android:background="@drawable/dot_accent" />
+
+                    <TextView
+                        android:id="@+id/whale_eyebrow"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.16"
+                        android:text="LISTENING"
+                        android:textColor="@color/primary"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Whale-chan"
+                        android:textColor="@color/muted_foreground"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/whale_you"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="3"
+                    android:textColor="@color/muted_foreground"
+                    android:textSize="15sp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/whale_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:lineSpacingExtra="4dp"
+                    android:maxLines="7"
+                    android:textColor="@color/foreground"
+                    android:textSize="24sp" />
+            </LinearLayout>
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/whale_art"
-            android:layout_width="300dp"
+        <!-- Pet with a soft ground shadow -->
+        <FrameLayout
+            android:layout_width="360dp"
             android:layout_height="300dp"
             android:layout_gravity="end"
-            android:layout_marginTop="-12dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_whale"
-            android:contentDescription="@string/app_name" />
+            android:layout_marginTop="-18dp">
+
+            <View
+                android:layout_width="280dp"
+                android:layout_height="56dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/pet_shadow" />
+
+            <ImageView
+                android:id="@+id/whale_art"
+                android:layout_width="380dp"
+                android:layout_height="380dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:scaleType="fitCenter"
+                android:contentDescription="Whale-chan"
+                android:src="@drawable/ic_whale" />
+        </FrameLayout>
     </LinearLayout>
 
     <TextView
-        android:id="@+id/whale_credit"
+        android:id="@+id/whale_attribution"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
         android:layout_margin="18dp"
         android:text="@string/credit"
-        android:textColor="#80FFFFFF"
-        android:textSize="12sp" />
+        android:textColor="#66FFFFFF"
+        android:textSize="11sp" />
 </FrameLayout>

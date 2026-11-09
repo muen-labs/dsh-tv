@@ -102,13 +102,22 @@ The remote's Disney+ button then opens Whale-chan; the mic button stays Google's
 Restart DSH and you get `whale_health`, `whale_ask` and `whale_start` tools; the
 daemon is started on demand.
 
+## Design system
+
+Every screen follows **EVA design tokens exposed as shadcn/ui primitives**
+(Button variants, Card, Badge, Input, Separator, Alert) — tokens, component
+states, screen specs and the accessibility contract are in
+[DESIGN.md](DESIGN.md).
+
+![Bridge home](docs/screenshots/tv-bridge-home.jpg)
+
 ## Settings pane (plugin UI)
 
 `plugin/ui/` is a DSH client plugin with a settings section shaped like
 *Mobile access*: it scans the LAN for TVs, selects one, and generates the pairing
 QR. Host routes proxy the daemon so the browser never sees the token.
 
-![Pane phases](plugin/ui/docs/screenshots/pane-preview.png)
+![Pane phases](docs/screenshots/pane-preview.png)
 
 Build and render a preview:
 

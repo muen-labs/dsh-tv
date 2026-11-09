@@ -4,17 +4,15 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.ViewGroup;
+import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,9 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TV-friendly control panel: shows bridge status and lets the user start the
- * server, enable accessibility, grant the microphone and refresh state.
- * Extras from adb are also honoured, e.g.:
+ * TV control panel: status at a glance, the pairing entry point, and the
+ * bridge controls. Extras from adb are still honoured, e.g.
  *   am start -n com.jp.dshtv/.MainActivity --es set_token secret --ez start_service true
  */
 public class MainActivity extends Activity {
@@ -34,8 +31,12 @@ public class MainActivity extends Activity {
     private static final long REFRESH_MS = 2000;
 
     private SharedPreferences prefs;
-    private TextView statusView;
-    private TextView instructionsView;
+    private View statusDot;
+    private TextView statusText;
+    private TextView valueAddress;
+    private TextView valueMic;
+    private TextView valueAccessibility;
+    private TextView valueForeground;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final Runnable refreshRunnable = new Runnable() {
@@ -50,7 +51,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefs = BridgeService.prefs(this);
-        buildUi();
+        setContentView(R.layout.activity_main);
+        bindUi();
         handleIntent(getIntent());
     }
 
@@ -80,7 +82,82 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
-    /** Extras used by the Mac/adb to configure the bridge without the remote. */
+    private void bindUi() {
+        statusDot = findViewById(R.id.status_dot);
+        statusText = (TextView) findViewById(R.id.status_text);
+        valueAddress = (TextView) findViewById(R.id.value_address);
+        valueMic = (TextView) findViewById(R.id.value_mic);
+        valueAccessibility = (TextView) findViewById(R.id.value_accessibility);
+        valueForeground = (TextView) findViewById(R.id.value_foreground);
+
+        Button pair = (Button) findViewById(R.id.btn_pair);
+        Button start = (Button) findViewById(R.id.btn_start);
+        Button stop = (Button) findViewById(R.id.btn_stop);
+        Button accessibility = (Button) findViewById(R.id.btn_accessibility);
+        Button mic = (Button) findViewById(R.id.btn_mic);
+        Button refresh = (Button) findViewById(R.id.btn_refresh);
+
+        pair.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, PairingActivity.class));
+            }
+        });
+        start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startBridgeService();
+                toast("Bridge service starting");
+                refreshStatus();
+            }
+        });
+        stop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopBridgeService();
+                toast("Bridge service stopped");
+                refreshStatus();
+            }
+        });
+        accessibility.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openAccessibilitySettings();
+            }
+        });
+        mic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestBridgePermissions();
+            }
+        });
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refreshStatus();
+                toast("Status refreshed");
+            }
+        });
+
+        for (Button b : new Button[]{pair, start, stop, accessibility, mic, refresh}) {
+            styleFocus(b);
+        }
+        pair.requestFocus();
+    }
+
+    /** 10-foot focus: lift and scale the focused control so the remote is obvious. */
+    private void styleFocus(final View view) {
+        view.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                v.animate().scaleX(hasFocus ? 1.03f : 1f)
+                        .scaleY(hasFocus ? 1.03f : 1f)
+                        .setDuration(120).start();
+                v.setElevation(hasFocus ? dp(8) : 0);
+            }
+        });
+    }
+
     private void handleIntent(Intent intent) {
         if (intent == null) {
             return;
@@ -93,12 +170,10 @@ public class MainActivity extends Activity {
                 prefs.edit().putString(BridgeService.KEY_TOKEN,
                         token != null ? token : "").apply();
                 changed = true;
-                Log.i(TAG, "set_token via intent");
             }
             if (intent.getBooleanExtra("clear_token", false)) {
                 prefs.edit().putString(BridgeService.KEY_TOKEN, "").apply();
                 changed = true;
-                Log.i(TAG, "clear_token via intent");
             }
             if (intent.hasExtra("set_port")) {
                 int port = intent.getIntExtra("set_port", BridgeService.DEFAULT_PORT);
@@ -106,7 +181,6 @@ public class MainActivity extends Activity {
                     prefs.edit().putInt(BridgeService.KEY_PORT, port).apply();
                     changed = true;
                     portChanged = true;
-                    Log.i(TAG, "set_port via intent: " + port);
                 }
             }
         } catch (Throwable t) {
@@ -117,7 +191,6 @@ public class MainActivity extends Activity {
             toast("Bridge settings updated");
         }
         if (portChanged && BridgeService.isRunning()) {
-            // The listening socket needs a restart to pick up the new port.
             stopBridgeService();
             handler.postDelayed(new Runnable() {
                 @Override
@@ -133,147 +206,45 @@ public class MainActivity extends Activity {
         refreshStatus();
     }
 
-    private void buildUi() {
-        int background = 0xFF0E1116;
-        int titleColor = 0xFF4FC3F7;
-        int textColor = 0xFFE6EDF3;
-        int mutedColor = 0xFF9AA7B4;
-
-        ScrollView scroll = new ScrollView(this);
-        scroll.setBackgroundColor(background);
-        scroll.setFillViewport(true);
-
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(48), dp(32), dp(48), dp(32));
-        scroll.addView(root, new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
-        TextView title = new TextView(this);
-        title.setText("DSH TV Bridge");
-        title.setTextColor(titleColor);
-        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f);
-        root.addView(title);
-
-        TextView subtitle = new TextView(this);
-        subtitle.setText("com.jp.dshtv  v1.0  —  LAN control server");
-        subtitle.setTextColor(mutedColor);
-        subtitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f);
-        root.addView(subtitle, marginTop(dp(2), dp(20)));
-
-        statusView = new TextView(this);
-        statusView.setTextColor(textColor);
-        statusView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f);
-        statusView.setLineSpacing(dp(3), 1f);
-        root.addView(statusView, marginTop(dp(20), dp(20)));
-
-        root.addView(button("Start service", new android.view.View.OnClickListener() {
-            @Override
-            public void onClick(android.view.View v) {
-                startBridgeService();
-                toast("Bridge service starting");
-                refreshStatus();
-            }
-        }), marginTop(dp(10), dp(6)));
-
-        root.addView(button("Stop service", new android.view.View.OnClickListener() {
-            @Override
-            public void onClick(android.view.View v) {
-                stopBridgeService();
-                toast("Bridge service stopped");
-                refreshStatus();
-            }
-        }), marginTop(dp(0), dp(6)));
-
-        root.addView(button("Open accessibility settings",
-                new android.view.View.OnClickListener() {
-                    @Override
-                    public void onClick(android.view.View v) {
-                        openAccessibilitySettings();
-                    }
-                }), marginTop(dp(0), dp(6)));
-
-        root.addView(button("Grant microphone", new android.view.View.OnClickListener() {
-            @Override
-            public void onClick(android.view.View v) {
-                requestBridgePermissions();
-            }
-        }), marginTop(dp(0), dp(6)));
-
-        root.addView(button("Refresh", new android.view.View.OnClickListener() {
-            @Override
-            public void onClick(android.view.View v) {
-                refreshStatus();
-                toast("Status refreshed");
-            }
-        }), marginTop(dp(0), dp(6)));
-
-        instructionsView = new TextView(this);
-        instructionsView.setText(
-                "Setup\n"
-                        + "1. Open accessibility settings and enable \"DSH TV Bridge\".\n"
-                        + "2. Grant the microphone if you want the /mic endpoint.\n"
-                        + "3. Start the service (restarts automatically after a reboot).\n"
-                        + "4. From the Mac:\n"
-                        + "     curl http://<TV-IP>:8765/ping\n"
-                        + "   If a token is set, add  -H 'X-DSH-Token: <token>'.\n"
-                        + "5. Optional: tap the service notification to reopen this screen.");
-        instructionsView.setTextColor(mutedColor);
-        instructionsView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f);
-        instructionsView.setLineSpacing(dp(2), 1f);
-        root.addView(instructionsView, marginTop(dp(28), dp(30)));
-
-        setContentView(scroll);
-    }
-
-    private Button button(String label, android.view.View.OnClickListener listener) {
-        Button button = new Button(this);
-        button.setText(label);
-        button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
-        button.setAllCaps(false);
-        button.setFocusable(true);
-        button.setOnClickListener(listener);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        button.setLayoutParams(params);
-        return button;
-    }
-
-    private LinearLayout.LayoutParams marginTop(int bottom, int top) {
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.topMargin = top;
-        params.bottomMargin = bottom;
-        return params;
-    }
-
     private void refreshStatus() {
-        if (statusView == null) {
+        if (statusText == null) {
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        String ip = joinIps();
-        sb.append("IP: ").append(ip.length() > 0 ? ip : "(no IPv4 address)")
-                .append("    Port: ").append(BridgeService.port(this)).append('\n');
-        sb.append("Server: ");
-        if (BridgeService.isRunning()) {
-            sb.append("RUNNING (uptime ").append(formatUptime(BridgeService.uptimeMs()))
-                    .append(')');
-        } else {
-            sb.append("STOPPED");
-        }
-        sb.append('\n');
-        sb.append("Accessibility service: ").append(accessibilityText()).append('\n');
-        sb.append("Microphone permission: ")
-                .append(MicRecorder.hasPermission(this) ? "GRANTED" : "DENIED").append('\n');
-        sb.append("Token: ").append(tokenText()).append('\n');
+        boolean running = BridgeService.isRunning();
+        statusDot.setBackgroundResource(running ? R.drawable.dot_on : R.drawable.dot_off);
+        statusText.setText(running
+                ? "RUNNING · " + formatUptime(BridgeService.uptimeMs())
+                : "STOPPED");
+        statusText.setTextColor(getColor(running ? R.color.success : R.color.destructive));
+
+        String ip = primaryIp();
+        valueAddress.setText((ip.length() > 0 ? ip : "no IPv4") + " : " + BridgeService.port(this));
+
+        boolean micGranted = MicRecorder.hasPermission(this);
+        valueMic.setText(micGranted ? "Granted" : "Denied");
+        valueMic.setTextColor(getColor(micGranted ? R.color.foreground : R.color.warning));
+
+        boolean accessibilityEnabled = accessibilityEnabled();
+        boolean connected = KeyService.isConnected();
+        valueAccessibility.setText(connected ? "Connected"
+                : accessibilityEnabled ? "Enabled" : "Disabled");
+        valueAccessibility.setTextColor(getColor(connected ? R.color.foreground
+                : accessibilityEnabled ? R.color.warning : R.color.destructive));
+
         KeyService ks = KeyService.getInstance();
         String foreground = ks != null ? ks.foregroundPackage() : "";
-        sb.append("Foreground app: ")
-                .append(foreground != null && foreground.length() > 0 ? foreground : "(unknown)")
-                .append('\n');
-        sb.append("Model: ").append(Build.MANUFACTURER).append(' ').append(Build.MODEL);
-        statusView.setText(sb.toString());
+        valueForeground.setText(foreground != null && foreground.length() > 0 ? foreground : "—");
+    }
+
+    /** Prefer the LAN address over a VPN/loopback interface. */
+    private String primaryIp() {
+        List<String> addresses = ApiHandler.ips();
+        for (String address : addresses) {
+            if (address.startsWith("192.168.") || address.startsWith("10.")) {
+                return address;
+            }
+        }
+        return addresses.isEmpty() ? "" : addresses.get(0);
     }
 
     private String joinIps() {
@@ -286,29 +257,6 @@ public class MainActivity extends Activity {
             sb.append(addresses.get(i));
         }
         return sb.toString();
-    }
-
-    private String accessibilityText() {
-        boolean enabled = accessibilityEnabled();
-        boolean connected = KeyService.isConnected();
-        if (connected) {
-            return "ENABLED, CONNECTED";
-        }
-        if (enabled) {
-            return "ENABLED (not connected yet)";
-        }
-        return "DISABLED — enable it in accessibility settings";
-    }
-
-    private String tokenText() {
-        String token = BridgeService.token(this);
-        if (token.length() == 0) {
-            return "not set (open API on LAN)";
-        }
-        if (token.length() <= 4) {
-            return "set: " + token;
-        }
-        return "set: " + token.substring(0, 2) + "***" + token.substring(token.length() - 2);
     }
 
     private boolean accessibilityEnabled() {
@@ -324,9 +272,7 @@ public class MainActivity extends Activity {
     private void startBridgeService() {
         try {
             startForegroundService(new Intent(this, BridgeService.class));
-            Log.i(TAG, "startForegroundService requested");
         } catch (Throwable t) {
-            Log.i(TAG, "startForegroundService failed: " + t);
             toast("Could not start service: " + t);
         }
     }
@@ -343,7 +289,6 @@ public class MainActivity extends Activity {
         try {
             startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
         } catch (Throwable t) {
-            Log.i(TAG, "open accessibility settings failed: " + t);
             toast("Could not open settings: " + t);
         }
     }

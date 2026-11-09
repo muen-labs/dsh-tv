@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Design tokens: shadcn/ui semantic names mapped onto the Eva Design System
+  dark theme (@eva-design/eva, UI Kitten dark.json).
+
+    background            = background-basic-color-4  #101426
+    foreground            = text-basic-color          #FFFFFF
+    card                  = background-basic-color-2  #1A2138
+    popover               = background-basic-color-1  #222B45
+    secondary             = background-basic-color-1  #222B45
+    muted                 = background-basic-color-3  #151A30
+    muted-foreground      = text-hint-color           #8F9BB3
+    primary               = color-primary-500         #3366FF
+    primary-hover         = color-primary-400         #598BFF
+    primary-active        = color-primary-600         #274BDB
+    destructive           = color-danger-500          #FF3D71
+    success               = color-success-500         #00E096
+    warning               = color-warning-500         #FFAA00
+    border/input          = color-basic-700           #2E3A59
+    ring                  = color-primary-400         #598BFF
+    radius                = 8dp controls, 14dp cards
+-->
+<resources>
+    <!-- shadcn semantic surfaces -->
+    <color name="background">#101426</color>
+    <color name="background_end">#0B0F1F</color>
+    <color name="foreground">#FFFFFF</color>
+    <color name="card">#1A2138</color>
+    <color name="card_foreground">#FFFFFF</color>
+    <color name="popover">#222B45</color>
+    <color name="secondary">#222B45</color>
+    <color name="secondary_foreground">#FFFFFF</color>
+    <color name="muted">#151A30</color>
+    <color name="muted_foreground">#8F9BB3</color>
+    <color name="border">#2E3A59</color>
+    <color name="input">#2E3A59</color>
+    <color name="ring">#598BFF</color>
+
+    <!-- Eva status colours -->
+    <color name="primary">#3366FF</color>
+    <color name="primary_foreground">#FFFFFF</color>
+    <color name="primary_hover">#598BFF</color>
+    <color name="primary_active">#274BDB</color>
+    <color name="primary_disabled">#A6C1FF</color>
+    <color name="destructive">#FF3D71</color>
+    <color name="success">#00E096</color>
+    <color name="warning">#FFAA00</color>
+    <color name="info">#0095FF</color>
+    <color name="white">#FFFFFF</color>
+
+    <!-- shadcn radius / spacing (10-foot scale) -->
+    <dimen name="radius_sm">8dp</dimen>
+    <dimen name="radius_md">10dp</dimen>
+    <dimen name="radius_lg">14dp</dimen>
+    <dimen name="space_1">4dp</dimen>
+    <dimen name="space_2">8dp</dimen>
+    <dimen name="space_3">12dp</dimen>
+    <dimen name="space_4">16dp</dimen>
+    <dimen name="space_5">24dp</dimen>
+    <dimen name="space_6">32dp</dimen>
+    <dimen name="space_7">48dp</dimen>
+    <dimen name="button_height">56dp</dimen>
+    <dimen name="focus_stroke">2dp</dimen>
+</resources>

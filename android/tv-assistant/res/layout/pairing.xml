@@ -2,75 +2,168 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0E1116"
-    android:fillViewport="true">
+    android:background="@drawable/bg_screen"
+    android:fillViewport="true"
+    android:scrollbars="none">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:padding="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pair this TV with Whale-chan"
-            android:textColor="#FFFFFF"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/pair_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Scan the QR with your phone to approve this TV."
-            android:textColor="#9FB3C8"
-            android:textSize="15sp" />
-
-        <ImageView
-            android:id="@+id/pair_qr"
-            android:layout_width="230dp"
-            android:layout_height="230dp"
-            android:layout_marginTop="10dp"
-            android:background="#FFFFFF"
-            android:padding="8dp"
-            android:scaleType="fitCenter" />
-
-        <TextView
-            android:id="@+id/pair_code"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textColor="#7FD3FF"
-            android:textSize="20sp" />
+        android:paddingLeft="@dimen/space_7"
+        android:paddingRight="@dimen/space_7"
+        android:paddingTop="@dimen/space_6"
+        android:paddingBottom="@dimen/space_6">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <EditText
-                android:id="@+id/pair_ip"
-                android:layout_width="230dp"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="Mac mini IP"
-                android:textColor="#FFFFFF"
-                android:textColorHint="#607080"
-                android:inputType="textUri"
-                android:singleLine="true"
-                android:textSize="18sp" />
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-            <Button
-                android:id="@+id/pair_start"
+                <TextView style="@style/Shadcn.H1" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="Pair this TV" />
+
+                <TextView style="@style/Shadcn.Muted" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_1"
+                    android:text="Scan with your phone → approve → this TV gets its DSH connection." />
+
+                <TextView android:id="@+id/pair_hint"
+                    style="@style/Shadcn.Muted"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_2"
+                    android:textColor="@color/primary"
+                    android:text="Contacting the Mac…" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:text="Pair"
-                android:textSize="16sp" />
+                android:background="@drawable/pill"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+                <View android:id="@+id/pair_dot" android:layout_width="10dp"
+                    android:layout_height="10dp" android:layout_marginRight="8dp"
+                    android:background="@drawable/dot_off" />
+
+                <TextView android:id="@+id/pair_status"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="WAITING" android:textColor="@color/muted_foreground"
+                    android:textSize="12sp" android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.08" />
+            </LinearLayout>
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_5"
+            android:background="@drawable/card"
+            android:orientation="vertical"
+            android:padding="@dimen/space_5">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <!-- QR panel -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/qr_panel"
+                    android:padding="14dp"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/pair_qr"
+                        android:layout_width="250dp"
+                        android:layout_height="250dp"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="Pairing QR code" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/space_5"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView style="@style/Shadcn.Label" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="PAIRING CODE" />
+
+                    <TextView android:id="@+id/pair_code"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_2"
+                        android:text="——————"
+                        android:textColor="@color/primary"
+                        android:textSize="34sp"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.28" />
+
+                    <TextView style="@style/Shadcn.Muted" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_3"
+                        android:text="On the TV this screen shows the same code. Approve it on the page that opens when you scan." />
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginTop="@dimen/space_4" android:layout_marginBottom="@dimen/space_4"
+                        android:background="@color/border" />
+
+                    <TextView style="@style/Shadcn.Label" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="MAC MINI ADDRESS" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_2"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <EditText
+                            android:id="@+id/pair_ip"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/button_height"
+                            android:layout_weight="1"
+                            android:background="@drawable/input_bg"
+                            android:hint="192.168.4.57"
+                            android:inputType="textUri"
+                            android:paddingLeft="16dp"
+                            android:paddingRight="16dp"
+                            android:singleLine="true"
+                            android:textColor="@color/foreground"
+                            android:textColorHint="@color/muted_foreground"
+                            android:textSize="17sp"
+                            android:fontFamily="monospace" />
+
+                        <Button
+                            android:id="@+id/pair_start"
+                            style="@style/Shadcn.Button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="@dimen/button_height"
+                            android:layout_marginLeft="@dimen/space_3"
+                            android:minWidth="140dp"
+                            android:text="Pair" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView style="@style/Shadcn.Muted" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_5"
+            android:text="Tip: the Mac's address is shown in DSH → Settings → Mobile access. Pairing stays on your LAN." />
     </LinearLayout>
 </ScrollView>
