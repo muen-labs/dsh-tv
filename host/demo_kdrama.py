@@ -129,8 +129,27 @@ def stremio_search(title: str) -> None:
     dshtv("key", "left"); time.sleep(0.8)
     dshtv("key", "up"); time.sleep(0.6)
     dshtv("key", "ok"); time.sleep(2.5)
-    dshtv("text", title); time.sleep(1)
+    # type a short prefix, then use Gboard's type-ahead row (UP, RIGHT to the
+    # exact title), which is faster and avoids fuzzy first-result mistakes.
+    prefix = title.split()[0] if title.split() else title
+    dshtv("text", prefix); time.sleep(1)
+    dshtv("key", "up"); time.sleep(0.6)          # focus suggestion strip
+    for _ in range(6):
+        d = ui()
+        focus = ((d.get("focused") or {}).get("text") or "").lower()
+        if focus.startswith(prefix.lower()):
+            break
+        dshtv("key", "right"); time.sleep(0.4)
+    dshtv("key", "ok"); time.sleep(0.8)          # accept the suggestion
+    dshtv("text", title[len(prefix):])            # ensure the full title
     dshtv("key", "enter"); time.sleep(6)
+    # move to the result card whose title matches, not just the first card
+    for _ in range(10):
+        d = ui()
+        focus = ((d.get("focused") or {}).get("text") or "").lower()
+        if title.lower().split()[0] in focus:
+            break
+        dshtv("key", "right"); time.sleep(0.5)
 
 
 def stremio_catalog_first(title: str) -> bool:
