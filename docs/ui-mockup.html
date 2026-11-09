@@ -125,6 +125,23 @@
   .btn.secondary { background: var(--secondary); color: var(--secondary-foreground); border-color: var(--border); }
   .btn.secondary:hover { background: var(--popover); }
   .btn.outline { background: transparent; border-color: var(--border); color: var(--foreground); }
+  .btn.tint {
+    background: rgba(51,102,255,.16);
+    border: 2px solid rgba(89,139,255,.55);
+    color: #EAF2FB;
+    border-radius: 14px;
+    font-weight: 600;
+  }
+  .btn.tint:hover { background: rgba(51,102,255,.22); border-color: rgba(89,139,255,.75); }
+  .btn.dark {
+    background: #151D2F;
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    border-radius: 14px;
+    font-weight: 600;
+  }
+  .btn.dark:hover { background: #1B2438; border-color: #3A4A6B; }
+  .btn.waiting { background: rgba(51,102,255,.16); border: 2px solid rgba(89,139,255,.55); color: #EAF2FB; border-radius: 14px; font-weight: 600; }
   .btn.outline:hover { background: #141B2C; }
   .btn.ghost { background: transparent; border-color: transparent; color: var(--muted-foreground); }
   .btn.ghost:hover { color: var(--foreground); background: #141B2C; }
@@ -589,18 +606,18 @@
                     </div>
                     <span class="badge plain">2 min</span>
                   </div>
-                  <button class="btn full"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span class="lbl">Pair this TV with your Mac</span></button>
+                  <button class="btn tint full"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span class="lbl">Pair this TV with your Mac</span></button>
                   <p class="muted" style="margin:12px 0 0;font-size:13.5px">Shows a QR code — scan it with your phone to connect this TV to DSH.</p>
                   <div class="sep"></div>
                   <div class="btn-row">
-                    <button class="btn secondary"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.6c0-.8.9-1.3 1.6-.9l9.2 6.4c.6.4.6 1.4 0 1.8l-9.2 6.4c-.7.4-1.6-.1-1.6-.9z"/></svg><span class="lbl">Start service</span></button>
-                    <button class="btn secondary"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg><span class="lbl">Stop service</span></button>
+                    <button class="btn dark"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.6c0-.8.9-1.3 1.6-.9l9.2 6.4c.6.4.6 1.4 0 1.8l-9.2 6.4c-.7.4-1.6-.1-1.6-.9z"/></svg><span class="lbl">Start service</span></button>
+                    <button class="btn dark"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg><span class="lbl">Stop service</span></button>
                   </div>
                   <div class="btn-row" style="margin-top:12px">
                     <button class="btn outline"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2"/><path d="M4 10h16M12 10v5l-4 6M12 15l4 6"/></svg><span class="lbl">Accessibility settings</span></button>
                     <button class="btn outline"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span class="lbl">Grant microphone</span></button>
                   </div>
-                  <button class="btn ghost full" style="margin-top:12px"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 5v6h-6"/></svg><span class="lbl">Refresh status</span></button>
+                  <button class="btn dark full" style="margin-top:12px"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 5v6h-6"/></svg><span class="lbl">Refresh status</span></button>
                 </div>
 
                 <div class="card" style="flex:1">
@@ -641,8 +658,8 @@
                   <div class="sep"></div>
                   <div class="code-chip"><span class="muted">Check from the Mac</span><span class="mono">curl 192.168.4.58:8765/ping</span></div>
                   <div class="btn-row" style="margin-top:18px">
-                    <button class="btn outline">Pair another TV</button>
-                    <button class="btn outline">Test the mic</button>
+                    <button class="btn dark">Pair another TV</button>
+                    <button class="btn dark">Test the mic</button>
                   </div>
                 </div>
                 <div class="card">
@@ -701,7 +718,7 @@
 
                 <div class="pair-actions">
                   <button class="btn waiting" disabled><span class="spinner"></span> Waiting for DSH approval…</button>
-                  <button class="btn outline">Use a different Mac</button>
+                  <button class="btn dark">Use a different Mac</button>
                 </div>
 
                 <div class="mini-steps">
@@ -823,7 +840,7 @@
             <h3>Buttons · variants</h3>
             <div class="comp-row">
               <button class="btn">Primary</button>
-              <button class="btn secondary">Secondary</button>
+              <button class="btn dark">Secondary</button>
               <button class="btn outline">Outline</button>
               <button class="btn ghost">Ghost</button>
               <button class="btn destructive">Destructive</button>
