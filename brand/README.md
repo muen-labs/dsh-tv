@@ -1,7 +1,7 @@
 # Brand
 
-- `deepseek-tv-whale.svg` — original project-owned whale mark (MIT): whale
-  silhouette + sonar arc in a DeepSeek blue → cyan → teal gradient.
-- The shipped app icon uses the **DeepSeek whale emblem** supplied by the owner;
-  see `docs/ui-assets/app-icon*.png` and `banner.png`.
+- **App icon**: white tile + whale silhouette + “TV”, DeepSeek deep blue `#576BB2`.
+  Minimal, no gradients. SVG source for the whale mark: `deepseek-tv-whale.svg`
+  (original project-owned, MIT) — the shipped whale shape comes from the
+  DeepSeek emblem with the owner's direction.
 - The mascot character (animated pet) is separate from the product mark.

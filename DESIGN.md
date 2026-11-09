@@ -43,10 +43,12 @@ Web pane: `evaTheme` CSS variables in [`plugin/ui/src/ui.tsx`](plugin/ui/src/ui.
 
 ## App icon
 
-The launcher icon is the whale emblem on a white rounded tile (`512 → 128`),
-with a 320×180 Leanback banner: emblem + “DeepSeek TV Assistant”. The original
-project-owned mark is kept at `brand/deepseek-tv-whale.svg` (MIT) as an
-alternative for release builds.
+Minimal: a white tile, the whale silhouette and **TV** next to it in the
+DeepSeek deep blue sampled from the emblem (`#576BB2`). No gradients, no extra
+artwork. Sizes 512/256/192/128, plus a white 320×180 Leanback banner with the
+same mark. The launcher label is **DeepSeek TV**.
+
+![icon](docs/ui-assets/icon-preview.png)
 
 ## Colour system (glows)
 
