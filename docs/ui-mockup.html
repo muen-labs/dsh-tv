@@ -109,12 +109,15 @@
 
   /* ============ primitives ============ */
   .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    height: 56px; padding: 0 24px; border-radius: var(--radius-md);
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    min-height: 56px; padding: 11px 22px; border-radius: var(--radius-md);
+    line-height: 1.25; text-align: center; white-space: normal;
     border: 1px solid transparent; background: var(--primary); color: var(--primary-foreground);
     font-size: 16px; font-weight: 600; transition: background .15s, box-shadow .15s, transform .12s, border-color .15s;
     outline: none;
   }
+  .btn .ico { flex: 0 0 20px; width: 20px; height: 20px; display: block; }
+  .btn .lbl { min-width: 0; }
   .btn:hover { background: var(--primary-hover); }
   .btn:active { background: var(--primary-active); }
   .btn:focus-visible, .show-focus .btn.demo-target { box-shadow: var(--shadow-focus); transform: scale(1.03); }
@@ -586,18 +589,18 @@
                     </div>
                     <span class="badge plain">2 min</span>
                   </div>
-                  <button class="btn full">Pair this TV with your Mac</button>
+                  <button class="btn full"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span class="lbl">Pair this TV with your Mac</span></button>
                   <p class="muted" style="margin:12px 0 0;font-size:13.5px">Shows a QR code — scan it with your phone to connect this TV to DSH.</p>
                   <div class="sep"></div>
                   <div class="btn-row">
-                    <button class="btn secondary">Start service</button>
-                    <button class="btn secondary">Stop service</button>
+                    <button class="btn secondary"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.6c0-.8.9-1.3 1.6-.9l9.2 6.4c.6.4.6 1.4 0 1.8l-9.2 6.4c-.7.4-1.6-.1-1.6-.9z"/></svg><span class="lbl">Start service</span></button>
+                    <button class="btn secondary"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg><span class="lbl">Stop service</span></button>
                   </div>
                   <div class="btn-row" style="margin-top:12px">
-                    <button class="btn outline">Accessibility settings</button>
-                    <button class="btn outline">Grant microphone</button>
+                    <button class="btn outline"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2"/><path d="M4 10h16M12 10v5l-4 6M12 15l4 6"/></svg><span class="lbl">Accessibility settings</span></button>
+                    <button class="btn outline"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span class="lbl">Grant microphone</span></button>
                   </div>
-                  <button class="btn ghost full" style="margin-top:12px">Refresh status</button>
+                  <button class="btn ghost full" style="margin-top:12px"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 5v6h-6"/></svg><span class="lbl">Refresh status</span></button>
                 </div>
 
                 <div class="card" style="flex:1">
