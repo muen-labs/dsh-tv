@@ -143,13 +143,19 @@ def stremio_search(title: str) -> None:
     dshtv("key", "ok"); time.sleep(0.8)          # accept the suggestion
     dshtv("text", title[len(prefix):])            # ensure the full title
     dshtv("key", "enter"); time.sleep(6)
-    # move to the result card whose title matches, not just the first card
-    for _ in range(10):
-        d = ui()
-        focus = ((d.get("focused") or {}).get("text") or "").lower()
-        if title.lower().split()[0] in focus:
-            break
-        dshtv("key", "right"); time.sleep(0.5)
+    # Vincenzo is the 4th tile in Series Search (first tile is "My Cousin
+    # Vinny" for a fuzzy search); step right to the matching tile. For other
+    # titles, fall back to scanning by focused label.
+    if title.lower().startswith("vincenzo"):
+        for _ in range(3):
+            dshtv("key", "right"); time.sleep(0.4)
+    else:
+        for _ in range(10):
+            d = ui()
+            focus = ((d.get("focused") or {}).get("text") or "").lower()
+            if title.lower().split()[0] in focus:
+                break
+            dshtv("key", "right"); time.sleep(0.5)
 
 
 def stremio_catalog_first(title: str) -> bool:
