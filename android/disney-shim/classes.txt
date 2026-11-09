@@ -1,0 +1,3 @@
+obj/com/disney/disneyplus/R.class
+obj/com/disney/disneyplus/MainActivity.class
+obj/com/disney/disneyplus/R$drawable.class

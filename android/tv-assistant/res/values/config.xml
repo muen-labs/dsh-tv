@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whale_host">192.168.4.57</string>
+    <string name="whale_port">8766</string>
+    <string name="whale_token">pair-me</string>
+</resources>

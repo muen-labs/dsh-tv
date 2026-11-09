@@ -3,7 +3,15 @@
 set -euo pipefail
 APP="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$APP/../.." && pwd)"
-TOOLS="${WHALE_TOOLS:-$ROOT/.tools}"
+if [ -n "${WHALE_TOOLS:-}" ]; then
+  TOOLS="$WHALE_TOOLS"
+elif [ -d "$ROOT/.tools/android-sdk" ]; then
+  TOOLS="$ROOT/.tools"
+elif [ -d "$ROOT/../.tools/android-sdk" ]; then
+  TOOLS="$ROOT/../.tools"
+else
+  TOOLS="$ROOT/.tools"
+fi
 export JAVA_HOME="${JAVA_HOME:-$TOOLS/jdk/Contents/Home}"
 export PATH="$JAVA_HOME/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 SDK="${ANDROID_SDK_ROOT:-$TOOLS/android-sdk}"
