@@ -101,6 +101,11 @@ TOOLS = [
         },
     },
     {
+        "name": "whale_discover",
+        "description": "Scan the local network for Android TVs running the Whale-chan bridge.",
+        "inputSchema": {"type": "object", "properties": {}},
+    },
+    {
         "name": "whale_start",
         "description": "Start the Whale-chan voice daemon if it is not already listening.",
         "inputSchema": {"type": "object", "properties": {}},
@@ -138,6 +143,11 @@ def dispatch(method: str, params: dict) -> dict:
                     return tool_result(json.dumps(start), True)
                 answer = call("/ask", {"text": text})
                 return tool_result(json.dumps(answer, ensure_ascii=False))
+            if name == "whale_discover":
+                start = ensure_daemon()
+                if not start.get("ok"):
+                    return tool_result(json.dumps(start), True)
+                return tool_result(json.dumps(call("/discover"), ensure_ascii=False))
             if name == "whale_start":
                 return tool_result(json.dumps(ensure_daemon()))
             return tool_result(f"unknown tool: {name}", True)

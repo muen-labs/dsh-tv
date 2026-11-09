@@ -102,6 +102,22 @@ The remote's Disney+ button then opens Whale-chan; the mic button stays Google's
 Restart DSH and you get `whale_health`, `whale_ask` and `whale_start` tools; the
 daemon is started on demand.
 
+## Settings pane (plugin UI)
+
+`plugin/ui/` is a DSH client plugin with a settings section shaped like
+*Mobile access*: it scans the LAN for TVs, selects one, and generates the pairing
+QR. Host routes proxy the daemon so the browser never sees the token.
+
+![Pane phases](plugin/ui/docs/screenshots/pane-preview.png)
+
+Build and render a preview:
+
+```bash
+cd plugin/ui && npm install && node build.mjs && node tools/preview.mjs
+```
+
+See [plugin/ui/README.md](plugin/ui/README.md) for the install seam.
+
 ## Using it
 
 1. Press the Whale-chan button (Disney+ shim) or open the assistant tile.
