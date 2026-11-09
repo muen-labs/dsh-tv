@@ -122,6 +122,13 @@ def trakt_trending(limit: int = 12) -> list[dict]:
     """Optional direct Trakt API (set TRAKT_CLIENT_ID); Korean shows only."""
     cid = os.environ.get("TRAKT_CLIENT_ID", "").strip()
     if not cid:
+        for base in (ROOT, ROOT.parent):
+            try:
+                cid = (base / ".auth" / "trakt.client_id").read_text().strip()
+                break
+            except OSError:
+                continue
+    if not cid:
         return []
     out = []
     for path in ("shows/trending", "shows/popular"):
