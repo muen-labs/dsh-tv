@@ -28,6 +28,8 @@ public final class WhaleUi {
     private final TextView eyebrow;
     private final TextView you;
     private final TextView text;
+    private final View closeBtn;
+    private final View againBtn;
     private final Runnable onFinished;
     private final Handler main = new Handler(Looper.getMainLooper());
     private final MicCapture mic = new MicCapture();
@@ -47,6 +49,30 @@ public final class WhaleUi {
         this.eyebrow = (TextView) root.findViewById(R.id.whale_eyebrow);
         this.you = (TextView) root.findViewById(R.id.whale_you);
         this.text = (TextView) root.findViewById(R.id.whale_text);
+        this.againBtn = root.findViewById(R.id.whale_again);
+        if (againBtn != null) {
+            againBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listening) {
+                        commit();
+                    } else {
+                        askAgain();
+                    }
+                }
+            });
+        }
+        this.closeBtn = root.findViewById(R.id.whale_close);
+        if (closeBtn != null) {
+            closeBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (onFinished != null) {
+                        onFinished.run();
+                    }
+                }
+            });
+        }
         try {
             tts = new TextToSpeech(ctx, new TextToSpeech.OnInitListener() {
                 @Override
@@ -68,6 +94,12 @@ public final class WhaleUi {
     public void listen() {
         Log.i("WhaleUi", "listen()");
         cancelClose();
+        if (againBtn != null) {
+            againBtn.setContentDescription("Send");
+        }
+        if (closeBtn != null) {
+            closeBtn.setContentDescription("Close");
+        }
         listening = true;
         pet.play(R.raw.whale_wave);
         setBubble("LISTENING", DOT_ACCENT, "", ctx.getString(R.string.listening));
@@ -187,6 +219,7 @@ public final class WhaleUi {
         setBubble("ASSISTANT", DOT_OK,
                 transcript.length() > 0 ? "“" + transcript + "”" : "", reply);
         speak(reply);
+        showCloseButton();
         scheduleClose(12000);
     }
 
@@ -195,7 +228,32 @@ public final class WhaleUi {
         cancelBusyPose();
         pet.play(R.raw.whale_wilt);
         setBubble("TRY AGAIN", DOT_ERROR, "", message);
+        showCloseButton();
         scheduleClose(7000);
+    }
+
+    /** After a reply or error the overlay offers a focusable close (X) button. */
+    private void showCloseButton() {
+        try {
+            if (againBtn != null) {
+                againBtn.setContentDescription("Ask another question");
+                againBtn.requestFocus();
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /** Ask another question in the same overlay. */
+    private void askAgain() {
+        try {
+            if (tts != null) {
+                tts.stop();
+            }
+        } catch (Throwable ignored) {
+        }
+        transcript = "";
+        cancelClose();
+        listen();
     }
 
     /** state / transcript / reply are three distinct lines, each optional. */
