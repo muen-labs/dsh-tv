@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive launcher icon.
+     The 512px "accepted" tile is a wide lockup (whale + tv = 433x212 inside the
+     tile), so a launcher that masks the central 72/108 circle crops the whale.
+     Instead the foreground is a dedicated 432x432 (4x 108dp) bitmap with the
+     mark re-composed centred at ~58% of the canvas so the whole lockup stays
+     inside the safe zone. Release checklist: keep res/drawable-nodpi/
+     ic_launcher_fg.png in sync with docs/ui-assets/app-icon.png. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_fg" />
+</adaptive-icon>

@@ -1,3 +1,7 @@
+# Whale-chan TV settings pane — add this row to a DSH profile's patch layer
+# (or just run ./plugin/install-ui.sh <profile>, which resolves it for you).
+# The package must be resolvable from the profile as `dsh-whale-chan-tv`
+# (install-ui.sh links/copies plugin/ui into the profile's node_modules).
 - insert:
     - id: dsh-whale-chan-tv
       name: dsh-whale-chan-tv

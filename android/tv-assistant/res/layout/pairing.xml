@@ -1,169 +1,610 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Pairing: 1920x1080 design / 2. 64px gutters -> 32dp, 40/28px vertical
+     -> 20/14dp, 44px column gap -> 22dp, 18px stack gap -> 9dp.
+     The TV + laptop scene on the right is the exported mockup illustration
+     (pair_scene.png); every control and text here is native. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_screen"
-    android:fillViewport="true"
-    android:scrollbars="none">
+    android:background="@drawable/pair_scene">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingLeft="@dimen/space_7"
-        android:paddingRight="@dimen/space_7"
-        android:paddingTop="@dimen/space_6"
-        android:paddingBottom="@dimen/space_6">
+        android:paddingLeft="@dimen/pair_gutter"
+        android:paddingTop="@dimen/pair_pad_top"
+        android:paddingRight="@dimen/pair_gutter"
+        android:paddingBottom="@dimen/pair_pad_bottom">
 
+        <!-- ============ brandbar ============ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView style="@style/Shadcn.H1" android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:text="Pair this TV" />
-
-                <TextView style="@style/Shadcn.Muted" android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_1"
-                    android:text="Scan with your phone → approve → this TV gets its DSH connection." />
-
-                <TextView android:id="@+id/pair_hint"
-                    style="@style/Shadcn.Muted"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_2"
-                    android:textColor="@color/primary"
-                    android:text="Contacting the Mac…" />
-            </LinearLayout>
+            <ImageView
+                android:layout_width="@dimen/pair_logo"
+                android:layout_height="@dimen/pair_logo"
+                android:background="@drawable/logo_tile"
+                android:contentDescription="DeepSeek TV Assistant"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_launcher" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="7dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Shadcn.Wordmark"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="DeepSeek " />
+
+                    <TextView
+                        style="@style/Shadcn.WordmarkStrong"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TV Assistant" />
+                </LinearLayout>
+
+                <TextView
+                    style="@style/Shadcn.Tagline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1.5dp"
+                    android:text="Android TV assistant" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/lan_pill_h"
                 android:background="@drawable/pill"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingLeft="14dp"
-                android:paddingRight="14dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
+                android:paddingLeft="6.5dp"
+                android:paddingRight="6.5dp">
 
-                <View android:id="@+id/pair_dot" android:layout_width="10dp"
-                    android:layout_height="10dp" android:layout_marginRight="8dp"
-                    android:background="@drawable/dot_off" />
+                <View
+                    android:layout_width="3.5dp"
+                    android:layout_height="3.5dp"
+                    android:layout_marginRight="4dp"
+                    android:background="@drawable/dot_on" />
 
-                <TextView android:id="@+id/pair_status"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="WAITING" android:textColor="@color/muted_foreground"
-                    android:textSize="12sp" android:fontFamily="sans-serif-medium"
-                    android:letterSpacing="0.08" />
+                <TextView
+                    style="@style/Shadcn.Badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LAN · same network" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/pair_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/badge_h"
+                android:layout_marginLeft="5dp"
+                android:background="@drawable/pill_success"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/badge_pad"
+                android:paddingRight="@dimen/badge_pad">
+
+                <View
+                    android:id="@+id/pair_dot"
+                    android:layout_width="@dimen/dot"
+                    android:layout_height="@dimen/dot"
+                    android:layout_marginRight="4dp"
+                    android:background="@drawable/dot_on" />
+
+                <TextView
+                    android:id="@+id/pair_status"
+                    style="@style/Shadcn.Badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.08"
+                    android:text="READY"
+                    android:textColor="@color/success" />
             </LinearLayout>
         </LinearLayout>
+
+        <!-- ============ hero ============ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/pair_hero_pad_top"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:paddingTop="@dimen/pair_hero_pad_top">
+
+            <LinearLayout
+                android:layout_width="@dimen/pair_col_width"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <!-- STEP 1 chip + line -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Shadcn.Badge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/step_chip_h"
+                        android:background="@drawable/step_chip"
+                        android:fontFamily="sans-serif-black"
+                        android:gravity="center"
+                        android:letterSpacing="0.12"
+                        android:paddingLeft="4.5dp"
+                        android:paddingRight="4.5dp"
+                        android:text="STEP 1"
+                        android:textColor="@color/primary_hover"
+                        android:textSize="5.25dp" />
+
+                    <TextView
+                        style="@style/Shadcn.Tagline"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_weight="1"
+                        android:text="Connect your TV to DSH" />
+                </LinearLayout>
+
+                <!-- 58px hero: "Pair this TV" / "with DSH" -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/pair_gap"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Shadcn.Hero"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pair this TV" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="-5dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Shadcn.Hero"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="with " />
+
+                        <TextView
+                            style="@style/Shadcn.Hero"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="DSH"
+                            android:textColor="@color/primary_hover" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    style="@style/Shadcn.Sub"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/pair_gap"
+                    android:maxWidth="310dp"
+                    android:text="DSH runs on your Mac. Scan the code with your phone, or approve this TV right inside DSH — the pairing never leaves your LAN." />
+
+                <!-- QR plate + code meta -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:layout_width="@dimen/qr_plate"
+                        android:layout_height="@dimen/qr_plate"
+                        android:background="@drawable/qr_panel"
+                        android:padding="@dimen/qr_pad">
+
+                        <ImageView
+                            android:id="@+id/pair_qr"
+                            android:layout_width="@dimen/qr_size"
+                            android:layout_height="@dimen/qr_size"
+                            android:layout_gravity="center"
+                            android:contentDescription="Pairing QR code"
+                            android:scaleType="fitCenter" />
+
+                        <!-- graceful fallback when the Mac cannot render a QR:
+                             show the pairing URL + code instead of a blank plate -->
+                        <LinearLayout
+                            android:id="@+id/pair_qr_fallback"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="10dp"
+                            android:visibility="gone">
+
+                            <TextView
+                                style="@style/Shadcn.Label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="OPEN THIS LINK IN DSH"
+                                android:textColor="#55637A" />
+
+                            <TextView
+                                android:id="@+id/pair_url"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:fontFamily="monospace"
+                                android:gravity="center"
+                                android:text="http://192.168.4.57:8766/pair"
+                                android:textColor="#101426"
+                                android:textSize="7dp" />
+
+                            <TextView
+                                style="@style/Shadcn.Fine"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:gravity="center"
+                                android:text="then confirm the code"
+                                android:textColor="#55637A" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="13dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Shadcn.Label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="PAIRING CODE" />
+
+                        <TextView
+                            android:id="@+id/pair_code"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:fontFamily="monospace"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="0.15"
+                            android:text="BM7U23"
+                            android:textColor="@color/primary_hover"
+                            android:textSize="22dp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            style="@style/Shadcn.MutedBody"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3.5dp"
+                            android:maxWidth="150dp"
+                            android:text="Confirm this code matches in DSH before approving." />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:background="@drawable/device_chip"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingLeft="@dimen/device_chip_pad_h"
+                            android:paddingTop="@dimen/device_chip_pad_v"
+                            android:paddingRight="@dimen/device_chip_pad_h"
+                            android:paddingBottom="@dimen/device_chip_pad_v">
+
+                            <View
+                                android:layout_width="4.5dp"
+                                android:layout_height="4.5dp"
+                                android:layout_marginRight="4dp"
+                                android:background="@drawable/dot_on" />
+
+                            <TextView
+                                style="@style/Shadcn.Fine"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Living Room TV"
+                                android:textColor="@color/foreground" />
+
+                            <TextView
+                                style="@style/Shadcn.Fine"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="3dp"
+                                android:layout_marginRight="3dp"
+                                android:text="·"
+                                android:textColor="@color/dim_text" />
+
+                            <TextView
+                                style="@style/Shadcn.Fine"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="onn. 4K Pro"
+                                android:textColor="@color/foreground" />
+
+                            <TextView
+                                style="@style/Shadcn.Fine"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="3dp"
+                                android:layout_marginRight="3dp"
+                                android:text="·"
+                                android:textColor="@color/dim_text" />
+
+                            <TextView
+                                android:id="@+id/pair_ip_chip"
+                                style="@style/Shadcn.MonoChip"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="5.75dp"
+                                android:text="192.168.4.58" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/pair_hint"
+                            style="@style/Shadcn.Fine"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="Code expires in 4:58"
+                            android:textColor="@color/dim_label" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- waiting action + change Mac -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/pair_waiting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/button_height"
+                        android:background="@drawable/btn_tint"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingLeft="@dimen/btn_pad_h"
+                        android:paddingRight="@dimen/btn_pad_h">
+
+                        <ProgressBar
+                            android:layout_width="7dp"
+                            android:layout_height="7dp"
+                            android:indeterminate="true"
+                            android:indeterminateTint="@color/tint_text" />
+
+                        <TextView
+                            android:id="@+id/pair_waiting_text"
+                            style="@style/Shadcn.Button.Tint"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:background="@null"
+                            android:text="Waiting for DSH approval…"
+                            android:textColor="@color/tint_text" />
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btn_change_mac"
+                        style="@style/Shadcn.Button.Dark"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/button_height"
+                        android:layout_marginLeft="6dp"
+                        android:text="Use a different Mac" />
+                </LinearLayout>
+
+                <!-- idle controls: address + pair (real flow when no QR session) -->
+                <LinearLayout
+                    android:id="@+id/pair_idle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <EditText
+                        android:id="@+id/pair_ip"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/button_height"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_bg"
+                        android:fontFamily="monospace"
+                        android:hint="192.168.4.57"
+                        android:imeOptions="actionGo"
+                        android:inputType="textUri"
+                        android:paddingLeft="9dp"
+                        android:paddingRight="9dp"
+                        android:singleLine="true"
+                        android:textColor="@color/foreground"
+                        android:textColorHint="@color/muted_foreground"
+                        android:textSize="8dp" />
+
+                    <Button
+                        android:id="@+id/pair_start"
+                        style="@style/Shadcn.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/button_height"
+                        android:layout_marginLeft="6dp"
+                        android:text="Pair this TV" />
+                </LinearLayout>
+
+                <!-- three-step tracker -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/pair_step1"
+                            android:layout_width="@dimen/mini_step_num"
+                            android:layout_height="@dimen/mini_step_num"
+                            android:background="@drawable/mini_step_on"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center"
+                            android:text="1"
+                            android:textColor="@color/white"
+                            android:textSize="5dp" />
+
+                        <TextView
+                            android:id="@+id/pair_step1_label"
+                            style="@style/Shadcn.Fine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="4dp"
+                            android:text="Scan the code"
+                            android:textColor="@color/foreground" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="20dp"
+                        android:layout_height="1dp"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@color/border" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/pair_step2"
+                            android:layout_width="@dimen/mini_step_num"
+                            android:layout_height="@dimen/mini_step_num"
+                            android:background="@drawable/mini_step_off"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center"
+                            android:text="2"
+                            android:textColor="@color/muted_foreground"
+                            android:textSize="5dp" />
+
+                        <TextView
+                            android:id="@+id/pair_step2_label"
+                            style="@style/Shadcn.Fine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="4dp"
+                            android:text="Approve in DSH"
+                            android:textColor="@color/dim_label" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="20dp"
+                        android:layout_height="1dp"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@color/border" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/pair_step3"
+                            android:layout_width="@dimen/mini_step_num"
+                            android:layout_height="@dimen/mini_step_num"
+                            android:background="@drawable/mini_step_off"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center"
+                            android:text="3"
+                            android:textColor="@color/muted_foreground"
+                            android:textSize="5dp" />
+
+                        <TextView
+                            android:id="@+id/pair_step3_label"
+                            style="@style/Shadcn.Fine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="4dp"
+                            android:text="Connected"
+                            android:textColor="@color/dim_label" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    style="@style/Shadcn.Fine"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:text="Trouble pairing? Read the pairing guide →"
+                    android:textColor="@color/dim_text" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/pair_col_gap"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <!-- ============ footer ============ -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#802E3A59" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_5"
-            android:background="@drawable/card"
-            android:orientation="vertical"
-            android:padding="@dimen/space_5">
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="12dp"
+                android:contentDescription="Wi-Fi"
+                android:src="@drawable/ic_wifi" />
+
+            <TextView
+                style="@style/Shadcn.Fine"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_marginLeft="4dp"
+                android:layout_weight="1"
+                android:text="Both devices on the same Wi-Fi" />
 
-                <!-- QR panel -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/qr_panel"
-                    android:padding="14dp"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:id="@+id/pair_qr"
-                        android:layout_width="250dp"
-                        android:layout_height="250dp"
-                        android:scaleType="fitCenter"
-                        android:contentDescription="Pairing QR code" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/space_5"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView style="@style/Shadcn.Label" android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:text="PAIRING CODE" />
-
-                    <TextView android:id="@+id/pair_code"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_2"
-                        android:text="——————"
-                        android:textColor="@color/primary"
-                        android:textSize="34sp"
-                        android:fontFamily="monospace"
-                        android:letterSpacing="0.28" />
-
-                    <TextView style="@style/Shadcn.Muted" android:layout_width="match_parent"
-                        android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_3"
-                        android:text="On the TV this screen shows the same code. Approve it on the page that opens when you scan." />
-
-                    <View android:layout_width="match_parent" android:layout_height="1dp"
-                        android:layout_marginTop="@dimen/space_4" android:layout_marginBottom="@dimen/space_4"
-                        android:background="@color/border" />
-
-                    <TextView style="@style/Shadcn.Label" android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:text="MAC MINI ADDRESS" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_2"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <EditText
-                            android:id="@+id/pair_ip"
-                            android:layout_width="0dp"
-                            android:layout_height="@dimen/button_height"
-                            android:layout_weight="1"
-                            android:background="@drawable/input_bg"
-                            android:hint="192.168.4.57"
-                            android:inputType="textUri"
-                            android:paddingLeft="16dp"
-                            android:paddingRight="16dp"
-                            android:singleLine="true"
-                            android:textColor="@color/foreground"
-                            android:textColorHint="@color/muted_foreground"
-                            android:textSize="17sp"
-                            android:fontFamily="monospace" />
-
-                        <Button
-                            android:id="@+id/pair_start"
-                            style="@style/Shadcn.Button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="@dimen/button_height"
-                            android:layout_marginLeft="@dimen/space_3"
-                            android:minWidth="140dp"
-                            android:text="Pair" />
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
+            <TextView
+                style="@style/Shadcn.Fine"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LAN only · nothing leaves your home network"
+                android:textColor="@color/dim_label" />
         </LinearLayout>
-
-        <TextView style="@style/Shadcn.Muted" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_5"
-            android:text="Tip: the Mac's address is shown in DSH → Settings → Mobile access. Pairing stays on your LAN." />
     </LinearLayout>
-</ScrollView>
+</FrameLayout>

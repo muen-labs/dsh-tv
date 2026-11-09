@@ -32,7 +32,8 @@
 
     <application
         android:label="DeepSeek TV"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:banner="@drawable/banner"
         android:allowBackup="false"
         android:largeHeap="true"

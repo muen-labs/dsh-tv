@@ -55,8 +55,9 @@ network. Rate limiting, per-device tokens and revocation are roadmap items.
 
 - No phone camera: the pairing screen shows the URL and the 6-character code;
   approve it from a browser on any device on the LAN (`GET /pair?id=…`).
-- No QR support on the host (`qrcode` not installed): the daemon returns
-  `qr: null` and the TV shows the URL + code instead.
+- No QR support on the host (the `qrcode` package itself is missing): the
+  daemon returns `qr: null` and the TV shows the URL + code instead. The PNG
+  encoder is stdlib-only, so Pillow is not required.
 - Manual override: the TV screen always includes the host field for a fixed IP,
   and the daemon's `/ask` endpoint accepts the token directly for scripts.
 
@@ -64,18 +65,25 @@ network. Rate limiting, per-device tokens and revocation are roadmap items.
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
-| GET | `/pair/new` | none | create pairing session + QR PNG (base64) |
+| GET | `/pair/new` | none | create pairing session + QR PNG (base64; stdlib PNG, no Pillow) |
 | GET | `/pair?id=` | none | approval page (phone) |
-| POST | `/pair/approve` | none, needs id | approve a session |
-| GET | `/pair/status?id=` | none | pending / approved + config |
+| POST | `/pair/approve` | none, needs id | approve a session (form field `id`, or JSON `{id}` with `Accept: application/json`) |
+| POST | `/pair/deny` | none, needs id | cancel a pending session (JSON `{id}`) |
+| GET | `/pair/status?id=` | none | pending / approved + config (TV poll) |
+| GET | `/pair/pending` | token | unapproved, unexpired sessions for the DSH GUI (`[{id,code,createdAt,ageSeconds,host}]`) |
 | GET | `/health` | token | daemon status |
 | POST | `/stt` | token | audio → transcript |
 | POST | `/ask` | token | text → DSH reply |
 | POST | `/voice` | token | audio → transcript + reply |
+
+The DSH settings pane (`plugin/ui`) proxies the token-authenticated pair routes
+from its host half, so a TV-initiated request can be approved inside DSH.
 
 ## Future
 
 1. mDNS (`_whale-voice._tcp`) so the TV finds the Mac automatically.
 2. Per-TV tokens (`devices.json`-style) + revoke in the plugin.
 3. QR that deep-links into the DSH mobile client instead of a browser page.
-4. Pairing confirmation in the DSH GUI, not just a browser page.
+
+Pairing confirmation in the DSH GUI is implemented in `plugin/ui` (Settings →
+Whale-chan TV → Pairing requests).

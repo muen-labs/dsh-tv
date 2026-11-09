@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- .btn.dark: #151D2F, 1px border, 14px radius. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/dark_btn_hover" />
+            <corners android:radius="@dimen/radius_btn" />
+            <stroke android:width="@dimen/focus_stroke" android:color="@color/ring" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/dark_btn_pressed" />
+            <corners android:radius="@dimen/radius_btn" />
+            <stroke android:width="1dp" android:color="@color/dark_btn_border_hover" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/dark_btn" />
+            <corners android:radius="@dimen/radius_btn" />
+            <stroke android:width="1dp" android:color="@color/border" />
+        </shape>
+    </item>
+</selector>

@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="#E61A2138" />
-    <corners android:radius="22dp" />
-    <stroke android:width="1dp" android:color="#59598BFF" />
-</shape>
+<!-- Overlay composer: card navy with a top rim, 18px radius, 1px border. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/card" />
+            <corners android:radius="@dimen/radius_bubble" />
+            <stroke android:width="1dp" android:color="@color/border" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:startColor="#0AFFFFFF"
+                android:endColor="#00FFFFFF" />
+            <corners android:radius="@dimen/radius_bubble" />
+        </shape>
+    </item>
+</layer-list>

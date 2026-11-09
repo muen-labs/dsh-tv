@@ -30,7 +30,6 @@ import re
 import subprocess
 import sys
 import base64
-import io
 import secrets
 import socket
 import tempfile
@@ -56,6 +55,7 @@ except Exception:  # optional: pair via URL/code without a QR image
     qrcode = None
 
 PAIR_TTL_SECONDS = 300
+PAIR_MAX = 64
 PAIRS: dict = {}
 DEFAULT_MODEL = "mlx-community/whisper-base.en-mlx"
 MAX_TURN_SECONDS = 150
@@ -97,22 +97,101 @@ def lan_ip() -> str:
         return "127.0.0.1"
 
 
+def _png_from_matrix(matrix: list, box_size: int = 8) -> bytes:
+    """Encode a QR module matrix as an 8-bit greyscale PNG using stdlib only.
+
+    The `qrcode` package is pure Python, but its convenience `.save()` path
+    needs Pillow, which the daemon's interpreter does not ship. Get the module
+    matrix from `qrcode` and write the PNG chunks directly: black modules are
+    byte 0, light modules byte 255, one filter-0 byte per scanline, zlib for
+    IDAT. `matrix` already includes the QR quiet-zone border.
+    """
+    import struct
+    import zlib
+
+    modules = len(matrix[0]) if matrix else 0
+    if modules == 0 or len(matrix) != modules:
+        raise ValueError("qr matrix must be square and non-empty")
+    width = modules * box_size
+    raw = bytearray()
+    for row in matrix:
+        line = bytearray()
+        for cell in row:
+            line.extend(b"\x00" * box_size if cell else b"\xff" * box_size)
+        for _ in range(box_size):
+            raw.append(0)  # PNG filter type 0 (None)
+            raw.extend(line)
+    compressed = zlib.compress(bytes(raw), 9)
+
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        body = kind + data
+        return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body) & 0xFFFFFFFF)
+
+    ihdr = struct.pack(">IIBBBBB", width, width, 8, 0, 0, 0, 0)  # 8-bit greyscale
+    return (b"\x89PNG\r\n\x1a\n"
+            + chunk(b"IHDR", ihdr)
+            + chunk(b"IDAT", compressed)
+            + chunk(b"IEND", b""))
+
+
 def qr_png_b64(text: str) -> str | None:
+    """Base64 PNG of a QR code for `text`, or None when the QR path is broken."""
     if qrcode is None:
         return None
     try:
-        image = qrcode.make(text)
-        buf = io.BytesIO()
-        image.save(buf, format="PNG")
-        return base64.b64encode(buf.getvalue()).decode()
+        code = qrcode.QRCode(
+            version=None,
+            error_correction=qrcode.constants.ERROR_CORRECT_M,
+            box_size=8,
+            border=4,
+        )
+        code.add_data(text)
+        code.make(fit=True)
+        return base64.b64encode(_png_from_matrix(code.get_matrix(), box_size=8)).decode()
     except Exception:
         return None
 
 
-def new_pair() -> tuple[str, str]:
+def prune_pairs(now: float | None = None) -> None:
+    """Drop expired pairing sessions. Safe to call from any handler."""
+    now = time.time() if now is None else now
+    for pid in [p for p, e in PAIRS.items() if now - e["created"] > PAIR_TTL_SECONDS]:
+        PAIRS.pop(pid, None)
+
+
+def pending_pairs() -> list[dict]:
+    """Unapproved, unexpired pairing sessions, oldest first.
+
+    `createdAt` is epoch milliseconds (the same clock as /health `now`) so the
+    DSH pane can format the age without knowing the daemon's clock.
+    """
+    now = time.time()
+    prune_pairs(now)
+    pending = [
+        {
+            "id": pid,
+            "code": entry["code"],
+            "createdAt": int(entry["created"] * 1000),
+            "ageSeconds": max(0, int(now - entry["created"])),
+            # The TV's LAN address (best effort): the request source address.
+            "host": entry.get("remote") or None,
+        }
+        for pid, entry in PAIRS.items()
+        if not entry.get("approved")
+    ]
+    pending.sort(key=lambda item: item["createdAt"])
+    return pending
+
+
+def new_pair(remote: str = "") -> tuple[str, str]:
+    prune_pairs()
+    if len(PAIRS) >= PAIR_MAX:
+        oldest = min(PAIRS, key=lambda pid: PAIRS[pid]["created"])
+        PAIRS.pop(oldest, None)
     pid = secrets.token_hex(8)
     code = "".join(secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(6))
-    PAIRS[pid] = {"code": code, "created": time.time(), "approved": False}
+    PAIRS[pid] = {"code": code, "created": time.time(), "approved": False,
+                  "remote": remote or ""}
     return pid, code
 
 
@@ -604,7 +683,7 @@ class Handler(BaseHTTPRequestHandler):
         ip = lan_ip()
         port = self.server.server_address[1]
         if path == "/pair/new":
-            pid, code = new_pair()
+            pid, code = new_pair(self.client_address[0])
             url = f"http://{ip}:{port}/pair?id={pid}"
             return self._json(200, {"ok": True, "id": pid, "code": code,
                                     "url": url, "qr": qr_png_b64(url),
@@ -633,16 +712,66 @@ class Handler(BaseHTTPRequestHandler):
         return self._json(404, {"ok": False, "error": "not found"})
 
     def _pair_approve(self) -> None:
-        from urllib.parse import parse_qs
-        length = int(self.headers.get("Content-Length") or 0)
-        body = self.rfile.read(length).decode("utf-8", "replace")
-        fields = parse_qs(body)
-        pid = (fields.get("id") or [""])[0]
+        pid, parsed = self._pair_id_from_body()
+        json_reply = self._wants_json()
+        if not parsed:
+            return self._pair_error(400, "bad request body", json_reply)
         entry = PAIRS.get(pid)
         if not entry or time.time() - entry["created"] > PAIR_TTL_SECONDS:
-            return self._html(404, "<h1>Pairing link expired</h1>")
+            return self._pair_error(404, "expired", json_reply)
         entry["approved"] = True
+        if json_reply:
+            return self._json(200, {"ok": True, "approved": True, "id": pid})
         return self._html(200, "<h1>Approved</h1><p>The TV will pick up its settings now.</p>")
+
+    def _pair_deny(self) -> None:
+        pid, parsed = self._pair_id_from_body()
+        json_reply = self._wants_json()
+        if not parsed:
+            return self._pair_error(400, "bad request body", json_reply)
+        if PAIRS.pop(pid, None) is None:
+            return self._pair_error(404, "expired", json_reply)
+        if json_reply:
+            return self._json(200, {"ok": True, "denied": True, "id": pid})
+        return self._html(200, "<h1>Denied</h1><p>This pairing request was cancelled.</p>")
+
+    def _pair_pending(self) -> None:
+        """Token-authenticated list for the DSH GUI (never on the public /pair page)."""
+        return self._json(200, {"ok": True, "pending": pending_pairs(),
+                                "now": int(time.time() * 1000)})
+
+    def _pair_error(self, code: int, error: str, json_reply: bool) -> None:
+        if json_reply:
+            return self._json(code, {"ok": False, "error": error})
+        return self._html(code, f"<h1>{error.capitalize()}</h1>")
+
+    def _request_body(self) -> bytes:
+        length = int(self.headers.get("Content-Length") or 0)
+        if length <= 0:
+            return b""
+        return self.rfile.read(length)
+
+    def _wants_json(self) -> bool:
+        """True when the caller asked for machine-readable output (GUI, curl, scripts)."""
+        accept = (self.headers.get("Accept") or "").lower()
+        ctype = (self.headers.get("Content-Type") or "").lower()
+        return "application/json" in accept or "application/json" in ctype
+
+    def _pair_id_from_body(self) -> tuple[str, bool]:
+        """Read the pairing id from a JSON `{id}` body or a form field `id`."""
+        raw = self._request_body()
+        ctype = (self.headers.get("Content-Type") or "").lower()
+        if "application/json" in ctype:
+            try:
+                data = json.loads(raw.decode("utf-8") or "{}")
+            except (ValueError, UnicodeDecodeError):
+                return "", False
+            if not isinstance(data, dict):
+                return "", False
+            return str(data.get("id") or "").strip(), True
+        from urllib.parse import parse_qs
+        fields = parse_qs(raw.decode("utf-8", "replace"))
+        return (fields.get("id") or [""])[0].strip(), True
 
     def _html(self, code: int, body: str) -> None:
         data = ("<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>"
@@ -657,6 +786,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?", 1)[0]
+        if path == "/pair/pending":
+            if not self._auth():
+                return self._json(401, {"ok": False, "error": "unauthorized"})
+            return self._pair_pending()
         if path.startswith("/pair"):
             return self._pair_get(path)
         if not self._auth():
@@ -687,6 +820,8 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         if path == "/pair/approve":
             return self._pair_approve()
+        if path == "/pair/deny":
+            return self._pair_deny()
         if not self._auth():
             return self._json(401, {"ok": False, "error": "unauthorized"})
         if path == "/feedback":

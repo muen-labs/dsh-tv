@@ -1,24 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Design tokens: shadcn/ui semantic names mapped onto the Eva Design System
-  dark theme (@eva-design/eva, UI Kitten dark.json).
+  dark theme (@eva-design/eva, UI Kitten dark.json) + the 10-foot "glass"
+  tokens from docs/ui-mockup.html.
 
-    background            = background-basic-color-4  #101426
-    foreground            = text-basic-color          #FFFFFF
-    card                  = background-basic-color-2  #1A2138
-    popover               = background-basic-color-1  #222B45
-    secondary             = background-basic-color-1  #222B45
-    muted                 = background-basic-color-3  #151A30
-    muted-foreground      = text-hint-color           #8F9BB3
-    primary               = color-primary-500         #3366FF
-    primary-hover         = color-primary-400         #598BFF
-    primary-active        = color-primary-600         #274BDB
-    destructive           = color-danger-500          #FF3D71
-    success               = color-success-500         #00E096
-    warning               = color-warning-500         #FFAA00
-    border/input          = color-basic-700           #2E3A59
-    ring                  = color-primary-400         #598BFF
-    radius                = 8dp controls, 14dp cards
+  SCALE CONTRACT: the mockup stage is 1920x1080 design px; the TV app canvas is
+  960x540dp (wm size 1920x1080 @ density 320). dp = design px / 2,
+  sp = design px / 2. So 152px gutters -> 76dp, 20px card radius -> 10dp,
+  34px H1 -> 17sp, 58px pairing hero -> 29sp, 16px body -> 8sp,
+  11.5px label -> 5.75sp, 56px control -> 28dp, 2px focus ring -> 2dp.
 -->
 <resources>
     <!-- shadcn semantic surfaces -->
@@ -42,13 +32,64 @@
     <color name="primary_hover">#598BFF</color>
     <color name="primary_active">#274BDB</color>
     <color name="primary_disabled">#A6C1FF</color>
+    <color name="primary_at_12">#1F3366FF</color>
     <color name="destructive">#FF3D71</color>
     <color name="success">#00E096</color>
     <color name="warning">#FFAA00</color>
     <color name="info">#0095FF</color>
     <color name="white">#FFFFFF</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
 
-    <!-- shadcn radius / spacing (10-foot scale) -->
+    <!-- glass cards over the ambient glows (mockup .card) -->
+    <color name="glass_fill">#660F1728</color>
+    <color name="glass_border">#29FFFFFF</color>
+    <color name="glass_rim_hi">#16FFFFFF</color>
+    <color name="glass_rim_lo">#06FFFFFF</color>
+    <color name="glass_rim_none">#00FFFFFF</color>
+
+    <!-- tinted primary button (.btn.tint) -->
+    <color name="tint_fill">#293366FF</color>
+    <color name="tint_fill_hover">#383366FF</color>
+    <color name="tint_border">#8C598BFF</color>
+    <color name="tint_text">#EAF2FB</color>
+
+    <!-- destructive tinted button (.btn.danger) -->
+    <color name="danger_fill">#24FF3D71</color>
+    <color name="danger_fill_hover">#38FF3D71</color>
+    <color name="danger_border">#85FF3D71</color>
+    <color name="danger_text">#FFD9E2</color>
+    <color name="danger_icon">#FF7A97</color>
+
+    <!-- dark secondary button (.btn.dark) -->
+    <color name="dark_btn">#151D2F</color>
+    <color name="dark_btn_hover">#1B2438</color>
+    <color name="dark_btn_border_hover">#3A4A6B</color>
+    <color name="dark_btn_pressed">#232F49</color>
+
+    <!-- badges / chips -->
+    <color name="success_fill">#1400E096</color>
+    <color name="success_border">#5900E096</color>
+    <color name="warning_fill">#14FFAA00</color>
+    <color name="warning_border">#59FFAA00</color>
+    <color name="danger_fill_badge">#17FF3D71</color>
+    <color name="danger_border_badge">#66FF3D71</color>
+    <color name="chip_fill_primary">#243366FF</color>
+    <color name="chip_border_primary">#59598BFF</color>
+    <color name="code_chip_fill">#8C080C16</color>
+    <color name="code_chip_border">#1AFFFFFF</color>
+    <color name="overlay_chip_fill">#99060910</color>
+    <color name="overlay_chip_border">#1AFFFFFF</color>
+    <color name="overlay_hint_fill">#A8060910</color>
+    <color name="overlay_hint_border">#14FFFFFF</color>
+    <color name="dim_text">#55637A</color>
+    <color name="dim_label">#6F7F97</color>
+    <color name="heard_text">#C9D6E8</color>
+    <color name="chip_text">#C6D2E4</color>
+    <color name="disabled_fill">#2B3550</color>
+    <color name="kbd_border">#2E3A59</color>
+    <color name="terminal_green">#3DFFA8</color>
+
+    <!-- shadcn radius / spacing -->
     <dimen name="radius_sm">8dp</dimen>
     <dimen name="radius_md">10dp</dimen>
     <dimen name="radius_lg">14dp</dimen>
@@ -59,6 +100,67 @@
     <dimen name="space_5">24dp</dimen>
     <dimen name="space_6">32dp</dimen>
     <dimen name="space_7">48dp</dimen>
-    <dimen name="button_height">56dp</dimen>
+    <dimen name="button_height">28dp</dimen>
     <dimen name="focus_stroke">2dp</dimen>
+
+    <!-- ===== 10-foot mockup dimensions (design px / 2) ===== -->
+    <!-- bridge home: 152px gutters, 54px top/bottom, 26px grid gap, 34px col gap -->
+    <dimen name="gutter">76dp</dimen>
+    <dimen name="screen_pad_v">27dp</dimen>
+    <dimen name="gap_row">13dp</dimen>
+    <dimen name="gap_col">17dp</dimen>
+    <dimen name="card_pad">13dp</dimen>
+    <dimen name="radius_card">10dp</dimen>
+    <dimen name="radius_btn">7dp</dimen>
+    <dimen name="radius_tight">5dp</dimen>
+    <dimen name="radius_chip">3dp</dimen>
+    <dimen name="radius_qr">8dp</dimen>
+    <dimen name="radius_bubble">9dp</dimen>
+    <dimen name="btn_pad_h">11dp</dimen>
+    <dimen name="icon_btn">10dp</dimen>
+    <dimen name="disc">33dp</dimen>
+    <dimen name="disc_icon">13dp</dimen>
+    <dimen name="disc_overlay">32dp</dimen>
+    <dimen name="badge_h">15dp</dimen>
+    <dimen name="badge_pad">6dp</dimen>
+    <dimen name="step_num">15dp</dimen>
+    <dimen name="mini_step_num">10dp</dimen>
+    <dimen name="dot">5dp</dimen>
+    <dimen name="dot_sm">4dp</dimen>
+    <dimen name="code_chip_pad_v">6dp</dimen>
+    <dimen name="code_chip_pad_h">7dp</dimen>
+    <dimen name="logo_lockup">32dp</dimen>
+
+    <!-- pairing: 64px gutters, 40/28px vertical, 44px col gap, 18px stack gap -->
+    <dimen name="pair_gutter">32dp</dimen>
+    <dimen name="pair_pad_top">20dp</dimen>
+    <dimen name="pair_pad_bottom">14dp</dimen>
+    <dimen name="pair_gap">9dp</dimen>
+    <dimen name="pair_hero_pad_top">13dp</dimen>
+    <dimen name="pair_col_gap">22dp</dimen>
+    <dimen name="pair_col_width">445dp</dimen>
+    <dimen name="pair_logo">27dp</dimen>
+    <dimen name="qr_plate">159dp</dimen>
+    <dimen name="qr_size">145dp</dimen>
+    <dimen name="qr_pad">7dp</dimen>
+    <dimen name="device_chip_pad_v">4dp</dimen>
+    <dimen name="device_chip_pad_h">6dp</dimen>
+    <dimen name="lan_pill_h">16dp</dimen>
+    <dimen name="step_chip_h">12dp</dimen>
+
+    <!-- assistant overlay -->
+    <dimen name="bubble_width">360dp</dimen>
+    <dimen name="overlay_right">32dp</dimen>
+    <dimen name="bubble_bottom">137dp</dimen>
+    <dimen name="overlay_actions_gap">7dp</dimen>
+    <dimen name="overlay_bubble_gap">6dp</dimen>
+    <dimen name="send">19dp</dimen>
+    <dimen name="send_icon">10dp</dimen>
+    <dimen name="pet_w">120dp</dimen>
+    <dimen name="pet_h">110dp</dimen>
+    <dimen name="pet_right">28dp</dimen>
+    <dimen name="pet_bottom">12dp</dimen>
+    <dimen name="app_chip_top">12dp</dimen>
+    <dimen name="app_chip_left">13dp</dimen>
+    <dimen name="app_chip_icon">8dp</dimen>
 </resources>

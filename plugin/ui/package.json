@@ -1,6 +1,6 @@
 {
   "name": "dsh-whale-chan-tv",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "DSH settings pane + pairing for the Whale-chan Android TV assistant",
   "license": "MIT",
   "type": "module",
@@ -13,9 +13,17 @@
   },
   "files": [
     "lib",
+    "docs",
     "cordis.patch.yml",
     "README.md"
   ],
+  "scripts": {
+    "build": "node build.mjs",
+    "preview": "node tools/preview.mjs --png",
+    "verify": "node tools/verify.mjs && node tools/verify-host.mjs",
+    "verify:ui": "node tools/verify.mjs",
+    "verify:host": "node tools/verify-host.mjs"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -25,7 +33,7 @@
       "inject": [
         "@deepseek-ai/dsh-client-runtime",
         "@deepseek-ai/dsh-client-ui-slots",
-        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-settings",
         "@deepseek-ai/dsh-client-locale"
       ]
     }

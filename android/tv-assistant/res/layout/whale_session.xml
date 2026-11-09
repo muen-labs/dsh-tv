@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Transparent voice-interaction overlay: the app behind keeps playing. -->
+<!-- Transparent voice-interaction overlay: the app behind keeps playing.
+     Design px / 2 from docs/ui-mockup.html #assistant: 720px bubble -> 360dp
+     at right 32dp / bottom 137dp, 4px accent rule -> 2dp, 38px send disc ->
+     19dp, 64px round controls -> 32dp above the bubble, 220px pet -> 110dp
+     at right 28dp / bottom 12dp. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/whale_session_root"
     android:layout_width="match_parent"
@@ -12,72 +16,107 @@
         android:layout_height="match_parent"
         android:background="@drawable/session_scrim" />
 
+    <!-- app chip: which app the assistant is over -->
+    <LinearLayout
+        android:id="@+id/whale_app_chip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginLeft="@dimen/app_chip_left"
+        android:layout_marginTop="@dimen/app_chip_top"
+        android:background="@drawable/app_chip"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="6.5dp"
+        android:paddingTop="4dp"
+        android:paddingRight="6.5dp"
+        android:paddingBottom="4dp">
+
+        <ImageView
+            android:layout_width="@dimen/app_chip_icon"
+            android:layout_height="@dimen/app_chip_icon"
+            android:contentDescription="App"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_launcher" />
+
+        <TextView
+            android:id="@+id/whale_app_chip_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:text="Projectivy · Home"
+            android:textColor="@color/chip_text"
+            android:textSize="6dp" />
+    </LinearLayout>
+
+    <!-- controls above the composer, right-aligned with it -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginRight="56dp"
-        android:layout_marginBottom="36dp"
+        android:layout_marginRight="@dimen/overlay_right"
+        android:layout_marginBottom="@dimen/bubble_bottom"
         android:gravity="end"
         android:orientation="vertical">
 
-        <!-- big circular controls above the composer, sized for D-pad focus -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="@dimen/overlay_bubble_gap"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/whale_again"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="@dimen/disc_overlay"
+                android:layout_height="@dimen/disc_overlay"
                 android:background="@drawable/btn_close"
                 android:contentDescription="Send / ask another question"
                 android:focusable="true"
-                android:padding="16dp"
+                android:padding="9dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_mic" />
+                android:src="@drawable/ic_mic_overlay" />
 
             <ImageButton
                 android:id="@+id/whale_close"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_marginLeft="14dp"
+                android:layout_width="@dimen/disc_overlay"
+                android:layout_height="@dimen/disc_overlay"
+                android:layout_marginLeft="@dimen/overlay_actions_gap"
                 android:background="@drawable/btn_close"
                 android:contentDescription="Close"
                 android:focusable="true"
-                android:padding="17dp"
+                android:padding="9dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_close" />
+                android:src="@drawable/ic_close_overlay" />
         </LinearLayout>
 
-        <!-- Speech bubble: accent rule + three-line content -->
+        <!-- Speech bubble: accent rule + eyebrow (state / send) + heard + say -->
         <LinearLayout
-            android:layout_width="660dp"
+            android:layout_width="@dimen/bubble_width"
             android:layout_height="wrap_content"
             android:background="@drawable/bubble"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingLeft="12dp"
+            android:paddingTop="10dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="11dp">
 
             <View
-                android:layout_width="4dp"
+                android:id="@+id/whale_rule"
+                android:layout_width="2dp"
                 android:layout_height="match_parent"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="20dp"
-                android:layout_marginLeft="0dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
                 android:background="@drawable/accent_bar" />
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="34dp"
-                android:paddingTop="20dp"
-                android:paddingBottom="22dp">
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -87,100 +126,157 @@
 
                     <View
                         android:id="@+id/whale_dot"
-                        android:layout_width="10dp"
-                        android:layout_height="10dp"
-                        android:layout_marginRight="9dp"
+                        android:layout_width="@dimen/dot_sm"
+                        android:layout_height="@dimen/dot_sm"
+                        android:layout_marginRight="4.5dp"
                         android:background="@drawable/dot_accent" />
 
                     <TextView
                         android:id="@+id/whale_eyebrow"
+                        style="@style/Shadcn.Eyebrow"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:fontFamily="sans-serif-medium"
-                        android:letterSpacing="0.16"
-                        android:text="LISTENING"
-                        android:textColor="@color/primary"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Assistant"
-                        android:textColor="@color/muted_foreground"
-                        android:textSize="11sp" />
+                        android:text="LISTENING" />
 
                     <ImageButton
                         android:id="@+id/whale_send"
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:layout_marginLeft="10dp"
+                        android:layout_width="@dimen/send"
+                        android:layout_height="@dimen/send"
                         android:background="@drawable/btn_close"
                         android:contentDescription="Send"
                         android:focusable="true"
-                        android:padding="8dp"
+                        android:padding="4.5dp"
                         android:scaleType="centerInside"
-                        android:src="@drawable/ic_send"
+                        android:src="@drawable/ic_send_small"
                         android:visibility="gone" />
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/whale_you"
+                    style="@style/Shadcn.Heard"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:lineSpacingExtra="3dp"
+                    android:layout_marginTop="6dp"
                     android:maxLines="3"
-                    android:textColor="#C9D6E8"
-                    android:textSize="20sp"
                     android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/whale_text"
+                    style="@style/Shadcn.Say"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:lineSpacingExtra="4dp"
-                    android:maxLines="7"
-                    android:textColor="@color/foreground"
-                    android:textSize="24sp" />
+                    android:layout_marginTop="4dp"
+                    android:maxLines="7" />
             </LinearLayout>
         </LinearLayout>
-
-        <!-- Pet with a soft ground shadow -->
-        <FrameLayout
-            android:layout_width="210dp"
-            android:layout_height="195dp"
-            android:layout_gravity="end"
-            android:layout_marginTop="-8dp">
-
-            <View
-                android:layout_width="160dp"
-                android:layout_height="34dp"
-                android:layout_gravity="bottom|center_horizontal"
-                android:layout_marginBottom="5dp"
-                android:background="@drawable/pet_shadow" />
-
-            <ImageView
-                android:id="@+id/whale_art"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:layout_gravity="bottom|center_horizontal"
-                android:scaleType="fitCenter"
-                android:contentDescription="Powered by Whale-chan"
-                android:src="@drawable/ic_whale" />
-        </FrameLayout>
     </LinearLayout>
 
+    <!-- Pet with a soft ground shadow -->
+    <FrameLayout
+        android:layout_width="@dimen/pet_w"
+        android:layout_height="@dimen/pet_h"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="@dimen/pet_right"
+        android:layout_marginBottom="@dimen/pet_bottom"
+        android:clipChildren="false">
 
+        <View
+            android:layout_width="85dp"
+            android:layout_height="15dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/pet_shadow" />
+
+        <ImageView
+            android:id="@+id/whale_art"
+            android:layout_width="@dimen/pet_h"
+            android:layout_height="@dimen/pet_h"
+            android:layout_gravity="bottom|center_horizontal"
+            android:contentDescription="Powered by Whale-chan"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_whale" />
+    </FrameLayout>
+
+    <!-- remote legend -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="11dp"
+        android:background="@drawable/remote_hint"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="9dp"
+        android:paddingTop="4.5dp"
+        android:paddingRight="9dp"
+        android:paddingBottom="4.5dp">
+
+        <TextView
+            style="@style/Shadcn.ChipKey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/kbd_chip"
+            android:paddingLeft="3dp"
+            android:paddingTop="0.5dp"
+            android:paddingRight="3dp"
+            android:paddingBottom="0.5dp"
+            android:text="OK" />
+
+        <TextView
+            style="@style/Shadcn.Fine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2.5dp"
+            android:text="send" />
+
+        <TextView
+            style="@style/Shadcn.ChipKey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="9dp"
+            android:background="@drawable/kbd_chip"
+            android:paddingLeft="3dp"
+            android:paddingTop="0.5dp"
+            android:paddingRight="3dp"
+            android:paddingBottom="0.5dp"
+            android:text="Back" />
+
+        <TextView
+            style="@style/Shadcn.Fine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2.5dp"
+            android:text="cancel" />
+
+        <TextView
+            style="@style/Shadcn.ChipKey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="9dp"
+            android:background="@drawable/kbd_chip"
+            android:paddingLeft="3dp"
+            android:paddingTop="0.5dp"
+            android:paddingRight="3dp"
+            android:paddingBottom="0.5dp"
+            android:text="Disney+" />
+
+        <TextView
+            style="@style/Shadcn.Fine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2.5dp"
+            android:text="open" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/whale_attribution"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
-        android:layout_margin="18dp"
+        android:layout_marginLeft="13dp"
+        android:layout_marginBottom="10dp"
         android:text="@string/credit"
-        android:textColor="#66FFFFFF"
-        android:textSize="11sp" />
+        android:textColor="#59FFFFFF"
+        android:textSize="5.5dp" />
 </FrameLayout>

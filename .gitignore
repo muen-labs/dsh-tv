@@ -14,8 +14,13 @@ logs/
 __pycache__/
 .DS_Store
 android/whale-app/res/values/config.xml
+android/tv-assistant/res/values/config.xml
 android/bridge/DSHTVBridge.apk
 
 # local TV memory (never commit)
 host/tv-memory.db
 host/config.json
+
+docs/media/
+android/tv-assistant/classes.txt
+android/tv-assistant/sources.txt

@@ -30,13 +30,27 @@ shadcn semantic token → EVA token → value (Eva dark theme):
 | `border` / `input` | `color-basic-700` | `#2E3A59` | 1px borders, input outline |
 | `ring` | `color-primary-400` | `#598BFF` | focus ring |
 
-Scale: `radius-sm 8dp` (inputs, chips) · `radius-md 10dp` (buttons) ·
-`radius-lg 14dp` (cards, bubble) · spacing `4/8/12/16/24/32/48`
-· control height `56dp` (TV) · focus ring `2dp`.
+**10-foot scale contract:** the mockup stage is 1920×1080 design px and the
+TV app's logical canvas is 960×540dp (`wm size` 1920×1080 @ density 320), so
+`dp = design px / 2`, `sp = design px / 2`. Bridge gutters 152px → **76dp**,
+pairing gutters 64px → **32dp**, column gaps 34/44px → **17/22dp**, card radius
+20px → **10dp**, control height 56px → **28dp** (pairing/bridge buttons),
+circle discs 66px → **33dp**, overlay composer 720×? px → **360dp**, focus ring
+`2dp`. Sizes are applied with the new tokens in
+[`theme_eva.xml`](android/tv-assistant/res/values/theme_eva.xml) (`gutter`,
+`gap_col`, `radius_card`, `disc`, `bubble_width`, …).
 
-Typography (EVA text styles, TV-scaled): **H1** 32sp bold · **H2** 20sp medium
-· **Body** 16sp · **BodyMedium** 16sp medium · **Muted** 14sp · **Label**
-12sp, tracked +0.08 · **Mono** 14sp (addresses, codes).
+Typography (mockup px / 2): **Hero** 29dp · **H1** 17dp bold · **H2**
+10.5dp medium (9dp inside cards) · **Body** 8dp · **Muted** 7dp / 6.75dp ·
+**Label** 5.75dp, tracked +0.09em · **Mono** 7dp (addresses, codes) ·
+**Pairing code** 22dp mono, tracked +0.15em · overlay eyebrow 5.75dp,
+heard line 10dp, say line 12.5dp.
+
+These text sizes are *pixel-locked to the design* and therefore declared in
+`dp` rather than `sp`: the TV's system `font_scale` is 0.85, and `sp` would
+shrink every screen by 15% versus the 1:1 design renders. The screen does not
+follow the system font-size setting by design; contrast and control sizes carry
+legibility instead.
 
 Android resources: [`android/tv-assistant/res/values/theme_eva.xml`](android/tv-assistant/res/values/theme_eva.xml).
 Web pane: `evaTheme` CSS variables in [`plugin/ui/src/ui.tsx`](plugin/ui/src/ui.tsx).
@@ -47,6 +61,17 @@ Minimal DeepSeek TV lockup: white tile, the DeepSeek whale, and lowercase
 **tv** in Poppins Medium, both in DeepSeek blue `#4D6BFF`. No gradients or
 extra artwork. Sizes 512/256/192/128, plus a white 320×180 Leanback banner.
 Launcher label: **DeepSeek TV**.
+
+Launcher icon path: `@mipmap/ic_launcher` is an **adaptive icon** (white
+background + `@drawable/ic_launcher_fg`). The foreground is a dedicated
+432×432 bitmap (4× the 108dp layer) in which the whale+tv lockup is re-composed
+centred at ~58% of the canvas, because the accepted 512px tile is a wide lockup
+(433×212) that a launcher masking the central 72/108 circle would crop to just
+the `tv`. Keep `res/drawable-nodpi/ic_launcher_fg.png` in sync with
+`docs/ui-assets/app-icon.png`; the 512px tile stays as the legacy fallback and
+the 320×180 Leanback banner (`res/drawable/banner.png`) is unchanged — its mark
+is horizontally centred (bbox centre 159.5 of 160) so a centre crop keeps the
+whale.
 
 ![icon](docs/ui-assets/icon-preview.png)
 
@@ -104,7 +129,7 @@ column gap. Cards are **glass**: translucent navy (`rgba(15,23,40,.40)`),
 the cards sit five soft glows (indigo, teal, amber, violet) plus a faint frost
 dot lattice so the glass has something to blur. (`com.jp.dshtv.MainActivity`)
 
-![Bridge home](docs/screenshots/tv-bridge-home.jpg)
+![Bridge home](docs/screenshots/tv-bridge-home.png)
 
 Order: brand → status card (state dot + address/mic/accessibility/foreground)
 → **Get started** (pairing primary, then service controls as secondary/outline)
@@ -112,21 +137,28 @@ Order: brand → status card (state dot + address/mic/accessibility/foreground)
 
 ### 2. Pairing (`PairingActivity`)
 
-![Pairing](docs/screenshots/tv-pairing.jpg)
+![Pairing](docs/screenshots/tv-pairing.png)
 
-Left: white QR plate. Right: `PAIRING CODE` label + monospace code, the
-"approve on your phone" instruction, separator, **Mac mini address** input and
-the `Pair` primary action. A status pill top-right reads `SCANNING`, `WAITING`,
-`PAIRED` or `ERROR`; the hint line beneath the title carries the detail.
+Brandbar (lockup + `LAN · same network` pill + `READY/SCANNING/WAITING/PAIRED/ERROR`
+badge), then a two-column hero. Left: **STEP 1** chip, 58px hero "Pair this TV
+with **DSH**", subline, 318px white QR plate beside the `PAIRING CODE`, device
+chip (Living Room TV · onn. 4K Pro · IP) and expiry countdown, the disabled
+"Waiting for DSH approval…" primary with spinner, a dark **Use a different
+Mac**, the three-step tracker and the pairing-guide line. Right: the exported
+mockup device scene (`res/drawable-nodpi/pair_scene.png` — TV + laptop, glows,
+caption). The real address input + `Pair` button are the idle/error state
+(hidden while a session is waiting). The QR is the live daemon bitmap; when the
+Mac cannot render one the plate shows the approve URL + code instead of going
+blank.
 
 ### 3. Assistant overlay (`WhaleActivity` / voice session)
 
-![Assistant listening](docs/screenshots/tv-assistant-listening.jpg)
+![Assistant listening](docs/screenshots/tv-assistant-listening.png)
 
-![Assistant error](docs/screenshots/tv-assistant-error.jpg)
+![Assistant error](docs/screenshots/tv-assistant-error.png)
 
-Transparent window over the playing app. A 660dp bubble (eyebrow + transcript +
-reply) sits above the animated pet. States:
+Transparent window over the playing app. A 360dp composer (2dp state rule + eyebrow + transcript +
+reply) sits above the animated pet, with the 32dp mic/close discs above it. States:
 
 | State | Eyebrow | Dot | Pet | Body |
 | --- | --- | --- | --- | --- |

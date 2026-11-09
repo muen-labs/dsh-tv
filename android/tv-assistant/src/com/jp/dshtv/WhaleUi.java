@@ -25,6 +25,7 @@ public final class WhaleUi {
     private final Context ctx;
     private final WhalePet pet;
     private final View dot;
+    private final View rule;
     private final TextView eyebrow;
     private final TextView you;
     private final TextView text;
@@ -47,6 +48,7 @@ public final class WhaleUi {
         this.onFinished = onFinished;
         this.pet = new WhalePet((ImageView) root.findViewById(R.id.whale_art));
         this.dot = root.findViewById(R.id.whale_dot);
+        this.rule = root.findViewById(R.id.whale_rule);
         this.eyebrow = (TextView) root.findViewById(R.id.whale_eyebrow);
         this.you = (TextView) root.findViewById(R.id.whale_you);
         this.text = (TextView) root.findViewById(R.id.whale_text);
@@ -307,6 +309,12 @@ public final class WhaleUi {
         try {
             eyebrow.setText(state);
             dot.setBackgroundResource(dotRes);
+            if (rule != null) {
+                // the 4px accent rule takes the state colour (design: primary /
+                // success / destructive)
+                rule.setBackgroundColor(dotRes == DOT_OK ? 0xFF00E096
+                        : dotRes == DOT_ERROR ? 0xFFFF3D71 : 0xFF3366FF);
+            }
             if (heard == null || heard.length() == 0) {
                 you.setText("");
                 you.setVisibility(View.GONE);

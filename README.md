@@ -97,8 +97,10 @@ adb shell pm grant com.jp.dshtv android.permission.RECORD_AUDIO
 ```
 
 Open the **Pair this TV with Whale-chan** tile on the TV and scan the QR with
-your phone; approve the code on the page. The TV stores the Mac's address and
-token and opens the assistant. See [docs/PAIRING.md](docs/PAIRING.md).
+your phone, or approve the same request inside DSH → Settings → **Whale-chan
+TV** (the pane shows the TV's code so you can confirm they match). The TV stores
+the Mac's address and token and opens the assistant. See
+[docs/PAIRING.md](docs/PAIRING.md).
 
 ### 3. The Disney+ button (optional)
 
@@ -113,14 +115,19 @@ adb install -r -g android/disney-shim/DisneyShim.apk
 
 The remote's Disney+ button then opens Whale-chan; the mic button stays Google's.
 
-### 4. DSH plugin (optional)
+### 4. DSH plugins (optional)
 
 ```bash
-./plugin/install.sh desktop     # writes an mcp-whale-chan row into the profile patch
+./plugin/install.sh desktop      # MCP tools: whale_health, whale_ask, whale_start
+./plugin/install-ui.sh desktop   # Settings -> "Whale-chan TV" pane (links plugin/ui)
 ```
 
-Restart DSH and you get `whale_health`, `whale_ask` and `whale_start` tools; the
-daemon is started on demand.
+Restart DSH. The MCP half adds `whale_health`, `whale_ask` and `whale_start`
+(the daemon is started on demand); the client half adds the **Whale-chan TV**
+section in Settings — daemon and TV-bridge state, the TVs it finds on the LAN,
+and **pairing approval inside DSH**: the TV shows a code, the pane shows the
+same request, one click approves it. `install-ui.sh --copy` installs a copy
+instead of a symlink.
 
 ## UI playground
 
@@ -164,23 +171,32 @@ Every screen follows **EVA design tokens exposed as shadcn/ui primitives**
 states, screen specs and the accessibility contract are in
 [DESIGN.md](DESIGN.md).
 
-![Bridge home](docs/screenshots/tv-bridge-home.jpg)
+![Bridge home](docs/screenshots/tv-bridge-home.png)
 
 ## Settings pane (plugin UI)
 
-`plugin/ui/` is a DSH client plugin with a settings section shaped like
-*Mobile access*: it scans the LAN for TVs, selects one, and generates the pairing
-QR. Host routes proxy the daemon so the browser never sees the token.
+`plugin/ui/` is a DSH client plugin with a **Whale-chan TV** settings section in
+the host's own language (`--dsw-alias-*` tokens, host-bound `t`, light and dark).
+It shows an honest split of *daemon* and *TV bridge* state, lists the Android
+TVs it finds on the network (configured target plus a bounded LAN sweep), and
+polls for pairing requests every two seconds: a request from the TV arrives with
+its 6-character code, source address and age, and **Approve / Deny** right there
+— no phone needed. Same-origin `/whale-chan/*` host routes proxy the daemon, so
+the browser never sees the token.
 
-![Pane phases](docs/screenshots/pane-preview.png)
+![Whale-chan TV settings pane](docs/screenshots/pane-live.png)
 
-Build and render a preview:
+Every phase (loading, daemon down, no TVs, ready, pending, approved, error) is
+rendered from the real component into [`docs/screenshots/pane-preview.png`](docs/screenshots/pane-preview.png):
 
 ```bash
-cd plugin/ui && npm install && node build.mjs && node tools/preview.mjs
+cd plugin/ui && npm install && node build.mjs && node tools/preview.mjs --png
+node tools/verify.mjs && node tools/verify-host.mjs   # copy + bundle + live routes
 ```
 
-See [plugin/ui/README.md](plugin/ui/README.md) for the install seam.
+Install it with `./plugin/install-ui.sh <profile>` and restart DSH; see
+[plugin/ui/README.md](plugin/ui/README.md) for the seam and the verification
+steps.
 
 ## Using it
 
@@ -219,6 +235,6 @@ MIT licensed — see [LICENSE](LICENSE).
 ## Roadmap
 
 - mDNS discovery so the pairing screen can find the host without typing an IP.
-- Per-TV tokens with revocation in the plugin.
+- Per-TV tokens with revocation in the plugin (the pane already sees each TV).
 - Background/wake-word mode and multilingual STT.
-- A DSH marketplace client pane (status + pairing) using the plugin slot API.
+- A DSH marketplace listing for the pane (`dsh plugin --profile <p> add`).

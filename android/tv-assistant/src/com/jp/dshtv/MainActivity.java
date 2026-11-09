@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,10 +32,21 @@ public class MainActivity extends Activity {
     private SharedPreferences prefs;
     private View statusDot;
     private TextView statusText;
+    private View statusBadge;
+    private View healthyBadge;
+    private View healthyDot;
+    private TextView healthyText;
+    private View connectedBadge;
+    private View connectedDot;
+    private TextView connectedText;
     private TextView valueAddress;
+    private TextView valuePort;
     private TextView valueMic;
     private TextView valueAccessibility;
     private TextView valueForeground;
+    private TextView valueUptime;
+    private TextView codeCurl;
+    private Button btnStop;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final Runnable refreshRunnable = new Runnable() {
@@ -85,17 +95,28 @@ public class MainActivity extends Activity {
     private void bindUi() {
         statusDot = findViewById(R.id.status_dot);
         statusText = (TextView) findViewById(R.id.status_text);
+        statusBadge = findViewById(R.id.status_badge);
+        healthyBadge = findViewById(R.id.healthy_badge);
+        healthyDot = findViewById(R.id.healthy_dot);
+        healthyText = (TextView) findViewById(R.id.healthy_text);
+        connectedBadge = findViewById(R.id.connected_badge);
+        connectedDot = findViewById(R.id.connected_dot);
+        connectedText = (TextView) findViewById(R.id.connected_text);
         valueAddress = (TextView) findViewById(R.id.value_address);
+        valuePort = (TextView) findViewById(R.id.value_port);
         valueMic = (TextView) findViewById(R.id.value_mic);
         valueAccessibility = (TextView) findViewById(R.id.value_accessibility);
         valueForeground = (TextView) findViewById(R.id.value_foreground);
+        valueUptime = (TextView) findViewById(R.id.value_uptime);
+        codeCurl = (TextView) findViewById(R.id.code_curl);
 
         Button pair = (Button) findViewById(R.id.btn_pair);
-        Button start = (Button) findViewById(R.id.btn_start);
-        Button stop = (Button) findViewById(R.id.btn_stop);
-        Button accessibility = (Button) findViewById(R.id.btn_accessibility);
-        Button mic = (Button) findViewById(R.id.btn_mic);
-        Button refresh = (Button) findViewById(R.id.btn_refresh);
+        Button pairSecond = (Button) findViewById(R.id.btn_pair_second);
+        Button testMic = (Button) findViewById(R.id.btn_test_mic);
+        btnStop = (Button) findViewById(R.id.btn_stop);
+        View accessibility = findViewById(R.id.btn_accessibility);
+        View mic = findViewById(R.id.btn_mic);
+        View refresh = findViewById(R.id.btn_refresh);
 
         pair.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,19 +124,28 @@ public class MainActivity extends Activity {
                 startActivity(new Intent(MainActivity.this, PairingActivity.class));
             }
         });
-        start.setOnClickListener(new View.OnClickListener() {
+        pairSecond.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startBridgeService();
-                toast("Bridge service starting");
-                refreshStatus();
+                startActivity(new Intent(MainActivity.this, PairingActivity.class));
             }
         });
-        stop.setOnClickListener(new View.OnClickListener() {
+        testMic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                stopBridgeService();
-                toast("Bridge service stopped");
+                openAssistant();
+            }
+        });
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (BridgeService.isRunning()) {
+                    stopBridgeService();
+                    toast("Bridge service stopped");
+                } else {
+                    startBridgeService();
+                    toast("Bridge service starting");
+                }
                 refreshStatus();
             }
         });
@@ -139,10 +169,36 @@ public class MainActivity extends Activity {
             }
         });
 
-        for (Button b : new Button[]{pair, start, stop, accessibility, mic, refresh}) {
+        // the mockup bolds the product/device names inside the setup steps
+        boldPart(R.id.step_text_1, "DSH TV Bridge");
+        boldPart(R.id.step_text_3, "Mac");
+        boldPart(R.id.step_text_4, "Disney+");
+
+        for (View b : new View[]{pair, pairSecond, testMic, btnStop, accessibility, mic,
+                refresh}) {
             styleFocus(b);
         }
         pair.requestFocus();
+    }
+
+    /** Render one substring of a TextView in Roboto Bold (mockup inline <b>). */
+    private void boldPart(int viewId, String part) {
+        try {
+            TextView view = (TextView) findViewById(viewId);
+            if (view == null || part == null) {
+                return;
+            }
+            String text = view.getText().toString();
+            int at = text.indexOf(part);
+            if (at < 0) {
+                return;
+            }
+            android.text.SpannableString spanned = new android.text.SpannableString(text);
+            spanned.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
+                    at, at + part.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            view.setText(spanned);
+        } catch (Throwable ignored) {
+        }
     }
 
     /** 10-foot focus: lift and scale the focused control so the remote is obvious. */
@@ -211,14 +267,20 @@ public class MainActivity extends Activity {
             return;
         }
         boolean running = BridgeService.isRunning();
+        String uptime = running ? formatUptime(BridgeService.uptimeMs()) : "";
         statusDot.setBackgroundResource(running ? R.drawable.dot_on : R.drawable.dot_off);
-        statusText.setText(running
-                ? "RUNNING · " + formatUptime(BridgeService.uptimeMs())
-                : "STOPPED");
+        statusText.setText(running ? "RUNNING · " + uptime : "STOPPED");
         statusText.setTextColor(getColor(running ? R.color.success : R.color.destructive));
+        statusBadge.setBackgroundResource(running
+                ? R.drawable.pill_success : R.drawable.pill_danger);
+
+        btnStop.setText(running ? "Stop service" : "Start service");
 
         String ip = primaryIp();
-        valueAddress.setText((ip.length() > 0 ? ip : "no IPv4") + " : " + BridgeService.port(this));
+        String shownIp = ip.length() > 0 ? ip : "no IPv4";
+        valueAddress.setText(shownIp);
+        valuePort.setText(": " + BridgeService.port(this));
+        codeCurl.setText("curl " + shownIp + ":" + BridgeService.port(this) + "/ping");
 
         boolean micGranted = MicRecorder.hasPermission(this);
         valueMic.setText(micGranted ? "Granted" : "Denied");
@@ -234,6 +296,24 @@ public class MainActivity extends Activity {
         KeyService ks = KeyService.getInstance();
         String foreground = ks != null ? ks.foregroundPackage() : "";
         valueForeground.setText(foreground != null && foreground.length() > 0 ? foreground : "—");
+
+        valueUptime.setText(uptime.length() > 0 ? formatUptimeLong(BridgeService.uptimeMs()) : "—");
+
+        // Healthy = bridge running and the accessibility key path is connected.
+        boolean healthy = running && connected;
+        healthyDot.setBackgroundResource(healthy ? R.drawable.dot_on : R.drawable.dot_off);
+        healthyText.setText(healthy ? "Healthy" : running ? "Degraded" : "Stopped");
+        healthyText.setTextColor(getColor(healthy ? R.color.success
+                : running ? R.color.warning : R.color.destructive));
+        healthyBadge.setBackgroundResource(healthy ? R.drawable.pill_success
+                : running ? R.drawable.pill_warn : R.drawable.pill_danger);
+
+        boolean paired = WhaleConfig.paired(this);
+        connectedDot.setBackgroundResource(paired ? R.drawable.dot_on : R.drawable.dot_off);
+        connectedText.setText(paired ? "CONNECTED" : "OFFLINE");
+        connectedText.setTextColor(getColor(paired ? R.color.success : R.color.muted_foreground));
+        connectedBadge.setBackgroundResource(paired
+                ? R.drawable.pill_success : R.drawable.pill_plain);
     }
 
     /** Prefer the LAN address over a VPN/loopback interface. */
@@ -245,18 +325,6 @@ public class MainActivity extends Activity {
             }
         }
         return addresses.isEmpty() ? "" : addresses.get(0);
-    }
-
-    private String joinIps() {
-        List<String> addresses = ApiHandler.ips();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < addresses.size(); i++) {
-            if (i > 0) {
-                sb.append(", ");
-            }
-            sb.append(addresses.get(i));
-        }
-        return sb.toString();
     }
 
     private boolean accessibilityEnabled() {
@@ -290,6 +358,19 @@ public class MainActivity extends Activity {
             startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
         } catch (Throwable t) {
             toast("Could not open settings: " + t);
+        }
+    }
+
+    /** "Test the mic": opens the assistant overlay (which starts listening). */
+    private void openAssistant() {
+        if (!MicRecorder.hasPermission(this)) {
+            requestBridgePermissions();
+            return;
+        }
+        try {
+            startActivity(new Intent(this, WhaleActivity.class));
+        } catch (Throwable t) {
+            toast("Could not open the assistant: " + t);
         }
     }
 
@@ -327,6 +408,20 @@ public class MainActivity extends Activity {
         }
         if (minutes > 0) {
             return minutes + "m" + (seconds % 60) + "s";
+        }
+        return seconds + "s";
+    }
+
+    /** The mockup prints "2h 14m" with a space in the status card. */
+    private String formatUptimeLong(long millis) {
+        long seconds = millis / 1000;
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+        if (hours > 0) {
+            return hours + "h " + (minutes % 60) + "m";
+        }
+        if (minutes > 0) {
+            return minutes + "m " + (seconds % 60) + "s";
         }
         return seconds + "s";
     }
