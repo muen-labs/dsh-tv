@@ -109,6 +109,19 @@
                         android:text="Assistant"
                         android:textColor="@color/muted_foreground"
                         android:textSize="11sp" />
+
+                    <ImageButton
+                        android:id="@+id/whale_send"
+                        android:layout_width="38dp"
+                        android:layout_height="38dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@drawable/btn_close"
+                        android:contentDescription="Send"
+                        android:focusable="true"
+                        android:padding="8dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_send"
+                        android:visibility="gone" />
                 </LinearLayout>
 
                 <TextView

@@ -30,6 +30,7 @@ public final class WhaleUi {
     private final TextView text;
     private final View closeBtn;
     private final View againBtn;
+    private final View sendBtn;
     private final Runnable onFinished;
     private final Handler main = new Handler(Looper.getMainLooper());
     private final MicCapture mic = new MicCapture();
@@ -49,6 +50,19 @@ public final class WhaleUi {
         this.eyebrow = (TextView) root.findViewById(R.id.whale_eyebrow);
         this.you = (TextView) root.findViewById(R.id.whale_you);
         this.text = (TextView) root.findViewById(R.id.whale_text);
+        this.sendBtn = root.findViewById(R.id.whale_send);
+        if (sendBtn != null) {
+            sendBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listening) {
+                        commit();
+                    } else {
+                        askAgain();
+                    }
+                }
+            });
+        }
         this.againBtn = root.findViewById(R.id.whale_again);
         if (againBtn != null) {
             againBtn.setOnClickListener(new View.OnClickListener() {
@@ -94,8 +108,11 @@ public final class WhaleUi {
     public void listen() {
         Log.i("WhaleUi", "listen()");
         cancelClose();
+        if (sendBtn != null) {
+            sendBtn.setVisibility(View.VISIBLE);
+        }
         if (againBtn != null) {
-            againBtn.setContentDescription("Send");
+            againBtn.setContentDescription("Ask another question");
         }
         if (closeBtn != null) {
             closeBtn.setContentDescription("Close");
@@ -220,7 +237,6 @@ public final class WhaleUi {
                 transcript.length() > 0 ? "“" + transcript + "”" : "", reply);
         speak(reply);
         showCloseButton();
-        scheduleClose(12000);
     }
 
     private void fail(String message) {
@@ -229,12 +245,14 @@ public final class WhaleUi {
         pet.play(R.raw.whale_wilt);
         setBubble("TRY AGAIN", DOT_ERROR, "", message);
         showCloseButton();
-        scheduleClose(7000);
     }
 
     /** After a reply or error the overlay offers a focusable close (X) button. */
     private void showCloseButton() {
         try {
+            if (sendBtn != null) {
+                sendBtn.setVisibility(View.GONE);
+            }
             if (againBtn != null) {
                 againBtn.setContentDescription("Ask another question");
                 againBtn.requestFocus();
