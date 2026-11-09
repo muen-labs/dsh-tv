@@ -76,6 +76,48 @@ def chat(prompt: str) -> dict:
     return json.loads(content)
 
 
+def tmdb_key() -> str:
+    k = os.environ.get("TMDB_API_KEY", "").strip()
+    if k:
+        return k
+    for base in (ROOT, ROOT.parent):
+        try:
+            return (base / ".auth" / "tmdb.key").read_text().strip()
+        except OSError:
+            continue
+    return ""
+
+
+def tmdb_trending(limit: int = 12) -> list[dict]:
+    """Direct TMDB API: this week's trending + currently popular Korean shows."""
+    key = tmdb_key()
+    if not key:
+        return []
+    urls = [
+        f"https://api.themoviedb.org/3/trending/tv/week?api_key={key}&language=en-US",
+        f"https://api.themoviedb.org/3/discover/tv?api_key={key}&with_original_language=ko"
+        f"&sort_by=popularity.desc&language=en-US",
+    ]
+    out = []
+    for url in urls:
+        try:
+            with urllib.request.urlopen(url, timeout=30) as r:
+                data = json.loads(r.read().decode())
+        except Exception:
+            continue
+        for show in (data.get("results") or [])[:limit]:
+            if show.get("original_language") != "ko" and "KR" not in (show.get("origin_country") or []):
+                continue
+            out.append({
+                "title": show.get("name", ""), "site_name": "TMDB",
+                "url": f"https://www.themoviedb.org/tv/{show.get('id')}",
+                "date": show.get("first_air_date", ""),
+                "summary": (show.get("overview") or "")[:280],
+                "_source": "tmdb(api)",
+            })
+    return out
+
+
 def trakt_trending(limit: int = 12) -> list[dict]:
     """Optional direct Trakt API (set TRAKT_CLIENT_ID); Korean shows only."""
     cid = os.environ.get("TRAKT_CLIENT_ID", "").strip()
@@ -116,6 +158,10 @@ def research() -> dict:
             results += hits
         except Exception as exc:  # noqa: BLE001
             print(f"search failed: {exc}", file=sys.stderr)
+    try:
+        results += tmdb_trending()
+    except Exception:
+        pass
     try:
         results += trakt_trending()
     except Exception:
