@@ -120,6 +120,13 @@ The remote's Disney+ button then opens Whale-chan; the mic button stays Google's
 Restart DSH and you get `whale_health`, `whale_ask` and `whale_start` tools; the
 daemon is started on demand.
 
+## UI playground
+
+Open [`docs/ui-mockup.html`](docs/ui-mockup.html) in a browser: every screen at
+1920×1080 with the real EVA tokens, the animated pet and all assistant states.
+Use the sidebar (or `#bridge`, `#pairing`, `#assistant`, `#components`) and the
+"Show focus rings" toggle to review focus treatment.
+
 ## Design system
 
 Every screen follows **EVA design tokens exposed as shadcn/ui primitives**
