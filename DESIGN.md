@@ -143,6 +143,49 @@ notification.
 | Use EVA tokens (no raw hex in layouts) | Invent a second accent colour |
 | Keep the pet at 300–380dp with a shadow | Stretch the pet to fill the screen |
 
+## Pairing-first visual language
+
+The pairing screen is the reference screen — every other surface borrows its
+parts rather than inventing new ones.
+
+![Pairing](docs/screenshots/ui-playground-pairing.png)
+
+**Anatomy**
+
+- **Brandbar** — 54px brand tile + wordmark (`DeepSeek` regular, `Whale-chan`
+  heavy) + tagline; on the right a LAN pill and a state badge. Appears on
+  pairing, bridge and (as a small mark) in the assistant bubble.
+- **Step chip + hero** — `STEP 1` chip, 58px/800 headline with exactly one
+  emphasised word (`DSH`), one-sentence subline.
+- **QR block** — white plate (318px, quiet zone built in), pairing code in
+  tracked monospace (44px), device chip (`● Living Room TV · onn. 4K Pro ·
+  192.168.4.58`), expiry in warning amber.
+- **Actions** — the waiting state is a *disabled* primary with a spinner; the
+  escape hatch (`Use a different Mac`) is outline. One primary per screen.
+- **Progress** — a three-step tracker under the actions: Scan → Approve in DSH →
+  Connected. The current step uses primary; done uses success.
+- **Device scene** — laptop running DSH (rail, conversation, Whale-chan TV pane
+  with QR + Approve) and a TV running Projectivy with the Whale-chan assistant
+  skirt. A dashed line connects them; Whale-chan herself peeks between them.
+- **Footer** — Wi-Fi icon + “Both devices on the same Wi-Fi” + “LAN only”.
+
+**Derived into the other screens**
+
+| Screen | Borrowed |
+| --- | --- |
+| Bridge home | brandbar, LAN/state pills, “Paired with” laptop ⇢ TV mini row, connected badge |
+| Assistant overlay | brand mark in the bubble header, same eyebrow/label language, whale as the state carrier |
+| Primitives | brand lockup + status chips + code/type styles as the shared kit |
+
+**Rules**
+
+- Brand appears once at the top of a screen; never in every card.
+- Whale-chan is a character, not wallpaper — one appearance per screen.
+- The device scene only appears where the connection is the subject; bridge
+  gets the compact row instead.
+- Status is always word + dot; codes and addresses always monospace.
+- Exactly one primary action per screen.
+
 ## Implementation map
 
 | File | Role |

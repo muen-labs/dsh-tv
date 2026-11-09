@@ -253,6 +253,164 @@
   .assistant .remote-hint { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; gap: 18px; align-items: center; padding: 9px 18px; border-radius: 999px; background: rgba(6,9,16,.66); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(8px); font-size: 12px; color: var(--muted-foreground); }
   .assistant .remote-hint kbd { background: #151A30; border: 1px solid #2E3A59; border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; font-size: 11px; color: #C6D2E4; }
 
+
+
+  .mini-setup { display: flex; align-items: center; gap: 10px; }
+  .mini-dev { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .mini-dev b { display: block; font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .mini-dev span { display: block; font-size: 10.5px; color: #6F7F97; white-space: nowrap; }
+  .mini-ico { flex: 0 0 auto; display: inline-block; border: 1px solid var(--border); background: var(--muted); border-radius: 4px; }
+  .mini-ico.laptop { width: 26px; height: 17px; border-radius: 4px 4px 2px 2px; border-bottom-width: 3px; }
+  .mini-ico.tv { width: 24px; height: 16px; border-radius: 3px; }
+  .mini-link { flex: 1; min-width: 26px; display: flex; align-items: center; gap: 4px; }
+  .mini-dash { flex: 1; height: 0; border-top: 1px dashed rgba(89,139,255,.5); }
+  .mini-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--primary); }
+
+  /* ============ brand ============ */
+  .brandbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+  .lockup { display: flex; align-items: center; gap: 14px; }
+  .lockup img { width: 54px; height: 54px; border-radius: 15px; border: 1px solid var(--border); background: #1A2138; }
+  .wordmark { font-size: 22px; font-weight: 500; letter-spacing: -.02em; line-height: 1.1; }
+  .wordmark b { font-weight: 800; }
+  .tagline { font-size: 12px; color: var(--muted-foreground); margin-top: 3px; letter-spacing: .02em; }
+  .pill-lan { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 13px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--secondary); color: var(--muted-foreground); font-size: 12px; font-weight: 600; }
+
+  /* ============ pairing hero ============ */
+  .pair-screen { padding: 40px 64px 28px; }
+  .pair-hero { display: grid; grid-template-columns: 1.02fr .98fr; gap: 44px; flex: 1; min-height: 0; padding-top: 26px; }
+  .pair-copy { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+  .step-line { display: flex; align-items: center; gap: 10px; }
+  .step-chip { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 6px;
+    background: rgba(51,102,255,.14); border: 1px solid rgba(89,139,255,.35); color: var(--primary-hover);
+    font-size: 10.5px; font-weight: 700; letter-spacing: .12em; }
+  .step-line span { font-size: 12px; color: var(--muted-foreground); letter-spacing: .02em; }
+  .pair-copy h1 { margin: 0; font-size: 58px; line-height: 1.03; letter-spacing: -.035em; font-weight: 800; }
+  .pair-copy h1 em { font-style: normal; color: var(--primary-hover); }
+  .pair-copy .sub { margin: 0; max-width: 620px; font-size: 16px; color: var(--muted-foreground); line-height: 1.5; }
+  .qr-row { display: flex; gap: 26px; align-items: flex-start; margin-top: 2px; }
+  .qr-plate { width: 318px; height: 318px; flex: 0 0 318px; background: #fff; border-radius: 16px; padding: 14px;
+    display: flex; align-items: center; justify-content: center; box-shadow: 0 24px 70px rgba(0,0,0,.45); }
+  .qr-plate img { width: 100%; height: 100%; }
+  .qr-meta { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+  .qr-meta .label { margin-top: 4px; }
+  .pair-code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 44px; font-weight: 700;
+    letter-spacing: .15em; color: var(--primary-hover); line-height: 1.1; margin: 0 0 2px; }
+  .qr-meta .muted { font-size: 13px; line-height: 1.45; max-width: 300px; }
+  .device-chip { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; padding: 8px 12px;
+    border-radius: 9px; background: var(--muted); border: 1px solid var(--border); font-size: 12.5px; width: fit-content; }
+  .device-chip .mono { color: var(--muted-foreground); font-size: 11.5px; }
+  .device-chip .mid { color: #55637A; }
+  .expires { font-size: 12px; color: #6F7F97; margin-top: 2px; }
+  .expires b { color: var(--warning); font-weight: 600; }
+  .pair-actions { display: flex; gap: 12px; margin-top: 16px; }
+  .btn.waiting { background: rgba(51,102,255,.14); border: 1px solid rgba(89,139,255,.4); color: #C7D7FF; }
+  .btn.waiting .spinner { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(199,215,255,.3);
+    border-top-color: #C7D7FF; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* laptop + TV scene */
+  .pair-visual { position: relative; height: 540px; align-self: center; }
+  .pair-visual .halo { position: absolute; inset: 6% 2% 8% 4%; background:
+      radial-gradient(60% 60% at 40% 42%, rgba(51,102,255,.20), transparent 70%),
+      radial-gradient(45% 45% at 76% 72%, rgba(0,224,150,.10), transparent 70%); filter: blur(10px); }
+  .scene { position: absolute; inset: 0; }
+
+  .laptop { position: absolute; left: -6px; top: 18px; width: 486px; }
+  .laptop .lid { border-radius: 16px 16px 4px 4px; padding: 9px; background: linear-gradient(180deg, #2A3350, #171D31);
+    border: 1px solid #3A4766; box-shadow: 0 30px 70px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08); }
+  .laptop .lcd { position: relative; height: 282px; border-radius: 8px; overflow: hidden; background: #0B0F1F;
+    border: 1px solid #070A12; }
+  .laptop .base { height: 13px; width: 108%; margin-left: -4%; border-radius: 0 0 12px 12px;
+    background: linear-gradient(180deg, #4A556F, #2A3247 60%, #1B2132); box-shadow: 0 12px 24px rgba(0,0,0,.45); }
+  .laptop .notch { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 64px; height: 9px;
+    background: #070A12; border-radius: 0 0 6px 6px; z-index: 2; }
+
+  .dsh { position: absolute; inset: 0; display: flex; font-size: 8px; color: #A9B6C9; }
+  .dsh-rail { width: 34px; flex: 0 0 34px; background: #0E1322; border-right: 1px solid #1B2436; padding: 8px 6px; display: flex; flex-direction: column; gap: 6px; }
+  .dsh-rail i { display: block; width: 100%; height: 5px; border-radius: 2px; background: #232D45; }
+  .dsh-rail i.on { background: var(--primary); height: 14px; border-radius: 4px; }
+  .dsh-main { flex: 1; display: flex; flex-direction: column; padding: 10px 12px; gap: 8px; min-width: 0; }
+  .dsh-top { display: flex; align-items: center; justify-content: space-between; }
+  .dsh-top b { font-size: 8.5px; color: #E6EDF7; font-weight: 700; letter-spacing: .01em; }
+  .dsh-top span { font-size: 7px; color: #5C6A82; }
+  .dsh-card { background: #131B2C; border: 1px solid #22304A; border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
+  .dsh-card .line { height: 4px; border-radius: 2px; background: #26334D; }
+  .dsh-card .line.short { width: 62%; }
+  .dsh-card .accent { height: 4px; width: 34%; border-radius: 2px; background: var(--primary); }
+  .dsh-pane { width: 158px; flex: 0 0 158px; background: #101728; border-left: 1px solid #1E2941; padding: 9px; display: flex; flex-direction: column; gap: 6px; }
+  .dsh-pane .ph { font-size: 7.5px; font-weight: 700; color: #E6EDF7; display: flex; align-items: center; gap: 5px; }
+  .dsh-pane .ph img { width: 12px; height: 12px; border-radius: 3px; }
+  .dsh-pane .row { display: flex; align-items: center; gap: 5px; font-size: 7px; color: #A9B6C9; }
+  .dsh-pane .row .dot { width: 5px; height: 5px; }
+  .dsh-pane .qr { width: 56px; height: 56px; background: #fff; border-radius: 4px; padding: 4px; align-self: center; margin-top: 2px; }
+  .dsh-pane .qr img { width: 100%; height: 100%; }
+  .dsh-pane .go { height: 16px; border-radius: 4px; background: var(--primary); color: #fff; font-size: 7px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+  .tv { position: absolute; right: -6px; bottom: 6px; width: 432px; }
+  .tv .panel { border-radius: 10px; padding: 8px; background: linear-gradient(180deg, #141A2B, #0A0E19);
+    border: 1px solid #2C3854; box-shadow: 0 34px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06); }
+  .tv .lcd { position: relative; height: 238px; border-radius: 5px; overflow: hidden;
+    background: radial-gradient(90% 80% at 70% 20%, #23345E 0%, #101A31 55%, #080C16 100%); }
+  .tv .stand { width: 34%; height: 6px; margin: 0 auto; background: linear-gradient(180deg, #2A3350, #121828); border-radius: 0 0 8px 8px; }
+  .tv .foot { width: 58%; height: 3px; margin: 0 auto; background: #121828; border-radius: 3px; }
+  .launcher { position: absolute; inset: 0; padding: 12px 14px; display: flex; flex-direction: column; }
+  .l-time { font-size: 8px; color: #C6D2E4; font-weight: 700; display: flex; justify-content: space-between; }
+  .l-greet { margin-top: 7px; font-size: 7px; color: #8F9BB3; letter-spacing: .02em; }
+  .l-row { display: flex; gap: 8px; margin-top: 8px; }
+  .l-tile { width: 46px; height: 30px; border-radius: 6px; border: 1px solid rgba(255,255,255,.12); display: flex; align-items: center; justify-content: center;
+    font-size: 6.5px; font-weight: 800; letter-spacing: .02em; color: rgba(255,255,255,.9); }
+  .l-tile.stremio { background: linear-gradient(135deg, #2B3F6B, #17233D); }
+  .l-tile.youtube { background: linear-gradient(135deg, #5C1D28, #2A1218); }
+  .l-tile.netflix { background: linear-gradient(135deg, #4B1520, #1D0A0E); }
+  .l-tile.prime { background: linear-gradient(135deg, #163A57, #0C1E30); }
+
+  .l-continue { margin-top: 10px; font-size: 6.5px; color: #8F9BB3; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; }
+  .l-cards { display: flex; gap: 6px; margin-top: 5px; }
+  .l-card { flex: 1; height: 52px; border-radius: 5px; border: 1px solid rgba(255,255,255,.07); }
+  .l-card.a { background: linear-gradient(135deg, #243B66, #101B30); }
+  .l-card.b { background: linear-gradient(135deg, #3A2440, #160F1D); }
+  .l-card.c { background: linear-gradient(135deg, #1E3B3A, #0C1A19); }
+  .l-card.d { background: linear-gradient(135deg, #3A3020, #17130B); }
+  .l-skirt { position: absolute; left: 14px; right: 14px; bottom: 12px; display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; border-radius: 8px; background: rgba(8,12,22,.78); border: 1px solid rgba(255,255,255,.10); backdrop-filter: blur(6px); }
+  .l-skirt img { width: 34px; height: 34px; }
+  .l-skirt .txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .l-skirt b { font-size: 7.5px; color: #EAF2FB; }
+  .l-skirt span { font-size: 6.5px; color: #8F9BB3; }
+  .l-skirt .wave { margin-left: auto; display: flex; align-items: flex-end; gap: 2px; height: 12px; }
+  .l-skirt .wave i { width: 2px; background: var(--primary); border-radius: 2px; animation: wave 1s ease-in-out infinite; }
+  .l-skirt .wave i:nth-child(2) { animation-delay: .15s; } .l-skirt .wave i:nth-child(3) { animation-delay: .3s; }
+  .l-skirt .wave i:nth-child(4) { animation-delay: .45s; }
+  @keyframes wave { 0%,100% { height: 3px; } 50% { height: 12px; } }
+
+  .whale-peek { position: absolute; right: 372px; bottom: -8px; width: 212px; filter: drop-shadow(0 22px 30px rgba(0,0,0,.55)); z-index: 3; }
+  .scene .link { position: absolute; inset: 0; pointer-events: none; }
+  .scene .link path { fill: none; stroke: rgba(89,139,255,.55); stroke-width: 2; stroke-dasharray: 5 7; animation: dash 14s linear infinite; }
+  .scene .link circle { fill: var(--primary); }
+  @keyframes dash { to { stroke-dashoffset: -240; } }
+  .visual-caption { position: absolute; left: 6px; bottom: -30px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted-foreground); }
+  .visual-caption b { color: var(--foreground); font-weight: 600; }
+  .pair-foot { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 16px;
+    border-top: 1px solid rgba(46,58,89,.5); font-size: 12px; color: #6F7F97; }
+  .pair-foot .net { display: inline-flex; align-items: center; gap: 8px; color: var(--muted-foreground); font-weight: 600; }
+  .wifi { display: inline-block; width: 14px; height: 10px; position: relative; }
+  .wifi::before, .wifi::after { content: ""; position: absolute; left: 50%; transform: translateX(-50%); border: 2px solid var(--success); border-color: var(--success) transparent transparent transparent; border-radius: 50%; }
+  .wifi::before { width: 14px; height: 14px; top: 0; opacity: .35; }
+  .wifi::after { width: 6px; height: 6px; top: 4px; }
+
+
+  .mini-steps { display: flex; align-items: center; gap: 10px; margin-top: 2px; }
+  .mini-step { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #6F7F97; }
+  .mini-step .b { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center;
+    justify-content: center; font-size: 10px; font-weight: 700; color: var(--muted-foreground); background: var(--muted); }
+  .mini-step.on { color: var(--foreground); }
+  .mini-step.on .b { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .mini-step.done .b { background: rgba(0,224,150,.14); border-color: rgba(0,224,150,.45); color: var(--success); }
+  .mini-step .tick { color: var(--success); }
+  .mini-step-sep { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); max-width: 40px; }
+  .pair-foot svg { display: block; }
+
   /* ============ components ============ */
   .comp { padding: 46px 56px; height: 100%; overflow: auto; }
   .comp h3 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted-foreground); margin: 30px 0 12px; font-weight: 700; }
@@ -277,8 +435,8 @@
     <div>
       <h5>Screens</h5>
       <div class="nav" id="nav">
-        <button data-goto="bridge" aria-current="true"><i>▣</i> Bridge home</button>
-        <button data-goto="pairing"><i>⌁</i> Pairing</button>
+        <button data-goto="pairing" aria-current="true"><i>⌁</i> Pairing</button>
+        <button data-goto="bridge"><i>▣</i> Bridge home</button>
         <button data-goto="assistant"><i>◍</i> Assistant overlay</button>
         <button data-goto="components"><i>◫</i> Primitives</button>
       </div>
@@ -321,12 +479,11 @@
         <section class="screen" data-screen="bridge" data-active="true">
           <div class="screen-inner">
             <div class="topbar">
-              <div class="brand">
+              <div class="lockup">
                 <img src="ui-assets/brand.png" alt="">
                 <div>
-                  <div class="kicker">Android TV Assistant</div>
-                  <h1 class="h1">DeepSeek Whale-chan</h1>
-                  <p class="sub">Press the Disney+ button, talk, and DSH drives the TV.</p>
+                  <div class="wordmark">DeepSeek <b>Whale-chan</b></div>
+                  <div class="tagline">Android TV Assistant · press the Disney+ button and talk</div>
                 </div>
               </div>
               <div class="topbar-right">
@@ -375,6 +532,10 @@
                     <div class="kv"><span class="label">Uptime</span><div class="v">2h 14m</div></div>
                     <div class="kv"><span class="label">Version</span><div class="v">2.0 <small>· debug</small></div></div>
                   </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+                    <span class="muted" style="font-size:12.5px">Whale-chan pane · DSH on Mac mini</span>
+                    <span class="badge success"><span class="dot success"></span> CONNECTED</span>
+                  </div>
                 </div>
               </div>
 
@@ -392,11 +553,19 @@
                   <div class="step"><span class="n">4</span><div class="t">Press Disney+ and talk.<small>OK sends, Back cancels</small></div></div>
                   <div class="sep"></div>
                   <div class="code-chip"><span class="muted">Check from the Mac</span><span class="mono">curl 192.168.4.58:8765/ping</span></div>
+                  <div class="btn-row" style="margin-top:18px">
+                    <button class="btn outline">Pair another TV</button>
+                    <button class="btn outline">Test the mic</button>
+                  </div>
                 </div>
                 <div class="card">
-                  <div class="label" style="margin-bottom:8px">Network</div>
-                  <div style="display:flex;align-items:center;gap:10px"><span class="dot success"></span><span style="font-size:15px">LAN only · encrypted pairing code</span></div>
-                  <p class="muted" style="margin:10px 0 0;font-size:13px">Keep ports <span class="mono">8765</span> and <span class="mono">8766</span> inside your home network.</p>
+                  <div class="label" style="margin-bottom:10px">Paired with</div>
+                  <div class="mini-setup">
+                    <div class="mini-dev"><span class="mini-ico laptop"></span><div><b>Mac mini</b><span>DSH</span></div></div>
+                    <div class="mini-link"><span class="mini-dot"></span><span class="mini-dash"></span><span class="mini-dot"></span></div>
+                    <div class="mini-dev"><span class="mini-ico tv"></span><div><b>Living Room TV</b><span>Projectivy</span></div></div>
+                  </div>
+                  <p class="muted" style="margin:12px 0 0;font-size:12.5px">LAN only · ports <span class="mono">8765</span> and <span class="mono">8766</span> stay inside your home network.</p>
                 </div>
               </div>
             </div>
@@ -408,68 +577,139 @@
           </div>
         </section>
 
-        <!-- ================= PAIRING ================= -->
+        <!-- ================= PAIRING (hero screen) ================= -->
         <section class="screen" data-screen="pairing">
-          <div class="screen-inner">
-            <div class="topbar">
-              <div>
-                <div class="kicker label">Pairing</div>
-                <h1 class="h1">Pair this TV</h1>
-                <p class="sub">Scan with your phone → approve → this TV gets its DSH connection.</p>
+          <div class="screen-inner pair-screen">
+            <div class="brandbar">
+              <div class="lockup">
+                <img src="ui-assets/brand.png" alt="">
+                <div>
+                  <div class="wordmark">DeepSeek <b>Whale-chan</b></div>
+                  <div class="tagline">Android TV Assistant</div>
+                </div>
               </div>
               <div class="topbar-right">
-                <span class="badge warn"><span class="dot" style="background:var(--warning)"></span> WAITING FOR APPROVAL</span>
+                <span class="pill-lan"><span class="dot success" style="width:7px;height:7px"></span> LAN · same network</span>
+                <span class="badge success"><span class="dot success"></span> READY</span>
               </div>
             </div>
 
-            <div class="pair-grid">
-              <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px">
-                <div class="qr-plate"><img src="ui-assets/qr.png" alt="Pairing QR" style="image-rendering:auto"></div>
-                <div style="text-align:center">
-                  <div style="font-size:15px;font-weight:600">Scan with your phone</div>
-                  <div class="muted" style="font-size:13px;margin-top:4px">The approval page opens automatically.</div>
-                </div>
-              </div>
+            <div class="pair-hero">
+              <div class="pair-copy">
+                <div class="step-line"><span class="step-chip">STEP 1</span><span>Connect your TV to DSH</span></div>
+                <h1>Pair this TV<br>with <em>DSH</em></h1>
+                <p class="sub">DSH runs on your Mac. Scan the code with your phone, or approve this TV right inside DSH — the pairing never leaves your LAN.</p>
 
-              <div class="col" style="gap:26px">
-              <div class="card">
-                <div class="label">Pairing code</div>
-                <div class="pair-code">BM7U23</div>
-                <p class="muted" style="margin:10px 0 0;font-size:14px">Confirm this code on the page that opens when you scan.</p>
-
-                <ul class="steps">
-                  <li><span class="b">1</span><span>Scan the QR <b>with your phone</b></span></li>
-                  <li><span class="b">2</span><span>Tap <b>Approve TV</b> on the page</span></li>
-                  <li><span class="b">3</span><span>The TV connects <b>automatically</b></span></li>
-                </ul>
-
-                <div class="sep"></div>
-                <div class="label" style="margin-bottom:8px">Mac mini address</div>
-                <div class="pair-cta">
-                  <input class="input demo-target" value="192.168.4.57" aria-label="Mac mini address">
-                  <button class="btn">Pair</button>
-                </div>
-                <p class="muted" style="margin:14px 0 0;font-size:12.5px">Find this in DSH → Settings → Mobile access. Pairing stays on your LAN.</p>
-              </div>
-              <div class="card">
-                <div class="card-head" style="margin-bottom:12px">
-                  <div>
-                    <div class="label">Host</div>
-                    <h2 class="h2">Mac mini</h2>
+                <div class="qr-row">
+                  <div class="qr-plate"><img src="ui-assets/qr.png" alt="Pairing QR code"></div>
+                  <div class="qr-meta">
+                    <div class="label">Pairing code</div>
+                    <div class="pair-code">BM7U23</div>
+                    <p class="muted">Confirm this code matches in DSH before approving.</p>
+                    <div class="device-chip">
+                      <span class="dot success"></span> Living Room TV <span class="mid">·</span> onn. 4K Pro <span class="mid">·</span> <span class="mono">192.168.4.58</span>
+                    </div>
+                    <div class="expires">Code expires in <b>4:58</b></div>
                   </div>
-                  <span class="badge success"><span class="dot success"></span> RUNNING</span>
                 </div>
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
-                  <span class="mono" style="font-size:15px;color:var(--primary-hover)">192.168.4.57:8766</span>
-                  <span class="muted" style="font-size:12.5px">Whale-chan daemon · v2.0</span>
+
+                <div class="pair-actions">
+                  <button class="btn waiting" disabled><span class="spinner"></span> Waiting for DSH approval…</button>
+                  <button class="btn outline">Use a different Mac</button>
                 </div>
+
+                <div class="mini-steps">
+                  <span class="mini-step on"><span class="b">1</span> Scan the code</span>
+                  <span class="mini-step-sep"></span>
+                  <span class="mini-step"><span class="b">2</span> Approve in DSH</span>
+                  <span class="mini-step-sep"></span>
+                  <span class="mini-step"><span class="b">3</span> Connected</span>
+                </div>
+                <a href="#" style="font-size:12px;color:#5C6A82;text-decoration:none;margin-top:2px">Trouble pairing? Read the pairing guide →</a>
               </div>
+
+              <div class="pair-visual">
+                <div class="halo"></div>
+                <div class="scene">
+                  <svg class="link" viewBox="0 0 820 620" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M470 268 C 560 268, 600 300, 640 340" />
+                    <circle cx="470" cy="268" r="4" />
+                    <circle cx="644" cy="342" r="4" />
+                  </svg>
+
+                  <!-- Mac running DSH -->
+                  <div class="laptop">
+                    <div class="notch"></div>
+                    <div class="lid">
+                      <div class="lcd">
+                        <div class="dsh">
+                          <div class="dsh-rail"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+                          <div class="dsh-main">
+                            <div class="dsh-top"><b>DeepSeek Harness</b><span>Whale-chan TV</span></div>
+                            <div class="dsh-card">
+                              <div class="line accent"></div>
+                              <div class="line"></div>
+                              <div class="line short"></div>
+                              <div class="line"></div>
+                              <div class="line short"></div>
+                            </div>
+                            <div class="dsh-card" style="flex:1">
+                              <div class="line accent" style="width:22%"></div>
+                              <div class="line"></div>
+                              <div class="line short"></div>
+                            </div>
+                          </div>
+                          <div class="dsh-pane">
+                            <div class="ph"><img src="ui-assets/brand.png" alt=""> Whale-chan TV</div>
+                            <div class="row"><span class="dot success" style="width:5px;height:5px"></span> Living Room TV</div>
+                            <div class="row" style="color:#5C6A82">onn. 4K Pro · 192.168.4.58</div>
+                            <div class="qr"><img src="ui-assets/qr.png" alt=""></div>
+                            <div class="go">Approve TV</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="base"></div>
+                  </div>
+
+                  <!-- TV running Projectivy + Whale-chan -->
+                  <div class="tv">
+                    <div class="panel">
+                      <div class="lcd">
+                        <div class="launcher">
+                          <div class="l-time"><span>9:41 PM</span><span>⌁ Wi-Fi</span></div>
+                          <div class="l-greet">Good evening, Thuy</div>
+                          <div class="l-row">
+                            <div class="l-tile stremio">Stremio</div>
+                            <div class="l-tile youtube">YouTube</div>
+                            <div class="l-tile netflix">Netflix</div>
+                            <div class="l-tile prime">Prime</div>
+                          </div>
+                          <div class="l-continue">Continue watching</div>
+                          <div class="l-cards">
+                            <div class="l-card a"></div><div class="l-card b"></div><div class="l-card c"></div><div class="l-card d"></div>
+                          </div>
+                          <div class="l-skirt">
+                            <img src="ui-assets/brand.png" alt="">
+                            <div class="txt"><b>Whale-chan</b><span>Listening… press OK to send</span></div>
+                            <div class="wave"><i></i><i></i><i></i><i></i></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="stand"></div>
+                    <div class="foot"></div>
+                  </div>
+
+                  <img class="whale-peek" src="ui-assets/pet-idle.webp" alt="Whale-chan waving">
+                </div>
+                <div class="visual-caption"><b>DSH on your Mac</b> <span>→</span> <b>Whale-chan on your TV</b></div>
               </div>
             </div>
 
-            <div class="foot">
-              <span>Whale-chan art © 1tryout (MIT) · Er1c0v0 (CC BY 4.0)</span>
-              <span>Pairing code expires in 5:00</span>
+            <div class="pair-foot">
+              <span class="net"><svg width="15" height="12" viewBox="0 0 15 12" fill="none" aria-hidden="true"><path d="M1.5 4.2a9 9 0 0 1 12 0" stroke="#00E096" stroke-width="1.6" stroke-linecap="round"/><path d="M4 6.6a5.5 5.5 0 0 1 7 0" stroke="#00E096" stroke-width="1.6" stroke-linecap="round"/><circle cx="7.5" cy="9.6" r="1.4" fill="#00E096"/></svg> Both devices on the same Wi-Fi</span>
+              <span>LAN only · nothing leaves your home network</span>
             </div>
           </div>
         </section>
@@ -501,7 +741,7 @@
               <img id="pet" src="ui-assets/pet-idle.webp" alt="Whale-chan">
             </div>
             <div class="remote-hint"><span><kbd>OK</kbd> send</span><span><kbd>Back</kbd> cancel</span><span><kbd>Disney+</kbd> open</span></div>
-            <div class="credit">Whale-chan art © 1tryout (MIT) · Er1c0v0 (CC BY 4.0)</div>
+            <div class="credit">DeepSeek Whale-chan · Android TV Assistant — art © 1tryout (MIT) · Er1c0v0 (CC BY 4.0)</div>
           </div>
         </section>
 
@@ -641,7 +881,7 @@
   });
 
   const fromHash = () => (location.hash || '').replace('#', '');
-  if (titles[fromHash()]) show(fromHash()); else show('bridge');
+  if (titles[fromHash()]) show(fromHash()); else show('pairing');
   window.addEventListener('hashchange', () => { if (titles[fromHash()]) show(fromHash()); });
 </script>
 </body>
