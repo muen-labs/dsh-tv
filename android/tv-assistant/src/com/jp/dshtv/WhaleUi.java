@@ -185,6 +185,15 @@ public final class WhaleUi {
         });
     }
 
+    /** QA-only: render a completed exchange without capture. */
+    public void demo(String heard, String reply) {
+        transcript = heard == null ? "" : heard;
+        pet.play(R.raw.whale_celebrate);
+        setBubble("ASSISTANT", DOT_OK,
+                transcript.length() > 0 ? "“" + transcript + "”" : "", reply);
+        showCloseButton();
+    }
+
     public boolean isListening() {
         return listening;
     }
