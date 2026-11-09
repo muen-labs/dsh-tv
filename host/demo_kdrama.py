@@ -76,6 +76,62 @@ def chat(prompt: str) -> dict:
     return json.loads(content)
 
 
+def mdblist_key() -> str:
+    k = os.environ.get("MDBLIST_API_KEY", "").strip()
+    if k:
+        return k
+    for base in (ROOT, ROOT.parent):
+        try:
+            return (base / ".auth" / "mdblist.key").read_text().strip()
+        except OSError:
+            continue
+    return ""
+
+
+def mdblist_lists(only=("korean", "asia", "japan")) -> list[dict]:
+    """Read the household's MDBList lists (Korean/Asian/Japan) as candidates."""
+    key = mdblist_key()
+    if not key:
+        return []
+    h = {"User-Agent": "dsh-tv/0.1"}
+    def get(path):
+        import urllib.parse
+        url = f"https://api.mdblist.com/{path}"
+        url += ("&" if "?" in url else "?") + "apikey=" + urllib.parse.quote(key)
+        with urllib.request.urlopen(urllib.request.Request(url, headers=h), timeout=25) as r:
+            return json.loads(r.read().decode())
+    out = []
+    try:
+        me = get("user")
+        lists = get(f"lists/user/{me.get('username')}")
+    except Exception:
+        return []
+    for lst in lists:
+        name = (lst.get("name") or "").lower()
+        if not any(k in name for k in only):
+            continue
+        try:
+            data = get(f"lists/{lst.get('id')}/items")
+        except Exception:
+            continue
+        items = data.get("items", data) if isinstance(data, dict) else data
+        for item in (items or [])[:40]:
+            title = item.get("title") or item.get("name") or ""
+            if not title:
+                continue
+            ids = item.get("ids") or {}
+            tmdb = ids.get("tmdb") or ids.get("tmdbid")
+            out.append({
+                "title": title,
+                "site_name": "MDBList",
+                "url": (f"https://www.themoviedb.org/tv/{tmdb}" if tmdb else "https://mdblist.com"),
+                "date": str(item.get("release_year") or item.get("release_date") or ""),
+                "summary": (item.get("description") or "")[:200],
+                "_source": f"mdblist:{lst.get('name')}",
+            })
+    return out
+
+
 def tmdb_key() -> str:
     k = os.environ.get("TMDB_API_KEY", "").strip()
     if k:
@@ -165,6 +221,10 @@ def research() -> dict:
             results += hits
         except Exception as exc:  # noqa: BLE001
             print(f"search failed: {exc}", file=sys.stderr)
+    try:
+        results += mdblist_lists()
+    except Exception:
+        pass
     try:
         results += tmdb_trending()
     except Exception:
