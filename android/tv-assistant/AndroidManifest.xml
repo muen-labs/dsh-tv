@@ -31,7 +31,7 @@
     </queries>
 
     <application
-        android:label="DSH TV Bridge"
+        android:label="DeepSeek TV"
         android:icon="@drawable/ic_launcher"
         android:banner="@drawable/banner"
         android:allowBackup="false"
@@ -68,7 +68,8 @@
         <activity
             android:name=".WhaleActivity"
             android:exported="true"
-            android:launchMode="singleTask"
+            android:launchMode="singleInstance"
+            android:taskAffinity="com.jp.dshtv.overlay"
             android:excludeFromRecents="true"
             android:theme="@style/WhaleTheme" />
 
