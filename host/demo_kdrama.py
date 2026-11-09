@@ -28,9 +28,9 @@ sys.path.insert(0, str(ROOT / "host"))
 import tv_memory  # noqa: E402
 
 TITLE_QUERIES = [
-    "site:reddit.com/r/kdrama trending kdramas this week 2026",
-    "mydramalist highest rated kdramas 2026 so far",
-    "top 3 ranked kdramas 2026 Netflix",
+    "what kdramas are people watching this week reddit r/kdrama {month} {year}",
+    "kdrama viewership ratings this week {month} {year}",
+    "most popular airing kdramas {month} {year}",
 ]
 
 
@@ -73,9 +73,11 @@ def chat(prompt: str) -> dict:
 
 def research() -> dict:
     results = []
+    today = time.localtime()
+    month, year = time.strftime("%B", today), today.tm_year
     for q in TITLE_QUERIES:
         try:
-            results += search(q)
+            results += search(q.format(month=month, year=year))
         except Exception as exc:  # noqa: BLE001
             print(f"search failed: {exc}", file=sys.stderr)
     seen, ctx = set(), []
@@ -93,7 +95,11 @@ Return JSON only:
 {{"top3":[{{"title":"...","why":"max 12 words"}}],"pick":{{"title":"...","reason":"max 28 words","runtime":"..."}},
   "question":"Want to watch it here?",
   "services":["Stremio with Torrentio"], "source":"https://..."}}
-Pick a title that actually appears in the research and is plausible on Stremio.
+Recency is mandatory: only consider titles that are currently airing, released in
+the last 30 days, or topping this week's ratings/buzz lists. Ignore "best of the
+year so far" articles and anything older than ~6 weeks unless the sources are all
+from this week. Prefer titles from sources dated within the last 10 days and say
+"as of <date>" in the reason. Pick a title that appears in the research.
 Use the top 3 as the answer, then recommend ONE of them.
 Research:
 {chr(10).join(ctx)}
