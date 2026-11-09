@@ -202,7 +202,21 @@
     "stremio://"
    ],
    "notes": "Primary player for anime/K-drama; addons can load slowly — wait and use ui after ENTER.",
-   "playbook": "host/playbooks/stremio.md"
+   "playbook": "host/playbooks/stremio.md",
+   "catalog_first": true,
+   "addons": {
+    "catalogs": [
+     "Cinemeta"
+    ],
+    "streams": [
+     "Torrentio",
+     "yastream"
+    ],
+    "metadata": [
+     "Ratings Aggregator"
+    ],
+    "note": "Browse Home/Discover catalog rows first; only search if the title is absent. Addons can be unhealthy (row shows “Search unavailable”)."
+   }
   },
   {
    "package": "com.amazon.music.tv",

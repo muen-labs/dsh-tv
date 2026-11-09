@@ -9,7 +9,27 @@ Left sidebar (top → bottom): **Search, Home, Discover, Library, Calendar, Addo
 - **UP/DOWN** move through the sidebar; **OK** opens the page; **BACK** closes it.
 - Content rows are reached with RIGHT; cards with OK; BACK returns.
 
-## Search (verified)
+## Catalog-first rule (preferred)
+
+Do **not** search first. Stremio's installed addons publish their own catalog rows
+on **Home** and **Discover**; check those before typing.
+
+1. Launch Stremio → LEFT (sidebar) → Home is focused → DOWN twice → **Discover**.
+2. Scan rows top-to-bottom with `ui` (row headers + card titles): Cinemeta
+   (Popular / Top / Featured), genre/addon shelves, and any other installed
+   catalog addons.
+3. If the title is found → OK opens the detail page → DOWN to streams → pick.
+4. Only if it is not in any catalog, fall back to Search (recipe below).
+5. If a catalog row shows an addon error ("Search unavailable…"), skip it and
+   continue; addon health varies. Search results can also be empty when the
+   catalog addon is down — prefer a title you saw in a shelf.
+
+Installed addons observed: **Cinemeta** (catalogs), **Ratings Aggregator**
+(ratings), **Torrentio | PM** (streams), plus community search rows. Stream
+pickers come from Torrentio / yastream when those addons are installed; the
+first 1080p Torrentio source is usually the safest pick.
+
+## Search (fallback, verified)
 ```
 launch stremio
 key left          # sidebar, focus Home

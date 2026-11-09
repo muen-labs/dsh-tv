@@ -23,6 +23,7 @@ reach it on the LAN; keep it on the LAN, never expose it to the internet.
 from __future__ import annotations
 
 import argparse
+import queue
 import json
 import os
 import re
@@ -205,8 +206,191 @@ def _clean_transcript(text: str) -> str:
     return t
 
 
+def _node_path() -> str:
+    home = Path.home()
+    candidates = [
+        os.environ.get("DSH_NODE_PATH"),
+        os.environ.get("NODE_PATH"),
+        str(home / ".local/share/dsh-superagent-runtime/node_modules/.pnpm/node_modules"),
+        str(home / ".local/share/dsh-superagent-runtime/node_modules"),
+        str(ROOT / "node_modules"),
+        str(ROOT / "host" / "node_modules"),
+    ]
+    for profile in sorted((home / ".dsh/profiles").glob("*/node_modules/.pnpm/node_modules")):
+        candidates.append(str(profile))
+    seen, parts = set(), []
+    for c in candidates:
+        if c and c not in seen and Path(c).exists():
+            seen.add(c)
+            parts.append(c)
+    return ":".join(parts)
+
+
+def _node_env() -> dict:
+    env = dict(os.environ)
+    np = _node_path()
+    if np:
+        env["NODE_PATH"] = np
+    return env
+
+
+class _DshWorker:
+    """Persistent sherpa-onnx worker: model loads once, ~0.1s per utterance."""
+
+    def __init__(self, model_dir: str | None = None):
+        self.model_dir = model_dir
+        self.proc: subprocess.Popen | None = None
+        self.queue: queue.Queue = queue.Queue()
+        self.lock = threading.Lock()
+        self.next_id = 0
+        self.reader: threading.Thread | None = None
+
+    def _start(self) -> None:
+        cmd = [os.environ.get("WHALE_NODE") or "node",
+               str(ROOT / "host" / "stt_worker.mjs")]
+        if self.model_dir:
+            cmd += ["--model-dir", self.model_dir]
+        self.proc = subprocess.Popen(
+            cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, text=True, bufsize=1,
+            cwd=str(ROOT), env=_node_env())
+        self.queue = queue.Queue()
+
+        def pump(stream):
+            for line in stream:
+                self.queue.put(line)
+
+        self.reader = threading.Thread(target=pump, args=(self.proc.stdout,), daemon=True)
+        self.reader.start()
+        # wait for the ready line
+        deadline = time.time() + 20
+        while time.time() < deadline:
+            try:
+                line = self.queue.get(timeout=max(0.1, deadline - time.time()))
+            except queue.Empty:
+                break
+            try:
+                msg = json.loads(line)
+            except ValueError:
+                continue
+            if msg.get("ready"):
+                return
+            if msg.get("ready") is False:
+                raise RuntimeError(msg.get("error") or "stt worker failed to start")
+        raise RuntimeError("stt worker did not become ready")
+
+    def transcribe(self, wav: Path, timeout: float = 30.0) -> dict:
+        with self.lock:
+            if self.proc is None or self.proc.poll() is not None:
+                self._start()
+            self.next_id += 1
+            rid = self.next_id
+            try:
+                self.proc.stdin.write(json.dumps({"id": rid, "wav": str(wav)}) + "\n")
+                self.proc.stdin.flush()
+            except Exception:
+                self._stop()
+                raise
+            deadline = time.time() + timeout
+            while time.time() < deadline:
+                try:
+                    line = self.queue.get(timeout=max(0.05, deadline - time.time()))
+                except queue.Empty:
+                    break
+                try:
+                    msg = json.loads(line)
+                except ValueError:
+                    continue
+                if msg.get("id") != rid:
+                    continue
+                if not msg.get("ok"):
+                    raise RuntimeError(msg.get("error") or "stt failed")
+                return msg
+            self._stop()
+            raise RuntimeError("stt worker timeout")
+
+    def _stop(self) -> None:
+        try:
+            if self.proc:
+                self.proc.kill()
+        except Exception:
+            pass
+        self.proc = None
+
+    def close(self) -> None:
+        self._stop()
+
+
 def _transcribe_dsh(wav: Path, model_dir: str | None = None) -> dict:
-    """Transcribe with DSH's own SenseVoice worker (sherpa-onnx)."""
+    """Transcribe with DSH's own SenseVoice model (sherpa-onnx)."""
+    script = ROOT / "host" / "dsh_stt.mjs"
+    node = os.environ.get("WHALE_NODE") or "node"
+    cmd = [node, str(script), "--wav", str(wav)]
+    if model_dir:
+        cmd += ["--model-dir", model_dir]
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=90,
+                          cwd=str(ROOT), env=_node_env())
+    line = (proc.stdout or "").strip().splitlines()
+    if not line:
+        raise RuntimeError(f"dsh_stt empty output: {(proc.stderr or '').strip()[:200]}")
+    result = json.loads(line[-1])
+    if not result.get("ok"):
+        raise RuntimeError(str(result.get("error") or "dsh stt failed"))
+    return result
+
+
+
+_APP_CANON = ["Stremio", "TiviMate", "Nuvio", "CloudStream", "YouTube", "Netflix",
+              "Prime Video", "Disney+", "Projectivy", "OwnTV", "JapanTV",
+              "Haystack News", "Amazon Music"]
+_APP_ALIASES = {
+    "netflicks": "Netflix", "netflex": "Netflix", "prime": "Prime Video",
+    "disney": "Disney+", "you tube": "YouTube", "youtube": "YouTube",
+    "stremio": "Stremio", "streemo": "Stremio", "streemio": "Stremio",
+    "streio": "Stremio", "stremo": "Stremio", "tivimate": "TiviMate",
+    "tivimates": "TiviMate", "nuvio": "Nuvio", "nubio": "Nuvio",
+    "cloudstream": "CloudStream", "cloud stream": "CloudStream",
+}
+_CANON_LOWER = {c.lower(): c for c in _APP_CANON}
+
+
+def _app_name_match(word: str) -> str | None:
+    import difflib
+    w = word.lower()
+    if w in _APP_ALIASES:
+        return _APP_ALIASES[w]
+    if w in _CANON_LOWER:
+        return _CANON_LOWER[w]
+    if len(w) >= 5:
+        hit = difflib.get_close_matches(w, _CANON_LOWER.keys(), n=1, cutoff=0.82)
+        if hit:
+            return _CANON_LOWER[hit[0]]
+    return None
+
+
+def _correct_app_names(text: str) -> str:
+    """Repair STT slips for the app names people actually say on this TV."""
+    if not text:
+        return text
+
+    def repl(match):
+        word = match.group(0)
+        low = word.lower()
+        if low == "open":
+            return word
+        if low.startswith("open") and len(low) > 6:
+            rest = low[4:]
+            name = _app_name_match(rest)
+            if name:
+                return "open " + name
+        name = _app_name_match(low)
+        return name or word
+
+    return re.sub(r"[A-Za-z]{4,}", repl, text)
+
+
+def _transcribe_dsh_oneshot(wav: Path, model_dir: str | None = None) -> dict:
+    """One-shot fallback (kept for CLI/tests)."""
     script = ROOT / "host" / "dsh_stt.mjs"
     node = os.environ.get("WHALE_NODE") or "node"
     cmd = [node, str(script), "--wav", str(wav)]
@@ -231,6 +415,7 @@ class Transcriber:
         self.dsh_model_dir = dsh_model_dir
         self.model = model
         self._lock = threading.Lock()
+        self._worker = _DshWorker(dsh_model_dir) if engine == "dsh" else None
         os.environ.setdefault("HF_HOME", str(ROOT / ".tools" / "hf-cache"))
         os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 
@@ -240,23 +425,37 @@ class Transcriber:
             return {"text": "", "model": self.engine,
                     "note": f"near-silence rms={rms:.0f}"}
         if self.engine == "dsh":
+            prepared = normalize_wav(wav)
             try:
-                prepared = normalize_wav(wav)
-                try:
-                    result = _transcribe_dsh(prepared, self.dsh_model_dir)
-                finally:
-                    if prepared != wav:
-                        try:
-                            prepared.unlink()
-                        except OSError:
-                            pass
-                return {"text": _clean_transcript(result.get("text", "")),
-                        "model": "sensevoice-dsh", "engine": "dsh"}
-            except Exception as exc:  # fall back to Whisper if the DSH worker fails
-                print(f"dsh stt failed, falling back to whisper: {exc}", flush=True)
+                result = None
+                if self._worker is not None:
+                    try:
+                        result = self._worker.transcribe(prepared)
+                    except Exception as exc:  # noqa: BLE001
+                        print(f"warm stt worker failed ({exc}); one-shot retry", flush=True)
+                if result is None:
+                    result = _transcribe_dsh_oneshot(prepared, self.dsh_model_dir)
+                text = _correct_app_names(_clean_transcript(result.get("text", "")))
+                if text and not re.search(r"[a-zA-Z0-9]", text):
+                    text = ""
+                return {"text": text, "model": "sensevoice-dsh", "engine": "dsh",
+                        "ms": result.get("ms")}
+            except Exception as exc:  # noqa: BLE001
+                print(f"dsh stt failed: {exc}", flush=True)
+            finally:
+                if prepared != wav:
+                    try:
+                        prepared.unlink()
+                    except OSError:
+                        pass
         prepared = normalize_wav(wav)
         try:
-            import mlx_whisper
+            try:
+                import mlx_whisper
+            except ImportError as exc:
+                raise RuntimeError(
+                    "no STT engine available: DSH worker failed and mlx_whisper "
+                    "is not installed") from exc
 
             with self._lock:
                 result = mlx_whisper.transcribe(
@@ -270,7 +469,8 @@ class Transcriber:
                     verbose=None,
                 )
             text = (result.get("text") or "").strip()
-            return {"text": _clean_transcript(text), "model": self.model, "engine": "whisper"}
+            return {"text": _correct_app_names(_clean_transcript(text)),
+                    "model": self.model, "engine": "whisper"}
         finally:
             if prepared != wav:
                 try:
@@ -316,7 +516,11 @@ class DshVoice:
             context = context[:6000]
         except Exception:
             pass
-        prompt = (f"{BRIEF}\n\n## Household taste (learned locally)\n{habits}\n\n"
+        prompt = (f"{BRIEF}\n\n"
+                  f"REPO: {ROOT} — the shell may start in the workspace parent; "
+                  f"cd {ROOT} first or use absolute paths like "
+                  f"`python3 {ROOT}/host/dshtv.py state`.\n\n"
+                  f"## Household taste (learned locally)\n{habits}\n\n"
                   f"## App catalog (truncated JSON; full file host/tv-apps.json)\n{context}\n\n"
                   f"Transcript: {utterance}")
         cmd = ["dsh", "--profile", "headless", "--json"]

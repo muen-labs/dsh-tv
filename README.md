@@ -129,6 +129,12 @@ Open [`docs/ui-mockup.html`](docs/ui-mockup.html) in a browser — it is fully s
 Use the sidebar (or `#bridge`, `#pairing`, `#assistant`, `#components`) and the
 "Show focus rings" toggle to review focus treatment.
 
+## Voice pipeline
+
+- [`docs/VOICE-STT.md`](docs/VOICE-STT.md) — DSH SenseVoice warm worker
+  (0.05–0.08 s/utterance), module resolution, app-name repair, and why the
+  daemon must run outside the agent sandbox.
+
 ## TV knowledge & personalisation
 
 - [`docs/APP-KNOWLEDGE.md`](docs/APP-KNOWLEDGE.md) — app catalog, per-app
