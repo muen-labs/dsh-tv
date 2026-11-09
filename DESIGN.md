@@ -52,19 +52,20 @@ Launcher label: **DeepSeek TV**.
 
 ## Colour system (glows)
 
-Two chromatic glows sit behind the device scene, picked with a split-complementary
-scheme around the EVA indigo base:
+Bridge home and the pairing scene share a three-glow palette:
 
 | Glow | Hex | Role |
 | --- | --- | --- |
-| teal | `#2DD4BF` | analogous to the blue base; screen light spilling from the Mac |
-| amber | `#FFB020` | split-complement (warm) for the TV side; balances the cool base |
-| violet bridge | `#7C6CFF` | low-opacity blend where the two meet, keeps the transition from going grey |
+| green | `#3DFFA8` | cool accent, bottom-left / left edge |
+| magenta | `#FF4FD8` | warm counterpoint, bottom / top-right |
+| purple | `#8B5CF6` | bridge between the two, centre / behind the cards |
 
-Ratio roughly 60 % indigo stage / 30 % teal / 10–15 % amber, with `mix-blend-mode:
-screen` so the mocks pick up the colour instead of sitting on top of it.
+Bridge home: green left, purple top-right, magenta bottom, over a faint frost
+dot lattice — the glass cards pick the colour up through `backdrop-filter`.
+Pairing: green under the laptop, magenta over the TV, purple low centre.
+Ratio roughly 60 % indigo base / 25 % purple / 10–15 % green + magenta.
 
-## Primitives
+## Primitives## Primitives
 
 | Primitive | Variants / states | Notes |
 | --- | --- | --- |
