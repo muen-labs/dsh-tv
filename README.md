@@ -1,10 +1,10 @@
-# Whale-chan — a TV assistant for DeepSeek Harness
+# DeepSeek Whale-chan — Android TV Assistant
 
-`https://github.com/thuyqpham/whale-chan` · MIT
+`https://github.com/thuyqpham/dsh-tv` · MIT
 
 ![Whale-chan](docs/screenshots/pet.jpg)
 
-Whale-chan turns an Android TV box into a voice terminal for
+DeepSeek Whale-chan turns an Android TV box into a voice terminal for
 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). Press one
 button on the remote, talk, and DSH on your Mac drives the TV — launch any app,
 navigate it, search, type — then answers through an animated whale-girl pet.
@@ -46,7 +46,7 @@ Android TV box                            Mac mini (or any LAN host)
 ## Install from a release
 
 Download the latest `TVAssistant.apk` (and optionally `DisneyShim.apk`) from
-[Releases](https://github.com/thuyqpham/whale-chan/releases), then:
+[Releases](https://github.com/thuyqpham/dsh-tv/releases), then:
 
 ```bash
 adb connect <tv-ip>:5555

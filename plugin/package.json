@@ -26,11 +26,11 @@
   "author": "thuyqpham",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thuyqpham/whale-chan.git",
+    "url": "git+https://github.com/thuyqpham/dsh-tv.git",
     "directory": "plugin"
   },
-  "homepage": "https://github.com/thuyqpham/whale-chan#readme",
+  "homepage": "https://github.com/thuyqpham/dsh-tv#readme",
   "bugs": {
-    "url": "https://github.com/thuyqpham/whale-chan/issues"
+    "url": "https://github.com/thuyqpham/dsh-tv/issues"
   }
 }

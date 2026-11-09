@@ -1,4 +1,4 @@
-# Whale-chan TV — design system
+# DeepSeek Whale-chan — Android TV assistant · design system
 
 The TV app and the DSH pane share one visual language: **Eva Design System
 tokens** exposed through **shadcn/ui primitives**. EVA supplies the colour
