@@ -124,7 +124,7 @@ daemon is started on demand.
 
 ## UI playground
 
-Open [`docs/ui-mockup.html`](docs/ui-mockup.html) in a browser: every screen at
+Open [`docs/ui-mockup.html`](docs/ui-mockup.html) in a browser — it is fully self-contained (all images inlined as data URIs, no asset folder needed): every screen at
 1920×1080 with the real EVA tokens, the animated pet and all assistant states.
 Use the sidebar (or `#bridge`, `#pairing`, `#assistant`, `#components`) and the
 "Show focus rings" toggle to review focus treatment.

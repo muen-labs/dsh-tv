@@ -41,6 +41,20 @@ Typography (EVA text styles, TV-scaled): **H1** 32sp bold · **H2** 20sp medium
 Android resources: [`android/tv-assistant/res/values/theme_eva.xml`](android/tv-assistant/res/values/theme_eva.xml).
 Web pane: `evaTheme` CSS variables in [`plugin/ui/src/ui.tsx`](plugin/ui/src/ui.tsx).
 
+## Colour system (glows)
+
+Two chromatic glows sit behind the device scene, picked with a split-complementary
+scheme around the EVA indigo base:
+
+| Glow | Hex | Role |
+| --- | --- | --- |
+| teal | `#2DD4BF` | analogous to the blue base; screen light spilling from the Mac |
+| amber | `#FFB020` | split-complement (warm) for the TV side; balances the cool base |
+| violet bridge | `#7C6CFF` | low-opacity blend where the two meet, keeps the transition from going grey |
+
+Ratio roughly 60 % indigo stage / 30 % teal / 10–15 % amber, with `mix-blend-mode:
+screen` so the mocks pick up the colour instead of sitting on top of it.
+
 ## Primitives
 
 | Primitive | Variants / states | Notes |
