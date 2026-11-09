@@ -150,6 +150,9 @@ parts rather than inventing new ones.
 
 ![Pairing](docs/screenshots/ui-playground-pairing.png)
 
+The TV grab is a real capture from the onn. 4K Plus (`docs/ui-assets/tv-launcher.webp`),
+so the scene stays honest about the launcher, the app row and the Whale-chan tile.
+
 **Anatomy**
 
 - **Brandbar** — 54px brand tile + wordmark (`DeepSeek` regular, `Whale-chan`
@@ -164,9 +167,11 @@ parts rather than inventing new ones.
   escape hatch (`Use a different Mac`) is outline. One primary per screen.
 - **Progress** — a three-step tracker under the actions: Scan → Approve in DSH →
   Connected. The current step uses primary; done uses success.
-- **Device scene** — laptop running DSH (rail, conversation, Whale-chan TV pane
-  with QR + Approve) and a TV running Projectivy with the Whale-chan assistant
-  skirt. A dashed line connects them; Whale-chan herself peeks between them.
+- **Device scene** — a big **onn. 4K Plus** TV (792px, `onn.` wordmark on the
+  chin) sits *behind* a 442px Mac laptop. The TV screen uses a real grab of the
+  Projectivy launcher, with Whale-chan and a listening bubble overlaid inside
+  the TV. The laptop in front runs DSH, with the Whale-chan TV pane open on
+  “Living Room TV · onn. 4K Plus · 192.168.4.58” and an Approve button.
 - **Footer** — Wi-Fi icon + “Both devices on the same Wi-Fi” + “LAN only”.
 
 **Derived into the other screens**
@@ -174,7 +179,7 @@ parts rather than inventing new ones.
 | Screen | Borrowed |
 | --- | --- |
 | Bridge home | brandbar, LAN/state pills, “Paired with” laptop ⇢ TV mini row, connected badge |
-| Assistant overlay | brand mark in the bubble header, same eyebrow/label language, whale as the state carrier |
+| Assistant overlay | same overlay language, but rendered over the same real launcher grab with a `Projectivy · Home` chip; brand mark in the bubble header, whale as the state carrier |
 | Primitives | brand lockup + status chips + code/type styles as the shared kit |
 
 **Rules**

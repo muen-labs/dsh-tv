@@ -221,6 +221,12 @@
   .player .bar i { display: block; width: 38%; height: 100%; border-radius: 2px; background: var(--primary); }
   
   .assistant { position: absolute; inset: 0; }
+  .player .shot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .9; }
+  .player .scrim-strong { position: absolute; inset: 0; background: radial-gradient(90% 90% at 50% 45%, transparent 0%, rgba(4,6,13,.35) 70%, rgba(4,6,13,.8) 100%), linear-gradient(180deg, rgba(4,6,13,.25), transparent 30%, transparent 60%, rgba(4,6,13,.72)); }
+  .assistant .app-chip { position: absolute; left: 26px; top: 24px; display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 13px; border-radius: 999px; background: rgba(6,9,16,.6); border: 1px solid rgba(255,255,255,.10);
+    font-size: 12px; font-weight: 600; color: #C6D2E4; backdrop-filter: blur(8px); }
+  .assistant .app-chip img { width: 16px; height: 16px; border-radius: 4px; }
   .assistant .scrim { position: absolute; inset: 0; background:
       radial-gradient(58% 40% at 82% 78%, rgba(6,9,16,.55), transparent 70%),
       linear-gradient(180deg, transparent 52%, rgba(4,6,13,.62) 100%); pointer-events: none; }
@@ -309,86 +315,74 @@
     border-top-color: #C7D7FF; animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* laptop + TV scene */
-  .pair-visual { position: relative; height: 540px; align-self: center; }
-  .pair-visual .halo { position: absolute; inset: 6% 2% 8% 4%; background:
-      radial-gradient(60% 60% at 40% 42%, rgba(51,102,255,.20), transparent 70%),
-      radial-gradient(45% 45% at 76% 72%, rgba(0,224,150,.10), transparent 70%); filter: blur(10px); }
+  /* laptop in front + big TV behind */
+  .pair-visual { position: relative; height: 600px; align-self: center; }
+  .pair-visual .halo { position: absolute; inset: 2% 0 8% 4%; background:
+      radial-gradient(60% 60% at 62% 38%, rgba(51,102,255,.22), transparent 70%),
+      radial-gradient(45% 45% at 30% 76%, rgba(0,224,150,.10), transparent 70%); filter: blur(12px); }
   .scene { position: absolute; inset: 0; }
 
-  .laptop { position: absolute; left: -6px; top: 18px; width: 486px; }
-  .laptop .lid { border-radius: 16px 16px 4px 4px; padding: 9px; background: linear-gradient(180deg, #2A3350, #171D31);
-    border: 1px solid #3A4766; box-shadow: 0 30px 70px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08); }
-  .laptop .lcd { position: relative; height: 282px; border-radius: 8px; overflow: hidden; background: #0B0F1F;
-    border: 1px solid #070A12; }
-  .laptop .base { height: 13px; width: 108%; margin-left: -4%; border-radius: 0 0 12px 12px;
-    background: linear-gradient(180deg, #4A556F, #2A3247 60%, #1B2132); box-shadow: 0 12px 24px rgba(0,0,0,.45); }
-  .laptop .notch { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 64px; height: 9px;
+  /* ---- TV (back) ---- */
+  .tv { position: absolute; right: -8px; top: 0; width: 792px; z-index: 1; }
+  .tv .panel { border-radius: 14px; padding: 11px 11px 0; background: linear-gradient(180deg, #121826, #070A12);
+    border: 1px solid #2A3450; box-shadow: 0 40px 100px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.06); }
+  .tv .lcd { position: relative; height: 424px; border-radius: 6px; overflow: hidden; background: #05070D; border: 1px solid #05070D; }
+  .tv .lcd .shot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .96; }
+  .tv .lcd .dim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4,6,13,.10), transparent 30%, transparent 52%, rgba(4,6,13,.72)); }
+  .tv .chin { height: 36px; display: flex; align-items: center; justify-content: flex-end; gap: 9px; padding-right: 20px; }
+  .tv .chin .onn { font-size: 14px; font-weight: 800; letter-spacing: -.03em; color: #EAF0FA; }
+  .tv .chin .model { font-size: 9px; letter-spacing: .17em; text-transform: uppercase; color: #6F7F97; font-weight: 700; }
+  .tv .stand { width: 26%; height: 7px; margin: 0 auto; background: linear-gradient(180deg, #2A3350, #101625); border-radius: 0 0 8px 8px; }
+  .tv .foot-base { width: 48%; height: 3px; margin: 0 auto; background: #0A0E18; border-radius: 3px; }
+
+  /* whale-chan assistant overlaid on the real launcher */
+  .tv-assistant { position: absolute; right: 16px; bottom: 14px; left: 16px; height: 150px; pointer-events: none; }
+  .tv-assistant .tbubble { position: absolute; right: 118px; bottom: 78px; width: 342px; padding: 10px 13px 11px;
+    border-radius: 11px; background: rgba(12,17,29,.92); border: 1px solid rgba(89,139,255,.38);
+    box-shadow: 0 14px 34px rgba(0,0,0,.5); backdrop-filter: blur(6px); }
+  .tv-assistant .tbubble .eb { display: flex; align-items: center; gap: 6px; font-size: 6.5px; letter-spacing: .16em;
+    font-weight: 700; color: var(--primary-hover); text-transform: uppercase; }
+  .tv-assistant .tbubble .eb .dot { width: 5px; height: 5px; animation: pulse 1.6s ease-out infinite; }
+  .tv-assistant .tbubble .say { margin-top: 4px; font-size: 11px; line-height: 1.35; color: #EAF2FB; }
+  .tv-assistant .tpet { position: absolute; right: 6px; bottom: 0; width: 154px; filter: drop-shadow(0 14px 18px rgba(0,0,0,.6)); }
+  .tv-assistant .tshadow { position: absolute; right: 26px; bottom: 2px; width: 110px; height: 18px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(0,0,0,.55), transparent); }
+  .tv .pill-brand { position: absolute; left: 16px; top: 14px; display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 9px; border-radius: 999px; background: rgba(6,9,16,.6); border: 1px solid rgba(255,255,255,.12);
+    color: #DCE7F7; font-size: 7px; font-weight: 700; letter-spacing: .05em; backdrop-filter: blur(6px); }
+  .tv .pill-brand img { width: 12px; height: 12px; border-radius: 3px; }
+
+  /* ---- laptop (front) ---- */
+  .laptop { position: absolute; left: -12px; bottom: -12px; width: 442px; z-index: 3; filter: drop-shadow(0 34px 50px rgba(0,0,0,.6)); }
+  .laptop .lid { border-radius: 15px 15px 4px 4px; padding: 8px; background: linear-gradient(180deg, #2A3350, #171D31);
+    border: 1px solid #3A4766; box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
+  .laptop .lcd { position: relative; height: 236px; border-radius: 7px; overflow: hidden; background: #0B0F1F; border: 1px solid #070A12; }
+  .laptop .base { height: 12px; width: 108%; margin-left: -4%; border-radius: 0 0 12px 12px;
+    background: linear-gradient(180deg, #4A556F, #2A3247 60%, #1B2132); }
+  .laptop .notch { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 56px; height: 8px;
     background: #070A12; border-radius: 0 0 6px 6px; z-index: 2; }
 
-  .dsh { position: absolute; inset: 0; display: flex; font-size: 8px; color: #A9B6C9; }
-  .dsh-rail { width: 34px; flex: 0 0 34px; background: #0E1322; border-right: 1px solid #1B2436; padding: 8px 6px; display: flex; flex-direction: column; gap: 6px; }
-  .dsh-rail i { display: block; width: 100%; height: 5px; border-radius: 2px; background: #232D45; }
-  .dsh-rail i.on { background: var(--primary); height: 14px; border-radius: 4px; }
-  .dsh-main { flex: 1; display: flex; flex-direction: column; padding: 10px 12px; gap: 8px; min-width: 0; }
+  .dsh { position: absolute; inset: 0; display: flex; font-size: 7.5px; color: #A9B6C9; }
+  .dsh-rail { width: 30px; flex: 0 0 30px; background: #0E1322; border-right: 1px solid #1B2436; padding: 7px 5px; display: flex; flex-direction: column; gap: 5px; }
+  .dsh-rail i { display: block; width: 100%; height: 4px; border-radius: 2px; background: #232D45; }
+  .dsh-rail i.on { background: var(--primary); height: 12px; border-radius: 4px; }
+  .dsh-main { flex: 1; display: flex; flex-direction: column; padding: 8px 10px; gap: 6px; min-width: 0; }
   .dsh-top { display: flex; align-items: center; justify-content: space-between; }
-  .dsh-top b { font-size: 8.5px; color: #E6EDF7; font-weight: 700; letter-spacing: .01em; }
-  .dsh-top span { font-size: 7px; color: #5C6A82; }
-  .dsh-card { background: #131B2C; border: 1px solid #22304A; border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
-  .dsh-card .line { height: 4px; border-radius: 2px; background: #26334D; }
+  .dsh-top b { font-size: 7.5px; color: #E6EDF7; font-weight: 700; }
+  .dsh-top span { font-size: 6.5px; color: #5C6A82; }
+  .dsh-card { background: #131B2C; border: 1px solid #22304A; border-radius: 5px; padding: 7px; display: flex; flex-direction: column; gap: 4px; }
+  .dsh-card .line { height: 3.5px; border-radius: 2px; background: #26334D; }
   .dsh-card .line.short { width: 62%; }
-  .dsh-card .accent { height: 4px; width: 34%; border-radius: 2px; background: var(--primary); }
-  .dsh-pane { width: 158px; flex: 0 0 158px; background: #101728; border-left: 1px solid #1E2941; padding: 9px; display: flex; flex-direction: column; gap: 6px; }
-  .dsh-pane .ph { font-size: 7.5px; font-weight: 700; color: #E6EDF7; display: flex; align-items: center; gap: 5px; }
-  .dsh-pane .ph img { width: 12px; height: 12px; border-radius: 3px; }
-  .dsh-pane .row { display: flex; align-items: center; gap: 5px; font-size: 7px; color: #A9B6C9; }
+  .dsh-card .line.accent { height: 3.5px; width: 34%; border-radius: 2px; background: var(--primary); }
+  .dsh-pane { width: 148px; flex: 0 0 148px; background: #101728; border-left: 1px solid #1E2941; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
+  .dsh-pane .ph { font-size: 7px; font-weight: 700; color: #E6EDF7; display: flex; align-items: center; gap: 4px; }
+  .dsh-pane .ph img { width: 11px; height: 11px; border-radius: 3px; }
+  .dsh-pane .row { display: flex; align-items: center; gap: 4px; font-size: 6.5px; color: #A9B6C9; }
   .dsh-pane .row .dot { width: 5px; height: 5px; }
-  .dsh-pane .qr { width: 56px; height: 56px; background: #fff; border-radius: 4px; padding: 4px; align-self: center; margin-top: 2px; }
+  .dsh-pane .qr { width: 50px; height: 50px; background: #fff; border-radius: 4px; padding: 3px; align-self: center; margin-top: 1px; }
   .dsh-pane .qr img { width: 100%; height: 100%; }
-  .dsh-pane .go { height: 16px; border-radius: 4px; background: var(--primary); color: #fff; font-size: 7px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .dsh-pane .go { height: 15px; border-radius: 4px; background: var(--primary); color: #fff; font-size: 6.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 
-  .tv { position: absolute; right: -6px; bottom: 6px; width: 432px; }
-  .tv .panel { border-radius: 10px; padding: 8px; background: linear-gradient(180deg, #141A2B, #0A0E19);
-    border: 1px solid #2C3854; box-shadow: 0 34px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06); }
-  .tv .lcd { position: relative; height: 238px; border-radius: 5px; overflow: hidden;
-    background: radial-gradient(90% 80% at 70% 20%, #23345E 0%, #101A31 55%, #080C16 100%); }
-  .tv .stand { width: 34%; height: 6px; margin: 0 auto; background: linear-gradient(180deg, #2A3350, #121828); border-radius: 0 0 8px 8px; }
-  .tv .foot { width: 58%; height: 3px; margin: 0 auto; background: #121828; border-radius: 3px; }
-  .launcher { position: absolute; inset: 0; padding: 12px 14px; display: flex; flex-direction: column; }
-  .l-time { font-size: 8px; color: #C6D2E4; font-weight: 700; display: flex; justify-content: space-between; }
-  .l-greet { margin-top: 7px; font-size: 7px; color: #8F9BB3; letter-spacing: .02em; }
-  .l-row { display: flex; gap: 8px; margin-top: 8px; }
-  .l-tile { width: 46px; height: 30px; border-radius: 6px; border: 1px solid rgba(255,255,255,.12); display: flex; align-items: center; justify-content: center;
-    font-size: 6.5px; font-weight: 800; letter-spacing: .02em; color: rgba(255,255,255,.9); }
-  .l-tile.stremio { background: linear-gradient(135deg, #2B3F6B, #17233D); }
-  .l-tile.youtube { background: linear-gradient(135deg, #5C1D28, #2A1218); }
-  .l-tile.netflix { background: linear-gradient(135deg, #4B1520, #1D0A0E); }
-  .l-tile.prime { background: linear-gradient(135deg, #163A57, #0C1E30); }
-
-  .l-continue { margin-top: 10px; font-size: 6.5px; color: #8F9BB3; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; }
-  .l-cards { display: flex; gap: 6px; margin-top: 5px; }
-  .l-card { flex: 1; height: 52px; border-radius: 5px; border: 1px solid rgba(255,255,255,.07); }
-  .l-card.a { background: linear-gradient(135deg, #243B66, #101B30); }
-  .l-card.b { background: linear-gradient(135deg, #3A2440, #160F1D); }
-  .l-card.c { background: linear-gradient(135deg, #1E3B3A, #0C1A19); }
-  .l-card.d { background: linear-gradient(135deg, #3A3020, #17130B); }
-  .l-skirt { position: absolute; left: 14px; right: 14px; bottom: 12px; display: flex; align-items: center; gap: 9px;
-    padding: 8px 10px; border-radius: 8px; background: rgba(8,12,22,.78); border: 1px solid rgba(255,255,255,.10); backdrop-filter: blur(6px); }
-  .l-skirt img { width: 34px; height: 34px; }
-  .l-skirt .txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  .l-skirt b { font-size: 7.5px; color: #EAF2FB; }
-  .l-skirt span { font-size: 6.5px; color: #8F9BB3; }
-  .l-skirt .wave { margin-left: auto; display: flex; align-items: flex-end; gap: 2px; height: 12px; }
-  .l-skirt .wave i { width: 2px; background: var(--primary); border-radius: 2px; animation: wave 1s ease-in-out infinite; }
-  .l-skirt .wave i:nth-child(2) { animation-delay: .15s; } .l-skirt .wave i:nth-child(3) { animation-delay: .3s; }
-  .l-skirt .wave i:nth-child(4) { animation-delay: .45s; }
-  @keyframes wave { 0%,100% { height: 3px; } 50% { height: 12px; } }
-
-  .whale-peek { position: absolute; right: 372px; bottom: -8px; width: 212px; filter: drop-shadow(0 22px 30px rgba(0,0,0,.55)); z-index: 3; }
-  .scene .link { position: absolute; inset: 0; pointer-events: none; }
-  .scene .link path { fill: none; stroke: rgba(89,139,255,.55); stroke-width: 2; stroke-dasharray: 5 7; animation: dash 14s linear infinite; }
-  .scene .link circle { fill: var(--primary); }
-  @keyframes dash { to { stroke-dashoffset: -240; } }
   .visual-caption { position: absolute; left: 6px; bottom: -30px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted-foreground); }
   .visual-caption b { color: var(--foreground); font-weight: 600; }
   .pair-foot { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 16px;
@@ -631,13 +625,29 @@
               <div class="pair-visual">
                 <div class="halo"></div>
                 <div class="scene">
-                  <svg class="link" viewBox="0 0 820 620" preserveAspectRatio="none" aria-hidden="true">
-                    <path d="M470 268 C 560 268, 600 300, 640 340" />
-                    <circle cx="470" cy="268" r="4" />
-                    <circle cx="644" cy="342" r="4" />
-                  </svg>
+                  <!-- big TV: real launcher + Whale-chan assistant overlay -->
+                  <div class="tv">
+                    <div class="panel">
+                      <div class="lcd">
+                        <img class="shot" src="ui-assets/tv-launcher.webp" alt="onn. 4K Plus launcher with the Whale-chan assistant overlay">
+                        <div class="dim"></div>
+                        <div class="pill-brand"><img src="ui-assets/brand.png" alt=""> Projectivy · Home</div>
+                        <div class="tv-assistant">
+                          <span class="tshadow"></span>
+                          <img class="tpet" src="ui-assets/pet-idle.webp" alt="Whale-chan">
+                          <div class="tbubble">
+                            <div class="eb"><span class="dot"></span> LISTENING</div>
+                            <div class="say">Listening… press <b>OK</b> to send</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="chin"><span class="onn">onn.</span><span class="model">4K Plus</span></div>
+                    </div>
+                    <div class="stand"></div>
+                    <div class="foot-base"></div>
+                  </div>
 
-                  <!-- Mac running DSH -->
+                  <!-- Mac in front running DSH -->
                   <div class="laptop">
                     <div class="notch"></div>
                     <div class="lid">
@@ -651,7 +661,6 @@
                               <div class="line"></div>
                               <div class="line short"></div>
                               <div class="line"></div>
-                              <div class="line short"></div>
                             </div>
                             <div class="dsh-card" style="flex:1">
                               <div class="line accent" style="width:22%"></div>
@@ -662,7 +671,7 @@
                           <div class="dsh-pane">
                             <div class="ph"><img src="ui-assets/brand.png" alt=""> Whale-chan TV</div>
                             <div class="row"><span class="dot success" style="width:5px;height:5px"></span> Living Room TV</div>
-                            <div class="row" style="color:#5C6A82">onn. 4K Pro · 192.168.4.58</div>
+                            <div class="row" style="color:#5C6A82">onn. 4K Plus · 192.168.4.58</div>
                             <div class="qr"><img src="ui-assets/qr.png" alt=""></div>
                             <div class="go">Approve TV</div>
                           </div>
@@ -671,39 +680,8 @@
                     </div>
                     <div class="base"></div>
                   </div>
-
-                  <!-- TV running Projectivy + Whale-chan -->
-                  <div class="tv">
-                    <div class="panel">
-                      <div class="lcd">
-                        <div class="launcher">
-                          <div class="l-time"><span>9:41 PM</span><span>⌁ Wi-Fi</span></div>
-                          <div class="l-greet">Good evening, Thuy</div>
-                          <div class="l-row">
-                            <div class="l-tile stremio">Stremio</div>
-                            <div class="l-tile youtube">YouTube</div>
-                            <div class="l-tile netflix">Netflix</div>
-                            <div class="l-tile prime">Prime</div>
-                          </div>
-                          <div class="l-continue">Continue watching</div>
-                          <div class="l-cards">
-                            <div class="l-card a"></div><div class="l-card b"></div><div class="l-card c"></div><div class="l-card d"></div>
-                          </div>
-                          <div class="l-skirt">
-                            <img src="ui-assets/brand.png" alt="">
-                            <div class="txt"><b>Whale-chan</b><span>Listening… press OK to send</span></div>
-                            <div class="wave"><i></i><i></i><i></i><i></i></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stand"></div>
-                    <div class="foot"></div>
-                  </div>
-
-                  <img class="whale-peek" src="ui-assets/pet-idle.webp" alt="Whale-chan waving">
                 </div>
-                <div class="visual-caption"><b>DSH on your Mac</b> <span>→</span> <b>Whale-chan on your TV</b></div>
+                <div class="visual-caption"><b>DSH on your Mac</b> <span>→</span> <b>Whale-chan on your onn. 4K Plus</b></div>
               </div>
             </div>
 
@@ -717,17 +695,13 @@
         <!-- ================= ASSISTANT ================= -->
         <section class="screen" data-screen="assistant">
           <div class="player">
-            <div class="glow one"></div>
-            <div class="glow two"></div>
-            <div class="media-meta">
-              <div class="label">Now playing</div>
-              <div class="media-title">Stremio <span>· paused</span></div>
-            </div>
-            <div class="bar" style="left:64px;right:64px;bottom:92px"><i></i></div>
+            <img class="shot" src="ui-assets/tv-launcher.webp" alt="Projectivy launcher with Whale-chan">
+            <div class="scrim-strong"></div>
           </div>
 
           <div class="assistant">
             <div class="scrim"></div>
+            <div class="app-chip"><img src="ui-assets/brand.png" alt=""> Projectivy · Home</div>
             <div class="bubble" id="bubble">
               <div class="rule" id="bubble-rule"></div>
               <div class="content">
