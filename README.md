@@ -135,6 +135,13 @@ Use the sidebar (or `#bridge`, `#pairing`, `#assistant`, `#components`) and the
   (0.05–0.08 s/utterance), module resolution, app-name repair, and why the
   daemon must run outside the agent sandbox.
 
+## Demo & contributing
+
+- [`docs/DEMO.md`](docs/DEMO.md) — the K-drama demo script and current status.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — architecture, setup, and where help is
+  most useful (stream selection, catalog-first navigation, voice UX, playbooks).
+- MIT licensed; issues and PRs welcome.
+
 ## TV knowledge & personalisation
 
 - [`docs/APP-KNOWLEDGE.md`](docs/APP-KNOWLEDGE.md) — app catalog, per-app
