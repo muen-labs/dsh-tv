@@ -262,7 +262,10 @@
 
 
 
-  .mini-setup { display: flex; align-items: center; gap: 10px; }
+  .mini-setup { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+  .mini-setup .mini-dev + .mini-dev { border-top: 1px dashed rgba(89,139,255,.35); padding-top: 8px; }
+  .mini-setup .mini-link { display: none; }
+  .mini-dev b { white-space: normal; }
   .mini-dev { display: flex; align-items: center; gap: 9px; min-width: 0; }
   .mini-dev b { display: block; font-size: 13px; font-weight: 600; white-space: nowrap; }
   .mini-dev span { display: block; font-size: 10.5px; color: #6F7F97; white-space: nowrap; }
@@ -425,6 +428,78 @@
   .mini-step-sep { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); max-width: 40px; }
   .pair-foot svg { display: block; }
 
+
+  /* ============ bridge home: big gutters + glass cards over glows ============ */
+  .screen[data-screen="bridge"] { position: absolute; inset: 0; overflow: hidden; }
+  .screen[data-screen="bridge"] .bridge-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+  .screen[data-screen="bridge"] .bridge-ambient .g { position: absolute; border-radius: 50%; filter: blur(90px); mix-blend-mode: screen; }
+  .screen[data-screen="bridge"] .bridge-ambient .g1 {
+    width: 760px; height: 560px; left: -160px; top: 90px;
+    background: radial-gradient(closest-side, rgba(77,107,255,.48), rgba(77,107,255,0) 72%);
+  }
+  .screen[data-screen="bridge"] .bridge-ambient .g2 {
+    width: 640px; height: 480px; right: -170px; top: -170px;
+    background: radial-gradient(closest-side, rgba(45,212,191,.30), rgba(45,212,191,0) 72%);
+  }
+  .screen[data-screen="bridge"] .bridge-ambient .dots {
+    position: absolute; left: 120px; right: 120px; top: 180px; bottom: 110px;
+    background-image: radial-gradient(rgba(255,255,255,.06) 1px, rgba(255,255,255,0) 1.2px);
+    background-size: 24px 24px;
+    -webkit-mask-image: radial-gradient(120% 90% at 50% 45%, #000 35%, transparent 78%);
+    mask-image: radial-gradient(120% 90% at 50% 45%, #000 35%, transparent 78%);
+  }
+  .screen[data-screen="bridge"] .bridge-ambient .g5 {
+    width: 980px; height: 640px; left: 31%; top: 28%;
+    background: radial-gradient(closest-side, rgba(77,107,255,.30), rgba(77,107,255,0) 72%);
+  }
+  .screen[data-screen="bridge"] .bridge-ambient .g4 {
+    width: 560px; height: 420px; left: 44%; top: 34%;
+    background: radial-gradient(closest-side, rgba(124,108,255,.26), rgba(124,108,255,0) 72%);
+  }
+  .screen[data-screen="bridge"] .bridge-ambient .g3 {
+    width: 720px; height: 520px; left: 40%; bottom: -220px;
+    background: radial-gradient(closest-side, rgba(255,176,32,.30), rgba(255,176,32,0) 72%);
+  }
+  .screen[data-screen="bridge"] .screen-inner {
+    position: relative; z-index: 1;
+    padding-left: 152px; padding-right: 152px;
+  }
+  .screen[data-screen="bridge"] .grid-2 { gap: 34px; }
+  .screen[data-screen="bridge"] .card {
+    position: relative; overflow: hidden;
+    border-radius: 20px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.025) 42%, rgba(255,255,255,0) 100%),
+      rgba(15, 23, 40, .40);
+    border: 1px solid rgba(255,255,255,.16);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
+    backdrop-filter: blur(30px) saturate(150%);
+    box-shadow:
+      0 34px 90px rgba(0,0,0,.48),
+      inset 0 1px 0 rgba(255,255,255,.12),
+      inset 0 -1px 0 rgba(255,255,255,.03);
+  }
+  .screen[data-screen="bridge"] .card::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(125deg, rgba(255,255,255,.13), rgba(255,255,255,0) 36%),
+                linear-gradient(300deg, rgba(120,160,255,.06), rgba(120,160,255,0) 45%);
+    opacity: .85;
+  }
+  .screen[data-screen="bridge"] .card > * { position: relative; z-index: 1; }
+  .screen[data-screen="bridge"] .card .sep { background: rgba(255,255,255,.10); }
+  .screen[data-screen="bridge"] .code-chip { background: rgba(8,12,22,.55); border-color: rgba(255,255,255,.10); }
+  .screen[data-screen="bridge"] .btn.secondary,
+  .screen[data-screen="bridge"] .btn.outline { backdrop-filter: blur(8px); }
+
+
+  .pair-list { display: flex; flex-direction: column; gap: 10px; }
+  .pair-row { display: flex; align-items: center; gap: 10px; }
+  .pair-ico { flex: 0 0 auto; width: 28px; height: 18px; border: 1px solid var(--border); background: var(--muted); border-radius: 5px; }
+  .pair-ico.pi-laptop { border-radius: 5px 5px 2px 2px; border-bottom-width: 3px; }
+  .pair-ico.pi-tv { width: 26px; height: 17px; border-radius: 4px; }
+  .pair-name { font-size: 13px; font-weight: 600; color: var(--foreground); }
+  .pair-meta { margin-left: auto; font-size: 11px; color: var(--muted-foreground); }
+
   /* ============ components ============ */
   .comp { padding: 46px 56px; height: 100%; overflow: auto; }
   .comp h3 { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted-foreground); margin: 30px 0 12px; font-weight: 700; }
@@ -491,6 +566,9 @@
 
         <!-- ================= BRIDGE ================= -->
         <section class="screen" data-screen="bridge" data-active="true">
+          <div class="bridge-ambient" aria-hidden="true">
+            <span class="g g1"></span><span class="g g2"></span><span class="g g3"></span><span class="g g4"></span><span class="g g5"></span><span class="dots"></span>
+          </div>
           <div class="screen-inner">
             <div class="topbar">
               <div class="lockup">
@@ -574,10 +652,9 @@
                 </div>
                 <div class="card">
                   <div class="label" style="margin-bottom:10px">Paired with</div>
-                  <div class="mini-setup">
-                    <div class="mini-dev"><span class="mini-ico laptop"></span><div><b>Mac mini</b><span>DSH</span></div></div>
-                    <div class="mini-link"><span class="mini-dot"></span><span class="mini-dash"></span><span class="mini-dot"></span></div>
-                    <div class="mini-dev"><span class="mini-ico tv"></span><div><b>Living Room TV</b><span>Projectivy</span></div></div>
+                  <div class="pair-list">
+                    <div class="pair-row"><span class="pair-ico pi-laptop"></span><span class="pair-name">Mac mini</span><span class="pair-meta">DSH</span></div>
+                    <div class="pair-row"><span class="pair-ico pi-tv"></span><span class="pair-name">Living Room TV</span><span class="pair-meta">Projectivy</span></div>
                   </div>
                   <p class="muted" style="margin:12px 0 0;font-size:12.5px">LAN only · ports <span class="mono">8765</span> and <span class="mono">8766</span> stay inside your home network.</p>
                 </div>

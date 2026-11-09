@@ -95,7 +95,13 @@ in a DSH client bundle, so no dependency was added).
 
 ## Screens
 
-### 1. Bridge home (`com.jp.dshtv.MainActivity`)
+### 1. Bridge home
+
+Layout: **152px side gutters** at 1920 (1616px content column) with a 34px
+column gap. Cards are **glass**: translucent navy (`rgba(15,23,40,.40)`),
+30px backdrop blur, 20px radius, a light top rim and a diagonal sheen. Behind
+the cards sit five soft glows (indigo, teal, amber, violet) plus a faint frost
+dot lattice so the glass has something to blur. (`com.jp.dshtv.MainActivity`)
 
 ![Bridge home](docs/screenshots/tv-bridge-home.jpg)
 
