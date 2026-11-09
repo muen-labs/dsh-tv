@@ -276,6 +276,7 @@
     background: #151D2F; border: 1px solid var(--border); color: var(--foreground);
     display: flex; align-items: center; justify-content: center; cursor: pointer; }
   .bubble .send-btn svg { width: 20px; height: 20px; }
+  .bubble .send-btn.is-focused { box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring); }
   .bubble .rule { flex: 0 0 4px; border-radius: 2px; background: var(--primary); margin: 2px 0; }
   .bubble .content { flex: 1; min-width: 0; }
   .bubble .eyebrow { display: flex; align-items: center; gap: 9px; font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; color: var(--primary-hover); }
@@ -1013,7 +1014,7 @@
     document.getElementById('pet').src = PET_DATA[s.pet] || PET_DATA['pet-idle.webp'];
     document.querySelectorAll('#states button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.state === name)));
     const send = document.getElementById('bubble-send');
-    if (send) send.style.display = name === 'listening' ? 'flex' : 'none';
+    if (send) { send.style.display = name === 'listening' ? 'flex' : 'none'; send.classList.toggle('is-focused', name === 'listening'); }
     requestAnimationFrame(positionOverlayActions);
   }
   document.getElementById('states').addEventListener('click', e => {

@@ -110,6 +110,16 @@ public final class WhaleUi {
         cancelClose();
         if (sendBtn != null) {
             sendBtn.setVisibility(View.VISIBLE);
+            // put D-pad focus straight on Send for each new request
+            sendBtn.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        sendBtn.requestFocus();
+                    } catch (Throwable ignored) {
+                    }
+                }
+            });
         }
         if (againBtn != null) {
             againBtn.setContentDescription("Ask another question");
