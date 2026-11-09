@@ -34,6 +34,7 @@ TITLE_QUERIES = [
     ("tmdb", "site:themoviedb.org kdrama airing {month} {year}"),
     ("rottentomatoes", "site:rottentomatoes.com best kdrama {month} {year}"),
     ("imdb", "site:imdb.com kdrama trending {month} {year}"),
+    ("trakt", "site:trakt.tv trending kdramas {month} {year}"),
     ("general", "kdrama viewership ratings this week {month} {year}"),
 ]
 
@@ -75,6 +76,34 @@ def chat(prompt: str) -> dict:
     return json.loads(content)
 
 
+def trakt_trending(limit: int = 12) -> list[dict]:
+    """Optional direct Trakt API (set TRAKT_CLIENT_ID); Korean shows only."""
+    cid = os.environ.get("TRAKT_CLIENT_ID", "").strip()
+    if not cid:
+        return []
+    out = []
+    for path in ("shows/trending", "shows/popular"):
+        req = urllib.request.Request(
+            f"https://api.trakt.tv/{path}?limit={limit}&genres=drama",
+            headers={"trakt-api-key": cid, "trakt-api-version": "2",
+                     "Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = json.loads(r.read().decode())
+        except Exception:
+            continue
+        for item in data:
+            show = item.get("show", item)
+            if str(show.get("language", "")).lower() not in ("ko", "korean"):
+                continue
+            out.append({"title": show.get("title", ""), "site_name": "Trakt",
+                        "url": f"https://trakt.tv/shows/{show.get('ids',{}).get('slug','')}",
+                        "date": time.strftime("%Y-%m-%d"),
+                        "summary": show.get("overview", "")[:280],
+                        "_source": "trakt(api)"})
+    return out
+
+
 def research() -> dict:
     results = []
     today = time.localtime()
@@ -87,6 +116,10 @@ def research() -> dict:
             results += hits
         except Exception as exc:  # noqa: BLE001
             print(f"search failed: {exc}", file=sys.stderr)
+    try:
+        results += trakt_trending()
+    except Exception:
+        pass
     seen, ctx = set(), []
     for r in results:
         url = r.get("url")
@@ -102,8 +135,8 @@ Return JSON only:
 {{"top3":[{{"title":"...","why":"max 12 words"}}],"pick":{{"title":"...","reason":"max 28 words","runtime":"..."}},
   "question":"Want to watch it here?",
   "services":["Stremio with Torrentio"], "source":"https://..."}}
-Use this trusted source set where possible: r/kdrama, MyDramaList, TMDB,
-Rotten Tomatoes, IMDb. Prefer a title corroborated by at least two distinct
+Use this trusted source set where possible: Trakt (trending/popular),
+r/kdrama, MyDramaList, TMDB, Rotten Tomatoes, IMDb. Prefer a title corroborated by at least two distinct
 sources; cite the strongest URL and list which sources agreed.
 Recency is mandatory: only consider titles that are currently airing, released in
 the last 30 days, or topping this week's ratings/buzz lists. Ignore "best of the
