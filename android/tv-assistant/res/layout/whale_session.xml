@@ -21,6 +21,39 @@
         android:gravity="end"
         android:orientation="vertical">
 
+        <!-- big circular controls above the composer, sized for D-pad focus -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginBottom="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/whale_again"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:background="@drawable/btn_close"
+                android:contentDescription="Send / ask another question"
+                android:focusable="true"
+                android:padding="16dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_mic" />
+
+            <ImageButton
+                android:id="@+id/whale_close"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginLeft="14dp"
+                android:background="@drawable/btn_close"
+                android:contentDescription="Close"
+                android:focusable="true"
+                android:padding="17dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_close" />
+        </LinearLayout>
+
         <!-- Speech bubble: accent rule + three-line content -->
         <LinearLayout
             android:layout_width="660dp"
@@ -127,38 +160,6 @@
     </LinearLayout>
 
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_marginTop="24dp"
-        android:layout_marginRight="28dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <ImageButton
-            android:id="@+id/whale_again"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:background="@drawable/btn_close"
-            android:contentDescription="Send / ask another question"
-            android:focusable="true"
-            android:padding="13dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_mic" />
-
-        <ImageButton
-            android:id="@+id/whale_close"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:layout_marginLeft="12dp"
-            android:background="@drawable/btn_close"
-            android:contentDescription="Close"
-            android:focusable="true"
-            android:padding="14dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_close" />
-    </LinearLayout>
 
     <TextView
         android:id="@+id/whale_attribution"
