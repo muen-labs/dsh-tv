@@ -1,0 +1,16 @@
+# Whale-chan TV assistant — add this row to your profile patch
+# (replace /ABSOLUTE/PATH with this repository's path). The installer in
+# plugin/install.sh writes a resolved copy for you.
+- insert:
+    - id: mcp-whale-chan
+      name: "@deepseek-ai/dsh-mcp-client"
+      config:
+        serverName: whale
+        transport: stdio
+        command: python3
+        args:
+          - /ABSOLUTE/PATH/whale-chan/plugin/mcp/whale_voice_mcp.py
+        env:
+          WHALE_REPO: /ABSOLUTE/PATH/whale-chan
+        toolCallTimeoutMs: 300000
+        failOnStartupError: false

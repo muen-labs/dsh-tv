@@ -1,0 +1,19 @@
+{
+  "name": "dsh-whale-chan-tv",
+  "version": "0.1.0",
+  "description": "Whale-chan: a TV assistant for DSH — animated pet, QR pairing and voice control of an Android TV box through the DSH TV Bridge.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./mcp/whale_voice_mcp.py",
+  "files": [
+    "mcp",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "keywords": ["dsh", "dsh-plugin", "android-tv", "whale-chan", "voice", "assistant"],
+  "dsh": {
+    "plugin": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

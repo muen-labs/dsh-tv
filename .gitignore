@@ -1,0 +1,17 @@
+*.apk
+*.idsig
+*.keystore
+build/
+gen/
+obj/
+dex/
+compiled/
+node_modules/
+.auth/
+.dsh-voice/
+logs/
+*.pyc
+__pycache__/
+.DS_Store
+android/whale-app/res/values/config.xml
+android/bridge/DSHTVBridge.apk

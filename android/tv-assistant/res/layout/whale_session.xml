@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Transparent voice-interaction overlay: the app behind keeps playing. Only
+     the animated pet and its speech bubble are drawn. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/whale_session_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <LinearLayout
+        android:id="@+id/whale_bubble_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="56dp"
+        android:layout_marginBottom="36dp"
+        android:orientation="vertical"
+        android:gravity="end">
+
+        <LinearLayout
+            android:layout_width="560dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bubble"
+            android:orientation="vertical"
+            android:paddingLeft="32dp"
+            android:paddingRight="32dp"
+            android:paddingTop="18dp"
+            android:paddingBottom="18dp">
+
+            <TextView
+                android:id="@+id/whale_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/listening"
+                android:textColor="#7FD3FF"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/whale_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:maxLines="6"
+                android:textColor="#FFFFFF"
+                android:textSize="26sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/whale_art"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_gravity="end"
+            android:layout_marginTop="-12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_whale"
+            android:contentDescription="@string/app_name" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/whale_credit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="18dp"
+        android:text="@string/credit"
+        android:textColor="#80FFFFFF"
+        android:textSize="12sp" />
+</FrameLayout>
