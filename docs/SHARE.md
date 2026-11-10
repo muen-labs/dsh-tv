@@ -39,6 +39,11 @@ Links to use:
 > - Also a small DSH plugin: Settings → **DeepSeek TV** shows the daemon and TV
 >   bridge, finds TVs on the LAN, and approves pairing requests in the GUI.
 >
+> **What the demo shows:** I ask *“Suggest an anime that is trending.”* It
+> researches AniList, shows the pick in the assistant's FOR YOU card, opens
+> Stremio, searches, opens the currently-airing season, picks a stream and plays
+> it on the TV.
+>
 > It's not a standalone IPTV app — you need a Mac/Linux host on the same LAN
 > running DSH (credentialed) plus the APK on the TV.
 >

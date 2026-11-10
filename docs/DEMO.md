@@ -61,3 +61,32 @@ at the known search/catalog matcher gap (below) — recording:
 
 The next milestone is the playback leg: filter stream cards by addon + seeders,
 skip failing sources, verify playback with `state`/`ui`, then record the demo.
+
+## Trending-anime demo (recorded 2026-11)
+
+Ask: *"Suggest an anime that is trending."*
+
+1. **Research** — `host/demo_anime.py --recommend` asks AniList for currently
+   airing anime sorted by `TRENDING_DESC` (a legit anime database, same data
+   MAL-style sites show). The pick is #5 on that list on the recording day:
+   *The Apothecary Diaries Season 3* (score 85, 111,488 followers).
+2. **Recommend** — the assistant's FOR YOU card shows the title and the reason
+   (rank, score, episode count, genres), then closes.
+3. **Drive Stremio** — launch → Search → type the title → open the series → the
+   currently-airing season (S03) → episode E01 → wait for addons → pick the
+   H.264 Torrentio source → play.
+4. **Playback** — the episode plays on the box (the player controls show
+   `The Apothecary Diaries – S03E01 – Locusts`, 00:10/24:00).
+
+The published video ([`docs/demo.mp4`](demo.mp4), [`docs/demo.gif`](demo.gif))
+is a real capture from the onn. 4K Plus, edited from three takes: this box's
+`screenrecord` stops when the video player takes the display, so the overlay,
+the Stremio UI and the playback were captured separately and cut together.
+Everything else on screen (search, seasons, sources, playback) is the actual
+device.
+
+**Capture notes for anyone redoing it:** the first Torrentio source is HEVC —
+it plays, but hardware overlay planes do not appear in `screencap`/`screenrecord`
+(black video), so pick the H.264 release. The source row also contains a
+"support the project" card that opens a donation page in the TV browser; clamp
+left before stepping right or you will open it by accident.
