@@ -82,7 +82,7 @@ SCREENS = [
     dict(g="Launcher", t="Launcher frame", s="icon", f="screenshots/tv-launcher-stock.png",
          c="Full 1920×1080 launcher frame after install."),
     dict(g="Launcher", t="Projectivy all-apps", s="icon", f="screenshots/tv-app-drawer.png",
-         c="The app listed in Projectivy’s app drawer with the banner/icon and the DeepSeek TV label."),
+         c="DeepSeek TV in Projectivy’s All apps list — the white adaptive tile shows the whale + “tv”, so the row reads exactly like the launcher tile."),
 
     dict(g="Design reference", t="Design — Bridge home", s="design", f="screenshots/ui-playground-bridge.png",
          c="The target render from docs/ui-mockup.html (interactive design reference)."),
