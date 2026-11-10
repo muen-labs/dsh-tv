@@ -1,7 +1,7 @@
 {
   "name": "dsh-whale-chan-tv",
   "version": "0.2.0",
-  "description": "DSH settings pane + pairing for the Whale-chan Android TV assistant",
+  "description": "DSH settings pane + pairing for the DeepSeek TV Android TV assistant",
   "license": "MIT",
   "type": "module",
   "main": "./lib/index.js",

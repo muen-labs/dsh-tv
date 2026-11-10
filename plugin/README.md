@@ -1,11 +1,11 @@
-# DSH plugin: Whale-chan TV
+# DSH plugin: DeepSeek TV
 
 Two halves, installed separately:
 
 | Half | What it adds | Install |
 | --- | --- | --- |
 | MCP tools (`plugin/`) | `whale_health`, `whale_ask`, `whale_discover`, `whale_start` as `mcp__whale__*` | `./plugin/install.sh desktop` |
-| Settings pane (`plugin/ui/`) | a **Whale-chan TV** Settings section: daemon/TV-bridge state, LAN TV discovery, and approving TV pairing requests from inside DSH | `./plugin/install-ui.sh desktop` |
+| Settings pane (`plugin/ui/`) | a **DeepSeek TV** Settings section: daemon/TV-bridge state, LAN TV discovery, and approving TV pairing requests from inside DSH | `./plugin/install-ui.sh desktop` |
 
 Both scripts back up the profile patch and are safe to re-run. Restart DSH after
 installing either half.
@@ -34,7 +34,7 @@ cd plugin/ui && npm install && node build.mjs   # build the client bundle
 ./plugin/install-ui.sh desktop --copy           # frozen copy + repo-path.txt marker
 ```
 
-Restart DSH, then **Settings → Whale-chan TV**. The daemon
+Restart DSH, then **Settings → DeepSeek TV**. The daemon
 (`python3 host/whale_voice.py --serve --port 8766`) must be running for the pane
 to be useful; it says so and prints the command when it is not.
 

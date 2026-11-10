@@ -109,8 +109,8 @@ adb shell pm grant com.jp.dshtv android.permission.RECORD_AUDIO
 > Projectivy). Disable that app's accessibility service if you do not need it;
 > this APK never writes the settings list (it only reads it).
 
-Open the **Pair this TV with Whale-chan** tile on the TV and scan the QR with
-your phone, or approve the same request inside DSH → Settings → **Whale-chan
+Open the **Pair this TV with your Mac** tile on the TV and scan the QR with
+your phone, or approve the same request inside DSH → Settings → **DeepSeek
 TV** (the pane shows the TV's code so you can confirm they match). The TV stores
 the Mac's address and token and opens the assistant. See
 [docs/PAIRING.md](docs/PAIRING.md).
@@ -132,11 +132,11 @@ The remote's Disney+ button then opens Whale-chan; the mic button stays Google's
 
 ```bash
 ./plugin/install.sh desktop      # MCP tools: whale_health, whale_ask, whale_start
-./plugin/install-ui.sh desktop   # Settings -> "Whale-chan TV" pane (links plugin/ui)
+./plugin/install-ui.sh desktop   # Settings -> "DeepSeek TV" pane (links plugin/ui)
 ```
 
 Restart DSH. The MCP half adds `whale_health`, `whale_ask` and `whale_start`
-(the daemon is started on demand); the client half adds the **Whale-chan TV**
+(the daemon is started on demand); the client half adds the **DeepSeek TV**
 section in Settings — daemon and TV-bridge state, the TVs it finds on the LAN,
 and **pairing approval inside DSH**: the TV shows a code, the pane shows the
 same request, one click approves it. `install-ui.sh --copy` installs a copy
@@ -197,7 +197,7 @@ states, screen specs and the accessibility contract are in
 
 ## Settings pane (plugin UI)
 
-`plugin/ui/` is a DSH client plugin with a **Whale-chan TV** settings section in
+`plugin/ui/` is a DSH client plugin with a **DeepSeek TV** settings section in
 the host's own language (`--dsw-alias-*` tokens, host-bound `t`, light and dark).
 It shows an honest split of *daemon* and *TV bridge* state, lists the Android
 TVs it finds on the network (configured target plus a bounded LAN sweep), and
@@ -206,7 +206,7 @@ its 6-character code, source address and age, and **Approve / Deny** right there
 — no phone needed. Same-origin `/whale-chan/*` host routes proxy the daemon, so
 the browser never sees the token.
 
-![Whale-chan TV settings pane](docs/screenshots/pane-live.png)
+![DeepSeek TV settings pane](docs/screenshots/pane-live.png)
 
 Every phase (loading, daemon down, no TVs, ready, pending, approved, error) is
 rendered from the real component into [`docs/screenshots/pane-preview.png`](docs/screenshots/pane-preview.png):

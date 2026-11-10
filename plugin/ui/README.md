@@ -1,4 +1,4 @@
-# Whale-chan TV — DSH settings pane
+# DeepSeek TV — DSH settings pane
 
 A DSH client plugin with a **settings section** shaped like the house ones:
 it tells you honestly whether the voice daemon and the TV bridge are up, shows
@@ -98,7 +98,7 @@ default `[]` patch, safe to re-run):
 ```
 
 then prints the restart steps. **Restart DSH** (quit/reopen the desktop app, or
-restart the `dsh --profile <profile>` web host), open **Settings → Whale-chan
+restart the `dsh --profile <profile>` web host), open **Settings → DeepSeek TV
 TV**. Both halves need the restart: the client bundle is composed during boot and
 the host routes are registered when the plugin fiber mounts.
 

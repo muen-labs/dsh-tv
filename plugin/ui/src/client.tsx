@@ -5,8 +5,8 @@ export const NS = 'whale-tv'
 
 /** English dictionary — the key source of truth. */
 export const en = {
-  nav: 'Whale-chan TV',
-  title: 'Whale-chan TV',
+  nav: 'DeepSeek TV',
+  title: 'DeepSeek TV',
   subtitle: 'Your Android TV, driven by DSH. Pair it once, then press the TV button and talk.',
   chipChecking: 'Checking connection',
   chipRouteError: 'Pane unavailable',
@@ -24,21 +24,21 @@ export const en = {
   stateNotConfigured: 'Not configured',
   tokenMissing: 'The daemon token was not found, so pairing cannot be approved from DSH.',
   sectionDevices: 'Android TVs on this network',
-  devicesHint: 'The TV runs the Whale-chan bridge app. Choose the one DSH should drive.',
+  devicesHint: 'The TV runs the DeepSeek TV bridge app. Choose the one DSH should drive.',
   scanning: 'Scanning this network for Android TVs…',
   scanningShort: 'Scanning…',
   scanAgain: 'Scan again',
   routeErrorTitle: 'The pane could not reach its host routes',
   routeErrorBody: 'The plugin host half is not answering. Reinstall it and restart DSH, then retry.',
   retry: 'Retry',
-  daemonDownTitle: 'The Whale-chan daemon is not answering',
+  daemonDownTitle: 'The DeepSeek TV daemon is not answering',
   daemonDownBody: 'Start it on the Mac from the repository, then retry:',
   startCommand: 'python3 host/whale_voice.py --serve --port 8766',
   noTvsTitle: 'No Android TVs answered',
-  noTvsBody: 'Turn the TV on, open Whale-chan there, and scan again.',
+  noTvsBody: 'Turn the TV on, open DeepSeek TV there, and scan again.',
   noTarget: 'No TV is configured yet: host/config.json has no bridge address. Pair the TV once from the TV first.',
   sectionPair: 'Pairing requests',
-  pairHint: 'On the TV, open “Pair this TV with Whale-chan”. When the code appears here, confirm it matches the TV before approving.',
+  pairHint: 'On the TV, open “Pair this TV with your Mac”. When the code appears here, confirm it matches the TV before approving.',
   pairPolling: 'Live · every 2s',
   pairPaused: 'Not live',
   pairEmpty: 'No pairing requests right now.',
@@ -61,8 +61,8 @@ export type Key = keyof typeof en
 
 /** Simplified Chinese dictionary; typed so a missing key is a build error. */
 export const zh: Record<Key, string> = {
-  nav: '鲸娘电视',
-  title: '鲸娘电视',
+  nav: 'DeepSeek TV',
+  title: 'DeepSeek TV',
   subtitle: '用 DSH 操作的安卓电视。配对一次，之后按下电视按钮说话即可。',
   chipChecking: '正在检查连接',
   chipRouteError: '面板不可用',
@@ -80,21 +80,21 @@ export const zh: Record<Key, string> = {
   stateNotConfigured: '未配置',
   tokenMissing: '没有找到后台令牌，因此无法在 DSH 里批准配对。',
   sectionDevices: '此网络上的安卓电视',
-  devicesHint: '电视上运行着鲸娘电视桥应用。请选择要由 DSH 控制的电视。',
+  devicesHint: '电视上运行着 DeepSeek TV 桥应用。请选择要由 DSH 控制的电视。',
   scanning: '正在扫描网络中的安卓电视…',
   scanningShort: '扫描中…',
   scanAgain: '重新扫描',
   routeErrorTitle: '面板无法连接自己的后台接口',
   routeErrorBody: '插件的主机端没有响应。请重新安装并重启 DSH，然后重试。',
   retry: '重试',
-  daemonDownTitle: '鲸娘后台没有响应',
+  daemonDownTitle: 'DeepSeek TV 后台没有响应',
   daemonDownBody: '请在 Mac 上的仓库目录里启动它，然后重试：',
   startCommand: 'python3 host/whale_voice.py --serve --port 8766',
   noTvsTitle: '没有安卓电视响应',
-  noTvsBody: '打开电视，并在电视上打开鲸娘，然后重新扫描。',
+  noTvsBody: '打开电视，并在电视上打开 DeepSeek TV，然后重新扫描。',
   noTarget: '还没有配置电视：host/config.json 里没有电视桥地址。请先在电视上完成一次配对。',
   sectionPair: '配对请求',
-  pairHint: '在电视上打开“Pair this TV with Whale-chan”。这里出现验证码后，先确认与电视上的一致，再批准。',
+  pairHint: '在电视上打开“Pair this TV with your Mac”。这里出现验证码后，先确认与电视上的一致，再批准。',
   pairPolling: '实时 · 每 2 秒',
   pairPaused: '未实时',
   pairEmpty: '当前没有配对请求。',
@@ -270,7 +270,7 @@ function DeviceRow(props: {
 }
 
 /**
- * The Whale-chan TV Settings section.
+ * The DeepSeek TV Settings section.
  *
  * Phases are independent: the device list can be empty or unavailable while
  * the pairing-request card keeps working, because approving a TV-initiated
