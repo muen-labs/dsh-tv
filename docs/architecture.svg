@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-label="DeepSeek TV Assistant architecture: an Android TV box talking to a Mac host running the whale daemon, SenseVoice STT and a DSH session; DSH drives the TV through the bridge and answers through the assistant overlay.">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B0F1F"/><stop offset="1" stop-color="#0E1426"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#141B2E"/><stop offset="1" stop-color="#111726"/>
+    </linearGradient>
+    <linearGradient id="panelEdge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4D6BFF" stop-opacity=".55"/><stop offset="1" stop-color="#8B5CF6" stop-opacity=".35"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#4D6BFF" stop-opacity=".30"/><stop offset="1" stop-color="#4D6BFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#3DFFA8" stop-opacity=".18"/><stop offset="1" stop-color="#3DFFA8" stop-opacity="0"/>
+    </radialGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8FA6FF"/>
+    </marker>
+    <marker id="arrowDim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#5B6A8C"/>
+    </marker>
+    <style>
+      .t { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; fill: #E8EEFB; }
+      .muted { fill: #95A3BD; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; fill: #7C8BAC; }
+      .h1 { font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+      .h2 { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+      .body { font-size: 13px; }
+      .small { font-size: 11.5px; }
+      .micro { font-size: 10.5px; }
+      .chip { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="760" rx="18" fill="url(#bg)"/>
+  <ellipse cx="250" cy="120" rx="420" ry="260" fill="url(#glowB)"/>
+  <ellipse cx="1160" cy="110" rx="420" ry="250" fill="url(#glowA)"/>
+
+  <!-- ===== title ===== -->
+  <text class="t h1" x="48" y="62">How it works</text>
+  <text class="t body muted" x="48" y="88">One button on the remote turns the TV into a voice terminal for DeepSeek Harness on the LAN.</text>
+
+  <!-- ===== left: TV box ===== -->
+  <rect x="48" y="116" width="604" height="540" rx="16" fill="url(#panel)" stroke="url(#panelEdge)" stroke-width="1.2"/>
+  <text class="label" x="76" y="150">ANDROID TV / GOOGLE TV BOX</text>
+  <text class="t h2" x="76" y="176">com.jp.dshtv — one APK</text>
+
+  <!-- remote button pill -->
+  <g>
+    <rect x="76" y="198" width="196" height="34" rx="17" fill="#1B2338" stroke="#2E3A59"/>
+    <circle cx="96" cy="215" r="5" fill="#3DFFA8"/>
+    <text class="t chip" x="110" y="219">REMOTE BUTTON</text>
+    <text class="t micro muted" x="286" y="219">Disney+ / mapped</text>
+  </g>
+
+  <!-- APK sub cards -->
+  <g>
+    <rect x="76" y="256" width="548" height="104" rx="12" fill="#0F1524" stroke="#26314C"/>
+    <rect x="76" y="256" width="4" height="104" rx="2" fill="#4D6BFF"/>
+    <text class="t h2" x="98" y="284">Bridge (accessibility service)</text>
+    <text class="t body muted" x="98" y="308">Key injection · D-pad/OK/Back · app launch · type text</text>
+    <text class="t body muted" x="98" y="328">Reads the screen (ui dump, screenshots) and reports state</text>
+  </g>
+  <g>
+    <rect x="76" y="374" width="548" height="122" rx="12" fill="#0F1524" stroke="#26314C"/>
+    <rect x="76" y="374" width="4" height="122" rx="2" fill="#3DFFA8"/>
+    <text class="t h2" x="98" y="402">Assistant overlay</text>
+    <text class="t body muted" x="98" y="426">Mic + VAD → audio over the LAN (STT stays on the host)</text>
+    <text class="t body muted" x="98" y="446">Bubble · state rule · animated whale pet · TTS replies</text>
+    <text class="t body muted" x="98" y="466">Modal dim + blurred backdrop · gear → Bridge settings</text>
+  </g>
+  <g>
+    <rect x="76" y="510" width="548" height="96" rx="12" fill="#0F1524" stroke="#26314C"/>
+    <rect x="76" y="510" width="4" height="96" rx="2" fill="#FF4FD8"/>
+    <text class="t h2" x="98" y="538">QR pairing (device-code flow)</text>
+    <text class="t body muted" x="98" y="562">TV shows a code + QR · phone or DSH pane approves</text>
+    <text class="t body muted" x="98" y="582">Host + token are delivered over the LAN, never typed</text>
+  </g>
+
+  <!-- ===== right: host ===== -->
+  <rect x="748" y="116" width="604" height="540" rx="16" fill="url(#panel)" stroke="url(#panelEdge)" stroke-width="1.2"/>
+  <text class="label" x="776" y="150">MAC / LINUX HOST (SAME LAN)</text>
+  <text class="t h2" x="776" y="176">three small processes, no cloud</text>
+
+  <g>
+    <rect x="776" y="198" width="548" height="112" rx="12" fill="#0F1524" stroke="#26314C"/>
+    <rect x="776" y="198" width="4" height="112" rx="2" fill="#3DFFA8"/>
+    <text class="t h2" x="798" y="226">whale_voice.py <tspan class="mono micro muted">:8766</tspan></text>
+    <text class="t body muted" x="798" y="250">LAN HTTP API · QR pairing endpoints · bearer token</text>
+    <text class="t body muted" x="798" y="270">SenseVoice STT on-device (audio never leaves the LAN)</text>
+    <text class="t body muted" x="798" y="290">Replies + TTS, and the persistent DSH voice session</text>
+  </g>
+  <g>
+    <rect x="776" y="330" width="548" height="128" rx="12" fill="#0F1524" stroke="#26314C"/>
+    <rect x="776" y="330" width="4" height="128" rx="2" fill="#4D6BFF"/>
+    <text class="t h2" x="798" y="358">DSH agent session</text>
+    <text class="t body muted" x="798" y="382">DeepSeek Harness thinks; tools drive the TV</text>
+    <text class="t body muted" x="798" y="402">dshtv.py — bridge CLI: launch · key · text · ui · screenshot</text>
+    <text class="t body muted" x="798" y="422">App catalog + playbooks decide how to navigate each app</text>
+    <text class="t body muted" x="798" y="442">Local taste memory + proactive suggestions</text>
+  </g>
+  <g>
+    <rect x="776" y="478" width="548" height="128" rx="12" fill="#0F1524" stroke="#26314C"/>
+    <rect x="776" y="478" width="4" height="128" rx="2" fill="#FFAA00"/>
+    <text class="t h2" x="798" y="506">DSH GUI — Settings → DeepSeek TV</text>
+    <text class="t body muted" x="798" y="530">Daemon + TV-bridge state · LAN TV discovery</text>
+    <text class="t body muted" x="798" y="550">Approve or deny pairing requests right in DSH</text>
+    <text class="t body muted" x="798" y="570">Optional: phone approval page when DSH is closed</text>
+    <text class="t body muted" x="798" y="590">MCP tools: whale_health · whale_ask · whale_start</text>
+  </g>
+
+  <!-- ===== arrows ===== -->
+  <!-- audio up -->
+  <path d="M 660 320 C 700 300, 710 278, 744 270" fill="none" stroke="#3DFFA8" stroke-width="2" marker-end="url(#arrow)"/>
+  <text class="t small" x="664" y="286" fill="#3DFFA8">audio</text>
+  <!-- replies down -->
+  <path d="M 744 300 C 706 316, 700 330, 660 336" fill="none" stroke="#8FA6FF" stroke-width="2" marker-end="url(#arrow)"/>
+  <text class="t small" x="664" y="356" fill="#8FA6FF">reply + TTS</text>
+  <!-- bridge down -->
+  <path d="M 744 392 C 706 384, 700 364, 660 356" fill="none" stroke="#4D6BFF" stroke-width="2" marker-end="url(#arrow)"/>
+  <text class="t small" x="664" y="396" fill="#8FA6FF">key · launch · text</text>
+  <!-- screenshots up -->
+  <path d="M 660 452 C 700 462, 712 470, 744 474" fill="none" stroke="#8B5CF6" stroke-width="2" marker-end="url(#arrow)"/>
+  <text class="t small" x="664" y="490" fill="#B79BFF">ui · screenshots</text>
+  <!-- pairing dashed -->
+  <path d="M 624 558 C 690 570, 700 560, 744 548" fill="none" stroke="#5B6A8C" stroke-width="1.6" stroke-dasharray="5 5" marker-end="url(#arrowDim)"/>
+  <path d="M 744 528 C 700 522, 690 526, 624 534" fill="none" stroke="#5B6A8C" stroke-width="1.6" stroke-dasharray="5 5" marker-end="url(#arrowDim)"/>
+  <text class="t micro muted" x="628" y="600">pair: id + code  →</text>
+  <text class="t micro muted" x="628" y="616">←  host + token</text>
+
+  <!-- ===== footer ===== -->
+  <rect x="48" y="672" width="1304" height="42" rx="12" fill="#0F1524" stroke="#26314C"/>
+  <circle cx="72" cy="693" r="5" fill="#3DFFA8"/>
+  <text class="t small muted" x="86" y="697">LAN only · no audio leaves the network · nothing exposed to the internet</text>
+  <text class="t micro muted" x="1352" y="697" text-anchor="end">MIT · github.com/muen-labs/dsh-tv</text>
+</svg>

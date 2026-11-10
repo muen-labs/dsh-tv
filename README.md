@@ -1,74 +1,92 @@
 # DeepSeek TV Assistant
 
-`https://github.com/muen-labs/dsh-tv` · MIT
+**Press one button on your Android TV remote, talk, and DeepSeek Harness on your
+Mac drives the TV** — launches apps, navigates, searches, types, reads the screen —
+and answers through an animated whale-girl pet. Over the LAN. No cloud in the audio path.
 
 [![build-apk](https://github.com/muen-labs/dsh-tv/actions/workflows/build-apk.yml/badge.svg)](https://github.com/muen-labs/dsh-tv/actions/workflows/build-apk.yml)
-[![latest release](https://img.shields.io/github/v/release/muen-labs/dsh-tv?label=download%20APK)](https://github.com/muen-labs/dsh-tv/releases/latest)
-[![license](https://img.shields.io/github/license/muen-labs/dsh-tv)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-3366FF)](LICENSE)
+[![Platform: Android TV](https://img.shields.io/badge/Android%20TV-API%2026%2B-00E096)](#requirements)
+[![Runtime: LAN only](https://img.shields.io/badge/runtime-LAN%20only-FFAA00)](#security)
+[![Status: alpha](https://img.shields.io/badge/status-alpha-FF3D71)](#project-status)
 
-**Whale-chan** — the animated assistant character — turns an Android TV box into a voice terminal for DeepSeek Harness.
-
-> **Also from this account:** [Projector OSD](https://github.com/muen-labs/projector-osd) — put a projector's picture menu on the same TV remote over ADB.
-
-**Demo** — a real capture on the onn. 4K Plus: bridge home → QR pairing → the
-assistant modal over Stremio (the assistant answers, DSH drives the box).
+**Demo** — a real capture on the onn. 4K Plus: Bridge home → QR pairing → the
+assistant modal over Stremio.
 
 ![DeepSeek TV Assistant demo: bridge home, QR pairing, assistant modal](docs/demo.gif)
 
-DeepSeek Whale-chan turns an Android TV box into a voice terminal for
-[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). Press one
-button on the remote, talk, and DSH on your Mac drives the TV — launch any app,
-navigate it, search, type — then answers through an animated whale-girl pet.
+[▶ Watch the MP4](docs/demo.mp4) · [every screen in the UI gallery](docs/ui-gallery.html)
 
-- **One APK** contains the TV bridge (key injection, app launching, screenshots)
-  and the Whale-chan assistant UI.
-- **QR pairing** — no IP addresses or tokens typed on a TV remote
-  ([design](docs/PAIRING.md)).
-- **DSH does the thinking** in a persistent voice session; the TV is a
-  microphone, a screen and a remote.
-- **DSH's own SenseVoice STT**, or Whisper as a fallback.
-- **Full app control**: D-pad/OK/back/home, text entry, screenshots; the agent
-  can see the screen and drive apps that have no voice API.
-- Works with Google Assistant left intact: the mic button stays Google's, the
-  Disney+ button becomes Whale-chan (optional shim).
+One APK contains the **TV bridge** (accessibility key injection, app launch,
+screenshots) and the **Whale-chan assistant UI**. A small daemon on the Mac keeps a
+persistent [DSH](https://github.com/deepseek-ai/deepseek-harness) voice session and
+does the thinking; the TV is the microphone, the screen and the remote.
 
-## How it fits together
+> **Status:** working on two boxes (onn. 4K Pro and onn. 4K Plus, Android 14) —
+> UI, pairing, voice, and full app control are dogfooded. The demo's playback leg
+> (Stremio catalog/search matching + stream health) is still being hardened, and a
+> wider device matrix is the main thing this project needs. See
+> [open issues](https://github.com/muen-labs/dsh-tv/issues).
+>
+> Also from this account: **[Projector OSD](https://github.com/muen-labs/projector-osd)**
+> — put an Android projector's picture menu on the same TV remote.
 
-```
-Android TV box                            Mac mini (or any LAN host)
-┌──────────────────────────────┐          ┌────────────────────────────────┐
-│ com.jp.dshtv (single APK)    │          │ host/whale_voice.py :8766      │
-│  • DSH TV Bridge (accessib.) │          │  • QR pairing endpoints        │
-│  • Whale-chan pet + bubble   │  audio   │  • SenseVoice STT              │
-│  • mic + VAD, OK to send     │ ───────▶ │  • DSH headless voice session  │
-│  • QR pairing screen         │ ◀─────── │  • agent drives the TV via     │
-└──────────────────────────────┘  reply   │    host/dshtv.py (bridge CLI)  │
-       ▲ Disney+ button                   └────────────────────────────────┘
-       └ com.disney.disneyplus shim (optional)
-```
+## Features
+
+- **One APK** — the bridge (key injection, launch, screenshots, screen dumps) and
+  the assistant UI; nothing else to install on the TV.
+- **QR pairing** — no IP or token typed with a remote. The TV shows a code; a phone
+  or the **DSH settings pane** approves it, and the host address/token arrive over
+  the LAN.
+- **DSH does the thinking** — one persistent voice session, persistent context,
+  the agent drives apps through a bridge CLI.
+- **Local STT** — DSH's SenseVoice runs on the host; audio never leaves your LAN,
+  only text reaches the model. Whisper is a fallback.
+- **Full app control** — D-pad/OK/Back/Home, text entry, screenshots and UI dumps
+  let the agent drive apps that have no voice API.
+- **Assistant as a modal** — dim + soft blur of the app behind (real captured
+  backdrop on boxes without system blur), state rule, animated pet, TTS replies.
+- **A real DSH plugin** — Settings → **DeepSeek TV**: daemon/TV-bridge health, LAN
+  discovery, and Approve/Deny for pairing requests inside DSH.
+- **Google Assistant intact** — the mic button stays Google's; the Disney+ button
+  becomes Whale-chan via an optional shim.
+- **MIT** — fork it, port it, ship it.
+
+## How it works
+
+![Architecture](docs/architecture.svg)
+
+1. **Listen.** The assistant overlay records a phrase, detects the end of speech
+   and sends the audio to `whale_voice.py` on the host (LAN bearer token).
+2. **Transcribe & think.** SenseVoice transcribes locally, the text goes into one
+   persistent DSH session, and the agent decides what to do — it can call the
+   bridge CLI (`dshtv.py`) to launch apps, move the D-pad, type or read the screen.
+3. **Drive the TV.** Commands land on `com.jp.dshtv`'s accessibility service, which
+   injects keys into the focused app; screenshots/UI dumps come back so the agent
+   can verify where it is.
+4. **Answer.** The reply is spoken via TTS and drawn in the bubble + pet; the modal
+   closes on reply timeout or Back.
+
+Pairing is the same LAN path: the TV asks the daemon for a one-time code, shows it
+as a QR, and either a phone or the DSH pane approves it; the host address and
+token are then delivered to the TV.
 
 ## Requirements
 
-- Android TV / Google TV, Android 9+ (tested on the onn. 4K Pro, Android 14).
-- A LAN host that stays awake: macOS/Linux with Python 3.10+, Node 22 for the
-  SenseVoice runtime, and DSH with a valid model credential.
-- Build machine with JDK 8+ and Android SDK build-tools + platform 33.
+| Requirement | Notes |
+| --- | --- |
+| **Android TV / Google TV box**, Android 9+ (API 26+) | tested on onn. 4K Pro / 4K Plus, Android 14 |
+| **A LAN host that stays awake** | macOS or Linux, Python 3.10+, Node 22 for the SenseVoice runtime |
+| **DeepSeek Harness with a model credential** | the host daemon starts one headless DSH session |
+| **Sideloading** | the APK is debug-signed for now |
 
-## Install from a release
-
-Download the latest `TVAssistant.apk` (and optionally `DisneyShim.apk`) from
-[Releases](https://github.com/muen-labs/dsh-tv/releases/latest), then:
-
-```bash
-adb connect <tv-ip>:5555
-adb install -r -g TVAssistant.apk
-adb shell pm grant com.jp.dshtv android.permission.RECORD_AUDIO
-# enable the bridge accessibility service once in the TV's settings
-```
-
-The release APK is debug-signed and baked with `WHALE_TOKEN=pair-me`; the QR
-pairing replaces that placeholder with the real token. Build from source for your
-own signing key (see below).
+| Your setup | Works? |
+| --- | --- |
+| onn. 4K Pro / 4K Plus (Android 14) + macOS host | ✅ tested |
+| Other Android TV / Google TV boxes (Android 9+) | 🟡 expected — the bridge is generic accessibility + intents; UI at 960dp/1080p |
+| Fire TV | 🟡 likely but untested (no Google Assistant button story) |
+| Apple TV / Roku / webOS / Tizen | ❌ different platforms, no accessibility bridge |
+| No host on the same LAN | ❌ the TV cannot do the thinking itself |
 
 ## Quick start
 
@@ -76,18 +94,18 @@ own signing key (see below).
 
 ```bash
 python3 -m venv .venv && . .venv/bin/activate
-pip install "qrcode[pil]"                     # QR pairing images
+pip install "qrcode[pil]"                     # QR images (optional: URL fallback)
 mkdir -p .auth
 python3 -c 'import secrets;print("".join(secrets.choice("abcdefghjkmnpqrstuvwxyz23456789") for _ in range(10)))' > .auth/whale.token
-printf '%s' 'sk-your-deepseek-key' > .auth/deepseek.key   # for `dsh headless`
+printf '%s' 'sk-your-deepseek-key' > .auth/deepseek.key
 chmod 600 .auth/*
 python3 host/whale_voice.py --serve --port 8766
 ```
 
-The daemon keeps one persistent DSH session (`--session-id`) so context carries
-between utterances. `host/dsh_stt.mjs` uses the SenseVoice ONNX model that DSH
-already caches (`~/.dsh/speech-to-text/sensevoice/models`); install
-`sherpa-onnx-node` into `host/` if it is not resolvable:
+The daemon keeps one persistent DSH session so context carries between utterances.
+STT uses the SenseVoice ONNX model DSH already caches
+(`~/.dsh/speech-to-text/sensevoice/models`); if `sherpa-onnx-node` is not
+resolvable from `host/`:
 
 ```bash
 cd host && npm install sherpa-onnx-node@1.13.8
@@ -99,211 +117,239 @@ cd host && npm install sherpa-onnx-node@1.13.8
 ANDROID_SDK_ROOT=/path/to/android-sdk bash android/tv-assistant/build.sh
 adb connect <tv-ip>:5555
 adb install -r -g android/tv-assistant/TVAssistant.apk
-# Enable ONLY our accessibility service, appending to whatever is already
-# enabled (Projectivy, tvQuickActions, ...). Never replace the list:
-bash host/tv-accessibility.sh <tv-ip>:5555
 adb shell pm grant com.jp.dshtv android.permission.RECORD_AUDIO
+# append ONLY our service — never replace the enabled-services list:
+bash host/tv-accessibility.sh <tv-ip>:5555
 ```
 
-> **Never** run `settings put secure enabled_accessibility_services <one
-> component>` — that REPLACES the whole list and silently disables the user's
-> Projectivy / tvQuickActions accessibility services. `host/tv-accessibility.sh`
-> reads the current list, appends `com.jp.dshtv/com.jp.dshtv.KeyService` if it
-> is missing, and only ever prunes entries whose package is no longer installed
-> (`--prune`). It prints the before/after list.
->
-> If entries keep disappearing after the helper ran, look at the vendor
-> **Projector OSD app (`com.jp.osdtrigger`)** — on these boxes it rewrites the
-> enabled-services list when it takes the foreground (it was observed dropping
-> Projectivy). Disable that app's accessibility service if you do not need it;
-> this APK never writes the settings list (it only reads it).
+Or grab `TVAssistant.apk` from
+[Releases](https://github.com/muen-labs/dsh-tv/releases/latest) (debug-signed,
+placeholder token `pair-me` — pairing replaces it).
 
-Open the **Pair this TV with your Mac** tile on the TV and scan the QR with
-your phone, or approve the same request inside DSH → Settings → **DeepSeek
-TV** (the pane shows the TV's code so you can confirm they match). The TV stores
-the Mac's address and token and opens the assistant. See
+> **Never** run `settings put secure enabled_accessibility_services <one component>`.
+> That replaces the whole list and silently disables the user's Projectivy /
+> tvQuickActions services. `host/tv-accessibility.sh` reads the list, appends
+> `com.jp.dshtv/com.jp.dshtv.KeyService` if missing, and only prunes packages that
+> are no longer installed. If entries keep vanishing, check the vendor **Projector
+> OSD app (`com.jp.osdtrigger`)** — it rewrites the list on these boxes. This APK
+> never writes it (it only reads).
+
+### 3. Pair
+
+Open the **Pair this TV with your Mac** tile on the TV, then scan the QR with your
+phone **or** approve the same request in DSH → Settings → **DeepSeek TV**. The TV
+stores the host and token and opens the assistant. See
 [docs/PAIRING.md](docs/PAIRING.md).
 
-### 3. The Disney+ button (optional)
+### 4. DSH plugins (optional but recommended)
 
-Google Assistant keeps the mic button. To get a dedicated Whale-chan button,
-install the shim at the package name the vendor remote service launches
-(`com.disney.disneyplus`) and make sure the real Disney+ app is not installed:
+```bash
+./plugin/install.sh desktop      # MCP tools: whale_health, whale_ask, whale_start
+./plugin/install-ui.sh desktop   # Settings -> "DeepSeek TV" pane
+```
+
+Restart DSH. The MCP half lets you drive the same voice session from DSH; the
+client half adds the settings pane (status, TV discovery, pairing approval).
+`install-ui.sh --copy` installs a copy instead of a symlink.
+
+### 5. The Disney+ button (optional)
+
+Google Assistant keeps the mic button. To get a dedicated whale button, install the
+shim at the package the vendor remote service launches and make sure the real
+Disney+ app is absent:
 
 ```bash
 bash android/disney-shim/build.sh
 adb install -r -g android/disney-shim/DisneyShim.apk
 ```
 
-The remote's Disney+ button then opens Whale-chan; the mic button stays Google's.
+## Screens
 
-### 4. DSH plugins (optional)
+| | |
+| --- | --- |
+| **Bridge home** — live state, green Start-service action, setup steps<br>![](docs/screenshots/tv-bridge-home.png) | **Pairing** — real daemon QR, code, tracker, device scene<br>![](docs/screenshots/tv-pairing.png) |
+| **Assistant modal** — dim + blur, pet, state bubble, gear<br>![](docs/screenshots/tv-assistant-listening.png) | **DSH pane** — state, TVs, Approve/Deny inside DSH<br>![](docs/screenshots/pane-live.png) |
 
-```bash
-./plugin/install.sh desktop      # MCP tools: whale_health, whale_ask, whale_start
-./plugin/install-ui.sh desktop   # Settings -> "DeepSeek TV" pane (links plugin/ui)
-```
-
-Restart DSH. The MCP half adds `whale_health`, `whale_ask` and `whale_start`
-(the daemon is started on demand); the client half adds the **DeepSeek TV**
-section in Settings — daemon and TV-bridge state, the TVs it finds on the LAN,
-and **pairing approval inside DSH**: the TV shows a code, the pane shows the
-same request, one click approves it. `install-ui.sh --copy` installs a copy
-instead of a symlink.
-
-## UI playground
-
-Open [`docs/ui-mockup.html`](docs/ui-mockup.html) in a browser — it is fully self-contained (all images inlined as data URIs, no asset folder needed): every screen at
-1920×1080 with the real EVA tokens, the animated pet and all assistant states.
-Use the sidebar (or `#bridge`, `#pairing`, `#assistant`, `#components`) and the
-"Show focus rings" toggle to review focus treatment.
-
-Every **implemented** screen is collected in
-[`docs/ui-gallery.html`](docs/ui-gallery.html) — real 1920×1080 captures of
-Bridge home (running/stopped/4K Plus), Pairing, the assistant modal states
-(listening/answered/error/gear focus), suggestions/demo leg, the DSH pane
-phases and the launcher icon. Open it in a browser and use the rail or ←/→.
-The page is self-contained (every screenshot embedded as a data URI, ~5 MB), so
-it works from anywhere; regenerate it with `python3 tools/make-ui-gallery.py`
-after recapturing a screen.
-
-## Verification & tests
-
-- `build-apk` CI on every push: builds the TV APK and the Disney+ shim on a
-  clean runner (placeholder `WHALE_TOKEN=pair-me`, no secrets) and uploads them
-  as artifacts.
-- `verify-tv` CI on every push: parses the DSH client bundle, checks that every
-  copy key is used in **both** `en` and `zh`, renders every pane phase, and
-  exercises the host proxy against the live daemon when one is present.
-- Local: `cd plugin/ui && npm ci && npm run verify` (bundle + pane + host
-  routes). Device checks are manual: bridge/pairing/overlay screenshots under
-  [`docs/screenshots/`](docs/screenshots) and the gallery
-  [`docs/ui-gallery.html`](docs/ui-gallery.html) are real captures from the
-  onn. 4K Pro and the onn. 4K Plus.
-- Not covered yet (see issues): the Stremio catalog/search matcher and playback
-  health, a per-Android-version test matrix, and the voice-interaction-session
-  overlay path.
-
-## Voice pipeline
-
-- [`docs/VOICE-STT.md`](docs/VOICE-STT.md) — DSH SenseVoice warm worker
-  (0.05–0.08 s/utterance), module resolution, app-name repair, and why the
-  daemon must run outside the agent sandbox.
-
-## Demo & contributing
-
-- [`docs/DEMO.md`](docs/DEMO.md) — the K-drama demo script and current status.
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — architecture, setup, and where help is
-  most useful (stream selection, catalog-first navigation, voice UX, playbooks).
-- MIT licensed; issues and PRs welcome.
-
-## TV knowledge & personalisation
-
-- [`docs/APP-KNOWLEDGE.md`](docs/APP-KNOWLEDGE.md) — app catalog, per-app
-  playbooks, `dshtv ui`, and the rules DSH uses to drive the box.
-- [`docs/PERSONALIZATION.md`](docs/PERSONALIZATION.md) — local taste memory and
-  the proactive suggestion pipeline.
-- [`host/tv-apps.json`](host/tv-apps.json) · [`host/playbooks/`](host/playbooks)
-
-## Agent skill
-
-[`skills/android-tv/SKILL.md`](skills/android-tv/SKILL.md) is a reusable
-DSH/agent skill for native Android TV work: 10-foot UI and D-pad focus, the
-transparent voice overlay pattern, icon/banner specs, ADB build→install→
-screenshot verification, and the input/launcher pitfalls this project hit.
-
-## Design system
-
-Every screen follows **EVA design tokens exposed as shadcn/ui primitives**
-(Button variants, Card, Badge, Input, Separator, Alert) — tokens, component
-states, screen specs and the accessibility contract are in
-[DESIGN.md](DESIGN.md).
-
-![Bridge home](docs/screenshots/tv-bridge-home.png)
-
-## Settings pane (plugin UI)
-
-`plugin/ui/` is a DSH client plugin with a **DeepSeek TV** settings section in
-the host's own language (`--dsw-alias-*` tokens, host-bound `t`, light and dark).
-It shows an honest split of *daemon* and *TV bridge* state, lists the Android
-TVs it finds on the network (configured target plus a bounded LAN sweep), and
-polls for pairing requests every two seconds: a request from the TV arrives with
-its 6-character code, source address and age, and **Approve / Deny** right there
-— no phone needed. Same-origin `/whale-chan/*` host routes proxy the daemon, so
-the browser never sees the token.
-
-![DeepSeek TV settings pane](docs/screenshots/pane-live.png)
-
-Every phase (loading, daemon down, no TVs, ready, pending, approved, error) is
-rendered from the real component into [`docs/screenshots/pane-preview.png`](docs/screenshots/pane-preview.png):
-
-```bash
-cd plugin/ui && npm install && node build.mjs && node tools/preview.mjs --png
-node tools/verify.mjs && node tools/verify-host.mjs   # copy + bundle + live routes
-```
-
-Install it with `./plugin/install-ui.sh <profile>` and restart DSH; see
-[plugin/ui/README.md](plugin/ui/README.md) for the seam and the verification
-steps.
+Every implemented screen and state is in the self-contained
+[`docs/ui-gallery.html`](docs/ui-gallery.html) (real 1920×1080 captures,
+←/→ navigation). The design source is
+[`docs/ui-mockup.html`](docs/ui-mockup.html).
 
 ## Using it
 
-1. Press the Whale-chan button (Disney+ shim) or open the assistant tile.
-2. The whale animates over a blurred, dimmed backdrop; say e.g. *"Open Stremio
-   and search for anime."*
-3. The bubble shows what it heard (SenseVoice), then DSH's reply, spoken via TTS.
+1. Press the whale button (Disney+ shim) or open the assistant tile.
+2. Say e.g. *“Open Stremio and search for anime.”*
+3. The bubble shows what it heard, then DSH's reply, spoken via TTS.
 4. **OK** sends early instead of waiting for the silence timeout; **Back** cancels.
-5. The **gear** at the left end of the control row above the composer (the row
-   is the composer's width; mic/close sit at its right end) closes the assistant
-   and opens the Bridge home / settings screen. D-pad: from the composer
-   **LEFT** jumps to the gear, **UP** returns to the mic; from the gear
-   **RIGHT/UP** go to the mic and **DOWN** back to the composer. The overlay is
-   a light modal — the app behind stays visible through a soft blur and ~36%
-   dim.
+5. The **gear** (left end of the row above the composer) opens the Bridge/settings
+   screen. D-pad: from the composer **LEFT** → gear, **UP** → mic; from the gear
+   **RIGHT/UP** → mic, **DOWN** → composer.
 
-### Mapping a remote button to the bridge screen
+**Map a remote button** (optional): tvQuickActions or Button Mapper → *Launch app* →
+**DeepSeek TV** (`com.jp.dshtv/.MainActivity` = the Bridge home with pairing and
+status). Google TV's launcher tile opens the same screen.
 
-The bridge home is a normal TV app entry point, so any button mapper can open it:
+## DSH settings pane
 
-- **tvQuickActions** → *Mappings* → pick a button → action **Launch app** →
-  **DeepSeek TV** (that activity is `com.jp.dshtv/.MainActivity`, the Bridge
-  home with pairing, service status and the settings gear target).
-- Projectivy → long-press the app tile → open app, or add it to the dock.
-- Google TV home: the launcher tile already opens the same screen.
+`plugin/ui/` is a DSH client plugin with a **DeepSeek TV** section in the host's own
+theme and language. It shows an honest split of *daemon* and *TV bridge* state,
+lists the TVs it finds on the LAN (configured target + bounded sweep), and polls for
+pairing requests every two seconds: code, source address, age, **Approve / Deny**.
+Same-origin `/whale-chan/*` host routes proxy the daemon, so the browser never sees
+the token.
 
-Do not remove other accessibility services while re-mapping: the helper above
-only appends.
+```bash
+cd plugin/ui && npm ci && node build.mjs && node tools/preview.mjs --png
+node tools/verify.mjs && node tools/verify-host.mjs
+```
 
-## Configuration
+![Pane phases](docs/screenshots/pane-preview.png)
 
-| Env | Default | Meaning |
-| --- | --- | --- |
-| `WHALE_PORT` | 8766 | daemon HTTP port (QR/pair/TV use it) |
-| `WHALE_TOKEN` / `.auth/whale.token` | generated | LAN bearer token |
-| `WHALE_HOST` (build) | 192.168.4.57 | default host shown on the pairing screen |
-| `DSH_STT_LANGUAGE` | auto | SenseVoice language |
-| `WHALE_DAEMON_URL` | http://127.0.0.1:8766 | MCP plugin target |
-| `DSHTV_CONFIG` / `DSHTV_ADB` | `host/config.json` / PATH | bridge CLI |
+## Voice pipeline, apps & personalisation
+
+- [`docs/VOICE-STT.md`](docs/VOICE-STT.md) — warm SenseVoice worker (0.05–0.08 s per
+  utterance), app-name repair, and why the daemon runs outside the agent sandbox.
+- [`docs/APP-KNOWLEDGE.md`](docs/APP-KNOWLEDGE.md) — app catalog, per-app playbooks,
+  `dshtv ui`, and how DSH decides to navigate each app.
+- [`docs/PERSONALIZATION.md`](docs/PERSONALIZATION.md) — local taste memory and the
+  proactive suggestion pipeline.
+- [`docs/DEMO.md`](docs/DEMO.md) — the K-drama demo script and current status.
+
+## Tested setups
+
+| TV box | Android | Host | Works |
+| --- | --- | --- | --- |
+| onn. 4K Pro Streaming | 14 | macOS (DSH) | ✅ UI, pairing, voice, app control |
+| onn. 4K Plus Streaming | 14 | macOS (DSH) | ✅ same, different subnet |
+
+Compatibility reports are welcome — see
+[issue #2](https://github.com/muen-labs/dsh-tv/issues/2) for the matrix.
+
+## Troubleshooting
+
+| Symptom | Cause / fix |
+| --- | --- |
+| TV says *Could not reach the Mac* | daemon not running, host IP changed, or TV/phone on another VLAN. Start `host/whale_voice.py --serve`, check the address on the pairing screen. |
+| Pairing request never appears in DSH | the DSH pane polls every 2 s; check *Daemon online* and the token file. Approval also works from the phone page. |
+| *Accessibility: Disabled* on Bridge home | the last reinstall disabled the service. Use the Accessibility button + `host/tv-accessibility.sh` — never replace the list. |
+| Assistant hears nothing / *TRY AGAIN* | microphone permission missing, or the daemon/STT failed; check `host/whale_voice.py` logs. |
+| Keys don't reach the app | the bridge accessibility service must be enabled; some vendor overlays grab input — check *Accessibility: Connected*. |
+| Demo playback stops at *Ow! That stings!* | known stream-health gap ([issue #1](https://github.com/muen-labs/dsh-tv/issues/1)). |
+| Remote button opens the wrong app | re-map it (tvQuickActions/Button Mapper) to `com.jp.dshtv/.MainActivity`; reinstall the Disney shim only if the real Disney+ app is absent. |
+
+Debug:
+
+```bash
+adb logcat -s DshtvBridge WhalePairing WhaleOverlay
+```
+
+## Build from source
+
+No Gradle: `build.sh` is `aapt2 → javac → d8 → zipalign → apksigner`.
+
+```bash
+export ANDROID_SDK_ROOT=/path/to/android-sdk   # build-tools + platform 33
+export JAVA_HOME=/path/to/jdk                  # JDK 8+
+bash android/tv-assistant/build.sh             # needs WHALE_TOKEN or .auth/whale.token
+bash android/disney-shim/build.sh
+```
+
+The DSH plugin has its own build (`cd plugin/ui && npm ci && node build.mjs`); CI
+runs `node tools/verify.mjs` on every push.
+
+## Architecture
+
+| Path | Purpose |
+| --- | --- |
+| `android/tv-assistant/` | the single APK: bridge accessibility service, assistant overlay, pairing, Bridge home |
+| `host/whale_voice.py` | LAN daemon: pairing, STT, persistent DSH voice session, TTS |
+| `host/dshtv.py` | bridge CLI (`launch`, `key`, `text`, `ui`, `screenshot`, `state`) |
+| `host/demo_kdrama.py` | end-to-end demo runner (research → recommend → play) |
+| `host/tv-accessibility.sh` | append-only accessibility helper (never clobbers other services) |
+| `plugin/` | MCP tools + DSH client pane (host proxy + settings section) |
+| `docs/` | pairing design, STT notes, app knowledge, UI gallery + mockup, screenshots |
+| `skills/android-tv/` | reusable DSH/agent skill for Android TV work |
+| `DESIGN.md` | EVA/shadcn token map, screen specs, focus and 10-foot rules |
+
+## QA / automation hooks
+
+The overlay and Bridge home accept intent extras, so captures and states can be
+driven over adb without touching the remote:
+
+| Extra (on `com.jp.dshtv/.WhaleActivity`) | Effect |
+| --- | --- |
+| `--ez demo true` | replay a completed exchange (answered state) |
+| `--ez thinking true` | render the THINKING state |
+| `--ez suggest true --es suggest_title … --es suggest_reason …` | render the FOR YOU suggestion card |
+
+| Extra (on `com.jp.dshtv/.MainActivity`) | Effect |
+| --- | --- |
+| `--es set_token …` / `--ez clear_token true` | set/clear the bridge token |
+| `--es set_port 8765` | change the bridge port |
+| `--ez start_service true` | start the bridge foreground service |
+
+```bash
+adb shell am start -n com.jp.dshtv/.WhaleActivity --ez thinking true
+adb shell am start -n com.jp.dshtv/.WhaleActivity --ez demo true
+```
+
+Accessibility key filtering only sees **hardware** key events, so
+`adb shell input keyevent` cannot exercise the bridge's forwarding — use the
+physical remote for that. Discovery, pairing, launch/text, panel states and the
+overlay are testable over adb.
 
 ## Security
 
-- Audio never leaves the LAN: STT is local, only text goes to the model.
-- The TV talks to the daemon with a bearer token; pairing is a one-time code
-  valid for 5 minutes and only on the local network.
-- Keep ports 8765/8766 on the LAN. Do not expose them to the internet.
+- Audio never leaves the LAN: STT is local; only text goes to the model.
+- The TV talks to the daemon with a bearer token over the LAN; pairing is a
+  one-time code valid for 5 minutes and only usable on the local network.
+- Keep ports 8765/8766 inside your home network. Never forward them to the internet.
+- The APK requests only network + microphone + accessibility access; no credentials
+  are stored on the TV beyond the paired host/token.
+
+## Project status
+
+Working and dogfooded on two onn. boxes. The most useful contributions right now:
+
+- [ ] **Compatibility reports** — TV box model, Android version, what worked
+      ([issue #2](https://github.com/muen-labs/dsh-tv/issues/2)).
+- [ ] **Demo playback leg** — Stremio catalog/search matching + stream health
+      ([issue #1](https://github.com/muen-labs/dsh-tv/issues/1)).
+- [ ] **Agent skills** — finish the reusable `android-tv` skill and add a
+      voice/overlay skill ([issue #3](https://github.com/muen-labs/dsh-tv/issues/3)).
+- [ ] **More UI/overscan testing** on 720p and 4K-native boxes.
+- [ ] Per-TV tokens with revocation, mDNS host discovery, wake-word mode.
+
+See the [roadmap](#roadmap) below and the
+[issues](https://github.com/muen-labs/dsh-tv/issues).
+
+## Contributing
+
+Yes, please — see [CONTRIBUTING.md](CONTRIBUTING.md). The highest-value things are
+compatibility reports, the demo's catalog/stream matching, and playbook entries for
+apps you actually use. Bug reports with a `logcat` excerpt and a screen recording
+are ideal.
+
+## Support the project
+
+DeepSeek TV Assistant is free, MIT and developed in the open. If it saved you a trip
+to the remote, you can buy me a coffee — that goes through Ko-fi (the same page as
+Projector OSD):
+
+[![Buy me a coffee on Ko-fi](https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/muenlabs)
 
 ## Credits
 
 Artwork and animation: [1tryout/dsh-whale-pixel-pet](https://github.com/1tryout/dsh-whale-pixel-pet)
-(MIT) and [Er1c0v0/dsh-whale-pet](https://github.com/Er1c0v0/dsh-whale-pet)
-(CC BY 4.0). STT: SenseVoiceSmall via sherpa-onnx (Apache-2.0), Whisper fallback
-via mlx-whisper. See [THIRD-PARTY.md](THIRD-PARTY.md).
+(MIT) and [Er1c0v0/dsh-whale-pet](https://github.com/Er1c0v0/dsh-whale-pet) (CC BY 4.0).
+STT: SenseVoiceSmall via sherpa-onnx (Apache-2.0), Whisper fallback via
+mlx-whisper. See [THIRD-PARTY.md](THIRD-PARTY.md).
 
-MIT licensed — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
 
 ## Roadmap
 
-- mDNS discovery so the pairing screen can find the host without typing an IP.
+- mDNS host discovery so the pairing screen can find the Mac without an address.
 - Per-TV tokens with revocation in the plugin (the pane already sees each TV).
 - Background/wake-word mode and multilingual STT.
 - A DSH marketplace listing for the pane (`dsh plugin --profile <p> add`).

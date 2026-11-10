@@ -5,6 +5,7 @@ Links to use:
 - Repo: <https://github.com/muen-labs/dsh-tv>
 - Download: <https://github.com/muen-labs/dsh-tv/releases/latest>
 - Demo GIF: [`docs/demo.gif`](demo.gif) (1.4 MB) — upload this as the post image/video
+- Demo MP4: [`docs/demo.mp4`](demo.mp4) (0.6 MB, 10 s) — if you prefer video
 - UI gallery: <https://github.com/muen-labs/dsh-tv/blob/main/docs/ui-gallery.html>
 
 ## Post title options
