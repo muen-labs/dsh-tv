@@ -154,6 +154,9 @@ Every **implemented** screen is collected in
 Bridge home (running/stopped/4K Plus), Pairing, the assistant modal states
 (listening/answered/error/gear focus), suggestions/demo leg, the DSH pane
 phases and the launcher icon. Open it in a browser and use the rail or ←/→.
+The page is self-contained (every screenshot embedded as a data URI, ~5 MB), so
+it works from anywhere; regenerate it with `python3 tools/make-ui-gallery.py`
+after recapturing a screen.
 
 ## Voice pipeline
 
