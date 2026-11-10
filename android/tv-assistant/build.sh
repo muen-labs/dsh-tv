@@ -52,6 +52,7 @@ if [ ! -f debug.keystore ]; then
 fi
 "$BT/apksigner" sign --ks debug.keystore --ks-pass pass:android --key-pass pass:android --out TVAssistant.apk aligned.apk
 "$BT/apksigner" verify --print-certs TVAssistant.apk | head -2
-# keep the CLI's setup path working
+# keep the CLI's setup path working (CI has no .tools directory)
+mkdir -p "$TOOLS/dshtv-app"
 cp TVAssistant.apk "$TOOLS/dshtv-app/DSHTVBridge.apk"
 ls -lh TVAssistant.apk
