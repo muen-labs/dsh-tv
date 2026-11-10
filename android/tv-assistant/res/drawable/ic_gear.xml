@@ -1,11 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Cog: "Settings" control in the assistant overlay action row. -->
+<!-- Lucide `settings` (lucide-static v1.70), OUTLINED: 24x24 viewport,
+     2px stroke, round caps/joins, no fill. Stroke colour is set directly
+     (not via android:tint) so the outline definitely picks it up. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="14dp" android:height="14dp"
-    android:viewportWidth="24" android:viewportHeight="24"
-    android:tint="@color/foreground">
-    <path android:pathData="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0 -.59-.22l-2.39.96a7.03 7.03 0 0 0 -1.62-.94l-.36-2.54a.48.48 0 0 0 -.48-.41h-3.84a.48.48 0 0 0 -.47.41l-.36 2.54a7.03 7.03 0 0 0 -1.62.94l-2.39-.96a.48.48 0 0 0 -.59.22L2.74 8.87a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0 -.12.61l1.92 3.32a.48.48 0 0 0 .59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54a.48.48 0 0 0 .48.41h3.84a.48.48 0 0 0 .47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96a.48.48 0 0 0 .59-.22l1.92-3.32a.49.49 0 0 0 -.12-.61l-2.01-1.58z"
-        android:fillColor="#FFFFFF" />
-    <path android:pathData="M12 15.6a3.6 3.6 0 1 1 0 -7.2 3.6 3.6 0 0 1 0 7.2z"
-        android:fillColor="#101426" />
+    android:width="16dp"
+    android:height="16dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/foreground"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/foreground"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
 </vector>

@@ -24,6 +24,7 @@ public final class WhaleUi {
     private static final int DOT_ERROR = R.drawable.dot_off;
 
     private final Context ctx;
+    private final View root;
     private final WhalePet pet;
     private final View dot;
     private final View rule;
@@ -32,6 +33,7 @@ public final class WhaleUi {
     private final TextView text;
     private final View closeBtn;
     private final View againBtn;
+    private View settingsBtn;
     private final View sendBtn;
     private final Runnable onFinished;
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -46,6 +48,7 @@ public final class WhaleUi {
 
     public WhaleUi(Context ctx, View root, Runnable onFinished) {
         this.ctx = ctx;
+        this.root = root;
         this.onFinished = onFinished;
         this.pet = new WhalePet((ImageView) root.findViewById(R.id.whale_art));
         this.dot = root.findViewById(R.id.whale_dot);
@@ -79,9 +82,9 @@ public final class WhaleUi {
                 }
             });
         }
-        View settingsBtn = root.findViewById(R.id.whale_settings);
-        if (settingsBtn != null) {
-            settingsBtn.setOnClickListener(new View.OnClickListener() {
+        this.settingsBtn = root.findViewById(R.id.whale_settings);
+        if (this.settingsBtn != null) {
+            this.settingsBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     openBridge();
@@ -298,6 +301,69 @@ public final class WhaleUi {
                 againBtn.requestFocus();
             }
         } catch (Throwable ignored) {
+        }
+    }
+
+    /**
+     * Explicit D-pad contract for the overlay (the user asked for
+     * "left goes to the gear, up defaults back to the mic"):
+     *   Send:   LEFT -> gear, UP -> mic
+     *   gear:   RIGHT -> mic, DOWN -> Send, UP -> mic
+     *   mic:    LEFT -> gear
+     *   close:  LEFT -> mic
+     * nextFocus* ids are declared in the layout as well, but this handler makes
+     * the contract deterministic when the composer state hides/shows controls.
+     */
+    public boolean handleDpad(int keyCode) {
+        try {
+            if (root == null) {
+                return false;
+            }
+            View focused = root.findFocus();
+            if (focused == null) {
+                return false;
+            }
+            if (focused == sendBtn) {
+                if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_LEFT) {
+                    return focus(settingsBtn);
+                }
+                if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_UP) {
+                    return focus(againBtn);
+                }
+                return false;
+            }
+            if (focused == settingsBtn) {
+                if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_RIGHT
+                        || keyCode == android.view.KeyEvent.KEYCODE_DPAD_UP) {
+                    return focus(againBtn);
+                }
+                if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_DOWN) {
+                    if (sendBtn != null && sendBtn.getVisibility() == View.VISIBLE) {
+                        return focus(sendBtn);
+                    }
+                    return focus(againBtn);
+                }
+                return false;
+            }
+            if (focused == againBtn && keyCode == android.view.KeyEvent.KEYCODE_DPAD_LEFT) {
+                return focus(settingsBtn);
+            }
+            if (focused == closeBtn && keyCode == android.view.KeyEvent.KEYCODE_DPAD_LEFT) {
+                return focus(againBtn);
+            }
+        } catch (Throwable ignored) {
+        }
+        return false;
+    }
+
+    private boolean focus(View view) {
+        if (view == null) {
+            return false;
+        }
+        try {
+            return view.requestFocus();
+        } catch (Throwable t) {
+            return false;
         }
     }
 

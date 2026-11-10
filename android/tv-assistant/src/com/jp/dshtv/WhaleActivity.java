@@ -144,6 +144,9 @@ public class WhaleActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (ui != null && ui.handleDpad(keyCode)) {
+            return true;
+        }
         if (ui != null && ui.isListening()
                 && (keyCode == KeyEvent.KEYCODE_DPAD_CENTER
                     || keyCode == KeyEvent.KEYCODE_ENTER

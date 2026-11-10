@@ -183,8 +183,14 @@ blank.
 
 A translucent window over the playing app, presented as a **modal**. The
 composer is a 360dp card (2dp state rule + eyebrow + transcript + reply) above
-the animated pet, with the 32dp round controls above it: **mic · gear · close**
-(the gear leaves the assistant for the Bridge home). States:
+the animated pet, with the 32dp round **mic** and **close** controls above it.
+The **settings gear** lives in a top-left cluster directly beside the app chip
+(same 32dp disc + focus ring; Lucide `settings` drawn *outlined* — 24×24
+viewport, 2px round stroke, no fill), and leaves the assistant for the Bridge
+home. D-pad contract (explicit `nextFocus*` ids + `WhaleUi.handleDpad`): Send
+LEFT → gear, Send UP → mic; gear RIGHT/UP → mic, gear DOWN → Send; mic LEFT →
+gear; close LEFT → mic. Initial focus stays on the composer Send while
+listening. States:
 
 | State | Eyebrow | Dot | Pet | Body |
 | --- | --- | --- | --- | --- |

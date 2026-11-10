@@ -212,8 +212,10 @@ steps.
    and search for anime."*
 3. The bubble shows what it heard (SenseVoice), then DSH's reply, spoken via TTS.
 4. **OK** sends early instead of waiting for the silence timeout; **Back** cancels.
-5. The **gear** button in the overlay's action row (mic · gear · close) closes
-   the assistant and opens the Bridge home / settings screen.
+5. The **gear** at the overlay's top-left (next to the app chip) closes the
+   assistant and opens the Bridge home / settings screen. D-pad: from the
+   composer **LEFT** jumps to the gear, **UP** returns to the mic; from the gear
+   **RIGHT/UP** go to the mic and **DOWN** back to the composer.
 
 ### Mapping a remote button to the bridge screen
 
