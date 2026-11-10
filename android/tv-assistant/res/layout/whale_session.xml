@@ -10,6 +10,18 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent">
 
+    <!-- Real-blur fallback: a capture of the screen behind the modal, heavily
+         downscaled + blurred, shown full-screen under the black scrim. -->
+    <ImageView
+        android:id="@+id/whale_backdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        android:visibility="invisible" />
+
     <View
         android:id="@+id/whale_scrim"
         android:layout_width="match_parent"
@@ -53,6 +65,7 @@
 
     <!-- controls above the composer, right-aligned with it -->
     <LinearLayout
+        android:id="@+id/whale_modal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
@@ -78,6 +91,18 @@
                 android:padding="9dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_mic_overlay" />
+
+            <ImageButton
+                android:id="@+id/whale_settings"
+                android:layout_width="@dimen/disc_overlay"
+                android:layout_height="@dimen/disc_overlay"
+                android:layout_marginLeft="@dimen/overlay_actions_gap"
+                android:background="@drawable/btn_close"
+                android:contentDescription="Settings"
+                android:focusable="true"
+                android:padding="9dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_gear" />
 
             <ImageButton
                 android:id="@+id/whale_close"
@@ -174,6 +199,7 @@
 
     <!-- Pet with a soft ground shadow -->
     <FrameLayout
+        android:id="@+id/whale_pet_wrap"
         android:layout_width="@dimen/pet_w"
         android:layout_height="@dimen/pet_h"
         android:layout_gravity="bottom|end"

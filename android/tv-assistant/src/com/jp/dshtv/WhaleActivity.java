@@ -3,6 +3,7 @@ package com.jp.dshtv;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.View;
+import android.widget.TextView;
 
 /** Launcher-tile fallback: same whale UI, listens as soon as it opens. */
 public class WhaleActivity extends Activity {
@@ -20,6 +22,10 @@ public class WhaleActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.whale_session);
+        // Stronger scrim + a captured/blurred backdrop (cross-window blur is not
+        // supported on these boxes). The modal fades/scales in when ready.
+        OverlayModal.show(this, findViewById(R.id.whale_session_root));
+        applyAppChip();
         applyBlurBehind();
         ensureBridgeRunning();
         if (!WhaleConfig.paired(this)) {
@@ -40,18 +46,64 @@ public class WhaleActivity extends Activity {
      * blur support, so the gradient scrim in the layout is the real fallback;
      * this call is a no-op there and a bonus on supported devices.
      */
+    /** App chip: name the app the assistant is actually over (the mockup's
+     *  "Projectivy · Home" copy is only right when the launcher is behind). */
+    private void applyAppChip() {
+        try {
+            TextView chip = (TextView) findViewById(R.id.whale_app_chip_text);
+            if (chip == null) {
+                return;
+            }
+            KeyService service = KeyService.getInstance();
+            // by now our own window is foreground, so name the app that is
+            // visible behind the modal
+            String pkg = service != null ? service.refreshExternalPackage() : "";
+            chip.setText(appChipLabel(pkg));
+        } catch (Throwable ignored) {
+        }
+    }
+
+    private String appChipLabel(String pkg) {
+        if (pkg == null || pkg.length() == 0 || pkg.equals(getPackageName())) {
+            return "DeepSeek TV";
+        }
+        if (pkg.equals("com.google.android.apps.tv.launcherx")) {
+            return "Google TV · Home";
+        }
+        if (pkg.contains("projengmenu")) {
+            return "Projectivy · Home";
+        }
+        try {
+            PackageManager pm = getPackageManager();
+            ApplicationInfo info = pm.getApplicationInfo(pkg, 0);
+            CharSequence label = pm.getApplicationLabel(info);
+            if (label != null && label.length() > 0) {
+                return label.toString();
+            }
+        } catch (Throwable ignored) {
+        }
+        return pkg;
+    }
+
     private void applyBlurBehind() {
         if (Build.VERSION.SDK_INT < 31) {
             return;
         }
         try {
+            WindowManager wm = getSystemService(WindowManager.class);
+            if (wm == null || !wm.isCrossWindowBlurEnabled()) {
+                // expected on the onn boxes (no cross-window blur); the
+                // OverlayModal capture fallback carries the blur instead
+                return;
+            }
             Window window = getWindow();
             WindowManager.LayoutParams lp = window.getAttributes();
             lp.flags |= WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
-            lp.setBlurBehindRadius(dp(40));
+            lp.setBlurBehindRadius(dp(24));
             window.setAttributes(lp);
+            window.setBackgroundBlurRadius(dp(24));
         } catch (Throwable ignored) {
-            // no blur support: the scrim carries the contrast
+            // no blur support: the scrim/backdrop carries the contrast
         }
     }
 

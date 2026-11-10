@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.util.concurrent.CountDownLatch;
@@ -28,6 +29,9 @@ public class KeyService extends AccessibilityService {
 
     private volatile String foregroundPkg = "";
     private volatile String foregroundClass = "";
+    /** Last foreground package that was NOT us (used by the overlay app chip,
+     *  because by the time our window is up the tracker already sees us). */
+    private volatile String lastExternalPkg = "";
 
     public static KeyService getInstance() {
         return instance;
@@ -35,6 +39,50 @@ public class KeyService extends AccessibilityService {
 
     public static boolean isConnected() {
         return instance != null;
+    }
+
+    /** Last non-DSH app that was foreground (the app the assistant is over). */
+    public String lastExternalPackage() {
+        return lastExternalPkg;
+    }
+
+    /**
+     * Re-scan the interactive windows for the app behind us. Called when the
+     * assistant overlay opens so the app chip names the app it is over even if
+     * the service was bound after that app was already in front.
+     */
+    public String refreshExternalPackage() {
+        try {
+            java.util.List<AccessibilityWindowInfo> windows = getWindows();
+            if (windows != null) {
+                for (int i = 0; i < windows.size(); i++) {
+                    AccessibilityWindowInfo window = windows.get(i);
+                    if (window == null
+                            || window.getType() != AccessibilityWindowInfo.TYPE_APPLICATION) {
+                        continue;
+                    }
+                    AccessibilityNodeInfo root = window.getRoot();
+                    if (root == null) {
+                        continue;
+                    }
+                    try {
+                        CharSequence pkg = root.getPackageName();
+                        if (pkg != null && !pkg.toString().equals(getPackageName())) {
+                            lastExternalPkg = pkg.toString();
+                            return lastExternalPkg;
+                        }
+                    } finally {
+                        try {
+                            root.recycle();
+                        } catch (Throwable ignored) {
+                        }
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            Log.i(TAG, "refreshExternalPackage failed: " + t);
+        }
+        return lastExternalPkg;
     }
 
     @Override
@@ -49,6 +97,23 @@ public class KeyService extends AccessibilityService {
             }
         } catch (Throwable t) {
             Log.i(TAG, "KeyService setServiceInfo failed: " + t);
+        }
+        try {
+            AccessibilityNodeInfo root = getRootInActiveWindow();
+            if (root != null) {
+                try {
+                    CharSequence pkg = root.getPackageName();
+                    if (pkg != null && !pkg.toString().equals(getPackageName())) {
+                        lastExternalPkg = pkg.toString();
+                    }
+                } finally {
+                    try {
+                        root.recycle();
+                    } catch (Throwable ignored) {
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
         }
         Log.i(TAG, "KeyService connected");
     }
@@ -77,6 +142,9 @@ public class KeyService extends AccessibilityService {
                 CharSequence pkg = event.getPackageName();
                 if (pkg != null) {
                     foregroundPkg = pkg.toString();
+                    if (!foregroundPkg.equals(getPackageName())) {
+                        lastExternalPkg = foregroundPkg;
+                    }
                 }
                 CharSequence cls = event.getClassName();
                 if (cls != null) {
@@ -162,15 +230,17 @@ public class KeyService extends AccessibilityService {
     }
 
     /**
-     * Capture the current display as a JPEG. Requires Android 11 (API 30)
-     * and the accessibility service's canTakeScreenshot capability.
+     * Capture the current display as a software Bitmap. Requires Android 11
+     * (API 30) and the accessibility service's canTakeScreenshot capability.
+     * Used by the assistant overlay to fake a real background blur (the box
+     * has no cross-window blur support).
      */
-    public byte[] screenshotJpeg(final int quality) throws Exception {
+    public Bitmap screenshotBitmap(final long timeoutSeconds) throws Exception {
         if (Build.VERSION.SDK_INT < 30) {
             throw new Exception("screenshot requires Android 11 (API 30) or newer");
         }
         final CountDownLatch latch = new CountDownLatch(1);
-        final Object[] result = new Object[2]; // [0] byte[] jpeg, [1] String error
+        final Object[] result = new Object[2]; // [0] Bitmap, [1] String error
 
         try {
             takeScreenshot(Display.DEFAULT_DISPLAY, getMainExecutor(),
@@ -178,7 +248,6 @@ public class KeyService extends AccessibilityService {
                         @Override
                         public void onSuccess(AccessibilityService.ScreenshotResult screenshot) {
                             HardwareBuffer buffer = null;
-                            Bitmap soft = null;
                             try {
                                 buffer = screenshot.getHardwareBuffer();
                                 Bitmap hardware = Bitmap.wrapHardwareBuffer(
@@ -187,24 +256,16 @@ public class KeyService extends AccessibilityService {
                                     result[1] = "wrapHardwareBuffer returned null";
                                     return;
                                 }
-                                soft = hardware.copy(Bitmap.Config.ARGB_8888, false);
+                                Bitmap soft = hardware.copy(Bitmap.Config.ARGB_8888, false);
                                 if (soft == null) {
                                     result[1] = "bitmap copy failed";
                                     return;
                                 }
-                                ByteArrayOutputStream out = new ByteArrayOutputStream(256 * 1024);
-                                soft.compress(Bitmap.CompressFormat.JPEG, quality, out);
-                                result[0] = out.toByteArray();
+                                result[0] = soft;
                             } catch (Throwable t) {
                                 result[1] = "screenshot error: " + t;
                                 Log.i(TAG, "screenshot onSuccess error: " + t);
                             } finally {
-                                if (soft != null) {
-                                    try {
-                                        soft.recycle();
-                                    } catch (Throwable ignored) {
-                                    }
-                                }
                                 if (buffer != null) {
                                     try {
                                         buffer.close();
@@ -227,7 +288,7 @@ public class KeyService extends AccessibilityService {
         }
 
         try {
-            if (!latch.await(10, TimeUnit.SECONDS)) {
+            if (!latch.await(Math.max(1, timeoutSeconds), TimeUnit.SECONDS)) {
                 throw new Exception("screenshot timed out");
             }
         } catch (InterruptedException e) {
@@ -235,9 +296,26 @@ public class KeyService extends AccessibilityService {
             throw new Exception("screenshot interrupted");
         }
 
-        if (result[0] instanceof byte[]) {
-            return (byte[]) result[0];
+        if (result[0] instanceof Bitmap) {
+            return (Bitmap) result[0];
         }
         throw new Exception(result[1] != null ? (String) result[1] : "screenshot failed");
+    }
+
+    /**
+     * Capture the current display as a JPEG (used by the bridge HTTP API).
+     */
+    public byte[] screenshotJpeg(final int quality) throws Exception {
+        Bitmap soft = screenshotBitmap(10);
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream(256 * 1024);
+            soft.compress(Bitmap.CompressFormat.JPEG, quality, out);
+            return out.toByteArray();
+        } finally {
+            try {
+                soft.recycle();
+            } catch (Throwable ignored) {
+            }
+        }
     }
 }

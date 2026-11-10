@@ -1,6 +1,7 @@
 package com.jp.dshtv;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.speech.tts.TextToSpeech;
@@ -75,6 +76,15 @@ public final class WhaleUi {
                     } else {
                         askAgain();
                     }
+                }
+            });
+        }
+        View settingsBtn = root.findViewById(R.id.whale_settings);
+        if (settingsBtn != null) {
+            settingsBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openBridge();
                 }
             });
         }
@@ -288,6 +298,21 @@ public final class WhaleUi {
                 againBtn.requestFocus();
             }
         } catch (Throwable ignored) {
+        }
+    }
+
+    /** Gear: leave the overlay and open the Bridge home / settings screen. */
+    private void openBridge() {
+        try {
+            stop();
+            Intent intent = new Intent(ctx, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(intent);
+        } catch (Throwable t) {
+            Log.i("WhaleUi", "openBridge failed: " + t);
+        }
+        if (onFinished != null) {
+            onFinished.run();
         }
     }
 

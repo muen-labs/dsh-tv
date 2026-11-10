@@ -347,6 +347,14 @@ public class MainActivity extends Activity {
         return addresses.isEmpty() ? "" : addresses.get(0);
     }
 
+    /**
+     * READ-ONLY status check. The app must never write
+     * Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES: that setting is a
+     * ':'-separated list shared with the user's other accessibility services
+     * (Projectivy, tvQuickActions, ...), and a naive overwrite silently
+     * disables them. Enabling our service is done out-of-band by
+     * host/tv-accessibility.sh, which appends instead of replacing.
+     */
     private boolean accessibilityEnabled() {
         try {
             String enabled = Settings.Secure.getString(getContentResolver(),

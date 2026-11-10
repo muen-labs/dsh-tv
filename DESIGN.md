@@ -177,10 +177,14 @@ blank.
 
 ![Assistant listening](docs/screenshots/tv-assistant-listening.png)
 
+![Assistant modal](docs/screenshots/tv-assistant-modal.png)
+
 ![Assistant error](docs/screenshots/tv-assistant-error.png)
 
-Transparent window over the playing app. A 360dp composer (2dp state rule + eyebrow + transcript +
-reply) sits above the animated pet, with the 32dp mic/close discs above it. States:
+A translucent window over the playing app, presented as a **modal**. The
+composer is a 360dp card (2dp state rule + eyebrow + transcript + reply) above
+the animated pet, with the 32dp round controls above it: **mic · gear · close**
+(the gear leaves the assistant for the Bridge home). States:
 
 | State | Eyebrow | Dot | Pet | Body |
 | --- | --- | --- | --- | --- |
@@ -191,6 +195,19 @@ reply) sits above the animated pet, with the 32dp mic/close discs above it. Stat
 | error | `TRY AGAIN` | destructive | wilt | what to do next |
 
 `OK` commits early; `Back` cancels. The credit line stays in the bottom-left.
+
+**Modal presentation** (`OverlayModal` + `WhaleActivity`): a captured backdrop
+of the screen behind (accessibility-service `takeScreenshot`, in `KeyService`)
+is downscaled to 160px, box-blurred and shown full-screen under a ~66%-black
+scrim with a vignette and a bottom gradient; the capture is taken before our
+window paints, so the bubble never blurs itself. If capture is unavailable
+(API < 30, accessibility off, refused) the strong scrim alone carries the
+contrast. Cross-window blur is dead on the demo boxes
+(`ro.surface_flinger.supports_background_blur` is empty), so
+`WindowManager.isCrossWindowBlurEnabled()` + `setBackgroundBlurRadius` is only a
+guarded bonus path. The composer and pet fade+scale in over 150-200ms, and the
+app chip names the app actually behind the modal (`KeyService`
+`refreshExternalPackage`, e.g. `Stremio` / `Projectivy · Home`).
 
 ### System-owned surfaces
 
@@ -213,6 +230,12 @@ notification.
 - Status is always label + dot (never colour alone).
 - Assistant state changes call `announceForAccessibility` so TalkBack hears the
   transcript and reply.
+- The app only **reads** the enabled accessibility services (to show
+  Connected/Enabled/Disabled on the bridge card). It never writes them:
+  enabling ours is done by [`host/tv-accessibility.sh`](host/tv-accessibility.sh),
+  which appends `com.jp.dshtv/com.jp.dshtv.KeyService` to the existing list and
+  never replaces it — a raw `settings put` would disable the user's Projectivy
+  and tvQuickActions services.
 - QR has a content description; codes are monospace for readability.
 - The pane uses native `<button role="radio">` semantics, `aria-live` on
   status, `role="alert"` on errors, and a visible ring on keyboard focus.

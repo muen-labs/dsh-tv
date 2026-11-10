@@ -90,11 +90,18 @@ cd host && npm install sherpa-onnx-node@1.13.8
 ANDROID_SDK_ROOT=/path/to/android-sdk bash android/tv-assistant/build.sh
 adb connect <tv-ip>:5555
 adb install -r -g android/tv-assistant/TVAssistant.apk
-adb shell settings put secure enabled_accessibility_services \
-  com.jp.osdtrigger/com.jp.osdtrigger.KeyForwardService:dev.vodik7.tvquickactions/dev.vodik7.tvquickactions.KeyAccessibilityService:com.jp.dshtv/com.jp.dshtv.KeyService
-adb shell settings put secure accessibility_enabled 1
+# Enable ONLY our accessibility service, appending to whatever is already
+# enabled (Projectivy, tvQuickActions, ...). Never replace the list:
+bash host/tv-accessibility.sh <tv-ip>:5555
 adb shell pm grant com.jp.dshtv android.permission.RECORD_AUDIO
 ```
+
+> **Never** run `settings put secure enabled_accessibility_services <one
+> component>` — that REPLACES the whole list and silently disables the user's
+> Projectivy / tvQuickActions accessibility services. `host/tv-accessibility.sh`
+> reads the current list, appends `com.jp.dshtv/com.jp.dshtv.KeyService` if it
+> is missing, and only ever prunes entries whose package is no longer installed
+> (`--prune`). It prints the before/after list.
 
 Open the **Pair this TV with Whale-chan** tile on the TV and scan the QR with
 your phone, or approve the same request inside DSH → Settings → **Whale-chan
@@ -201,9 +208,25 @@ steps.
 ## Using it
 
 1. Press the Whale-chan button (Disney+ shim) or open the assistant tile.
-2. The whale animates; say e.g. *"Open Stremio and search for anime."*
+2. The whale animates over a blurred, dimmed backdrop; say e.g. *"Open Stremio
+   and search for anime."*
 3. The bubble shows what it heard (SenseVoice), then DSH's reply, spoken via TTS.
 4. **OK** sends early instead of waiting for the silence timeout; **Back** cancels.
+5. The **gear** button in the overlay's action row (mic · gear · close) closes
+   the assistant and opens the Bridge home / settings screen.
+
+### Mapping a remote button to the bridge screen
+
+The bridge home is a normal TV app entry point, so any button mapper can open it:
+
+- **tvQuickActions** → *Mappings* → pick a button → action **Launch app** →
+  **DeepSeek TV** (that activity is `com.jp.dshtv/.MainActivity`, the Bridge
+  home with pairing, service status and the settings gear target).
+- Projectivy → long-press the app tile → open app, or add it to the dock.
+- Google TV home: the launcher tile already opens the same screen.
+
+Do not remove other accessibility services while re-mapping: the helper above
+only appends.
 
 ## Configuration
 

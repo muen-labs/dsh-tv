@@ -1,33 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Soft blur-scrim: a gentle overall dim, a bottom-right focus pool and a
-     bottom fade so the bubble/pet always sit on contrast. Replaces the
-     hardware blur on TVs without background-blur support. -->
+<!-- Modal scrim: ~66% black base + a soft vignette + a bottom gradient so the
+     composer always reads, even over a bright frame. Shown over the captured
+     blurred backdrop when that is available (real blur fallback). -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#3304060D" />
+            <solid android:color="#A8060A12" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
             <gradient
                 android:type="radial"
-                android:centerX="0.8"
-                android:centerY="0.86"
-                android:gradientRadius="760dp"
-                android:startColor="#CC04060D"
-                android:centerColor="#6604060D"
-                android:endColor="#0004060D" />
+                android:centerX="0.5"
+                android:centerY="0.45"
+                android:gradientRadius="900dp"
+                android:startColor="#00000000"
+                android:centerColor="#1A000000"
+                android:endColor="#66000000" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
             <gradient
-                android:type="linear"
                 android:angle="270"
                 android:startColor="#00000000"
                 android:centerColor="#33000000"
-                android:endColor="#99000000" />
+                android:endColor="#A6000000" />
         </shape>
     </item>
 </layer-list>
