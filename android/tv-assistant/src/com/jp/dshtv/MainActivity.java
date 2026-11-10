@@ -206,17 +206,14 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** 10-foot focus: lift and scale the focused control so the remote is obvious. */
+    /** 10-foot focus feedback is the control's own 2dp focus ring only.
+     *
+     *  Deliberately no scale/elevation "grow": a scaled button paints past the
+     *  card's content box and the parent ViewGroup clips it (the user saw the
+     *  focus ring cut at the card padding). The ring lives in each focused-state
+     *  drawable, so focus is still unmistakable on a 10-foot screen. */
     private void styleFocus(final View view) {
-        view.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                v.animate().scaleX(hasFocus ? 1.03f : 1f)
-                        .scaleY(hasFocus ? 1.03f : 1f)
-                        .setDuration(120).start();
-                v.setElevation(hasFocus ? dp(8) : 0);
-            }
-        });
+        // no-op: focus highlight comes from the button drawable's focused state
     }
 
     private void handleIntent(Intent intent) {

@@ -154,17 +154,11 @@ public class PairingActivity extends Activity {
         beginPairing(WhaleConfig.host(this));
     }
 
-    /** Same 10-foot focus treatment as the bridge home: lift + scale 1.03. */
+    /** Same focus rule as the bridge home: a 2dp ring from the focused-state
+     *  drawable, and no scale/elevation grow (it overflowed the card padding and
+     *  was clipped by the parent). */
     private void styleFocus(final View view) {
-        view.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                v.animate().scaleX(hasFocus ? 1.03f : 1f)
-                        .scaleY(hasFocus ? 1.03f : 1f)
-                        .setDuration(120).start();
-                v.setElevation(hasFocus ? 8 * getResources().getDisplayMetrics().density : 0);
-            }
-        });
+        // no-op: focus highlight comes from the button drawable's focused state
     }
 
     /** Chip label: "Living Room TV · onn. Streaming Device 4K pro · <ip>" on the

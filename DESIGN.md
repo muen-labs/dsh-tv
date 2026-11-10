@@ -126,7 +126,10 @@ in a DSH client bundle, so no dependency was added).
 
 - Every interactive control shows a **visible ring** when focused; focus is the
   only state a remote user has, so it may never rely on hover.
-- Focused controls scale **1.03**, lift with elevation, in **120 ms**.
+- Focus is shown by the control's **2dp focus ring only** — no scale/grow and no
+  elevation lift. The old 1.03 grow painted past the card's content box and was
+  clipped by the card padding (visible in the bridge home); the focused-state
+  drawable ring is unambiguous on a 10-foot screen and never overflows.
 - Initial focus lands on the primary action of the screen.
 - No auto-advancing carousels or timed dismissals inside the assistant overlay;
   the overlay closes only after a reply/error timeout or Back.
