@@ -86,6 +86,12 @@
     <color name="heard_text">#C9D6E8</color>
     <color name="chip_text">#C6D2E4</color>
     <color name="disabled_fill">#2B3550</color>
+
+    <!-- success action button (.btn.success analogue, mirrors .btn.danger) -->
+    <color name="success_btn_fill">#2400E096</color>
+    <color name="success_btn_fill_hover">#3800E096</color>
+    <color name="success_btn_border">#8000E096</color>
+    <color name="success_text">#D9FFF0</color>
     <color name="kbd_border">#2E3A59</color>
     <color name="terminal_green">#3DFFA8</color>
 
@@ -132,6 +138,21 @@
     <dimen name="logo_lockup">32dp</dimen>
 
     <!-- pairing: 64px gutters, 40/28px vertical, 44px col gap, 18px stack gap -->
+    <!-- title-safe / overscan insets. 5% of the 960dp canvas = 48dp each side.
+         The projector + HDMI path crops the outer few percent, so the two
+         full-screen screens add this on top of their design gutters. -->
+    <dimen name="safe_inset">12dp</dimen>
+    <dimen name="safe_inset_v">8dp</dimen>
+    <dimen name="pair_safe_inset">24dp</dimen>
+    <dimen name="pair_safe_inset_v">24dp</dimen>
+    <!-- effective paddings = design padding + safe inset (kept explicit so the
+         layout reads at a glance) -->
+    <dimen name="bridge_pad_h">88dp</dimen>   <!-- gutter 76 + safe_inset 12 -->
+    <dimen name="bridge_pad_v">35dp</dimen>   <!-- screen_pad_v 27 + safe_inset_v 8 -->
+    <dimen name="pairing_pad_h">56dp</dimen>  <!-- pair_gutter 32 + pair_safe_inset 24 = 5.8% -->
+    <dimen name="pairing_pad_top">44dp</dimen>
+    <dimen name="pairing_pad_bottom">38dp</dimen>
+
     <dimen name="pair_gutter">32dp</dimen>
     <dimen name="pair_pad_top">20dp</dimen>
     <dimen name="pair_pad_bottom">14dp</dimen>

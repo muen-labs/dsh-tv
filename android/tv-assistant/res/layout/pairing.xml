@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pairing: 1920x1080 design / 2. 64px gutters -> 32dp, 40/28px vertical
-     -> 20/14dp, 44px column gap -> 22dp, 18px stack gap -> 9dp.
+<!-- Pairing: 1920x1080 design / 2. Design gutters are 64px -> 32dp (3.3%,
+     too small for overscan), so the root adds the title-safe inset: effective
+     32+24 = 56dp L/R (5.8%) and 20+24 / 14+24dp top/bottom. 44px column gap
+     -> 22dp, 18px stack gap -> 9dp.
      The TV + laptop scene on the right is the exported mockup illustration
      (pair_scene.png); every control and text here is native. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -12,10 +14,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingLeft="@dimen/pair_gutter"
-        android:paddingTop="@dimen/pair_pad_top"
-        android:paddingRight="@dimen/pair_gutter"
-        android:paddingBottom="@dimen/pair_pad_bottom">
+        android:paddingLeft="@dimen/pairing_pad_h"
+        android:paddingTop="@dimen/pairing_pad_top"
+        android:paddingRight="@dimen/pairing_pad_h"
+        android:paddingBottom="@dimen/pairing_pad_bottom">
 
         <!-- ============ brandbar ============ -->
         <LinearLayout
@@ -321,13 +323,16 @@
                                 android:background="@drawable/dot_on" />
 
                             <TextView
+                                android:id="@+id/pair_device_name"
                                 style="@style/Shadcn.Fine"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:maxLines="1"
                                 android:text="Living Room TV"
                                 android:textColor="@color/foreground" />
 
                             <TextView
+                                android:id="@+id/pair_device_sep"
                                 style="@style/Shadcn.Fine"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -337,10 +342,12 @@
                                 android:textColor="@color/dim_text" />
 
                             <TextView
+                                android:id="@+id/pair_device_model"
                                 style="@style/Shadcn.Fine"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="onn. 4K Pro"
+                                android:maxLines="1"
+                                android:text="onn. Streaming Device 4K pro"
                                 android:textColor="@color/foreground" />
 
                             <TextView

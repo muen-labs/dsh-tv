@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Bridge home: 1920x1080 design / 2 = 960x540dp. 152px gutters -> 76dp,
      two columns 1.12fr/.88fr with a 34px (17dp) gap, glass cards over the
-     exported ambient glow background. -->
+     exported ambient glow background. Padding is the design gutter PLUS the
+     title-safe inset (76+12dp horiz, 27+8dp vert) so HDMI/projector overscan
+     cannot crop the left card edge. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_bridge_ambient"
     android:orientation="vertical"
-    android:paddingLeft="@dimen/gutter"
-    android:paddingRight="@dimen/gutter"
-    android:paddingTop="@dimen/screen_pad_v"
-    android:paddingBottom="@dimen/screen_pad_v">
+    android:paddingLeft="@dimen/bridge_pad_h"
+    android:paddingRight="@dimen/bridge_pad_h"
+    android:paddingTop="@dimen/bridge_pad_v"
+    android:paddingBottom="@dimen/bridge_pad_v">
 
     <!-- ============ topbar: lockup + status badges ============ -->
     <LinearLayout
@@ -870,11 +872,13 @@
                         android:src="@drawable/ic_tv" />
 
                     <TextView
+                        android:id="@+id/paired_tv_name"
                         style="@style/Shadcn.StepText"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="5dp"
                         android:layout_weight="1"
+                        android:maxLines="1"
                         android:text="Living Room TV" />
 
                     <TextView

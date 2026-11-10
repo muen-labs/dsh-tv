@@ -63,6 +63,9 @@ public class PairingActivity extends Activity {
     private TextView[] stepNums = new TextView[3];
     private TextView[] stepLabels = new TextView[3];
     private TextView ipChip;
+    private TextView deviceName;
+    private TextView deviceModel;
+    private View deviceSep;
 
     private String pairId;
     private boolean polling;
@@ -112,6 +115,9 @@ public class PairingActivity extends Activity {
         startButton = (Button) findViewById(R.id.pair_start);
         changeMac = findViewById(R.id.btn_change_mac);
         ipChip = (TextView) findViewById(R.id.pair_ip_chip);
+        deviceName = (TextView) findViewById(R.id.pair_device_name);
+        deviceModel = (TextView) findViewById(R.id.pair_device_model);
+        deviceSep = findViewById(R.id.pair_device_sep);
         stepNums[0] = (TextView) findViewById(R.id.pair_step1);
         stepNums[1] = (TextView) findViewById(R.id.pair_step2);
         stepNums[2] = (TextView) findViewById(R.id.pair_step3);
@@ -122,6 +128,7 @@ public class PairingActivity extends Activity {
         ipView.setText(WhaleConfig.host(this));
         ipView.clearFocus();
         showLocalIp();
+        showDeviceIdentity();
         styleFocus(startButton);
         styleFocus(changeMac);
 
@@ -158,6 +165,19 @@ public class PairingActivity extends Activity {
                 v.setElevation(hasFocus ? 8 * getResources().getDisplayMetrics().density : 0);
             }
         });
+    }
+
+    /** Chip label: "Living Room TV · onn. Streaming Device 4K pro · <ip>" on the
+     *  Pro, but just "onn. 4K Plus Streaming · <ip>" when the user-set name is
+     *  the model (the 4K Plus ships un-named). */
+    private void showDeviceIdentity() {
+        String tvName = DeviceInfo.name(this);
+        String tvModel = DeviceInfo.model();
+        boolean showModel = DeviceInfo.nameDiffersFromModel(this);
+        deviceName.setText(tvName);
+        deviceModel.setText(tvModel);
+        deviceModel.setVisibility(showModel ? View.VISIBLE : View.GONE);
+        deviceSep.setVisibility(showModel ? View.VISIBLE : View.GONE);
     }
 
     private void showLocalIp() {

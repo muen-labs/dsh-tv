@@ -40,6 +40,19 @@ circle discs 66px → **33dp**, overlay composer 720×? px → **360dp**, focus 
 [`theme_eva.xml`](android/tv-assistant/res/values/theme_eva.xml) (`gutter`,
 `gap_col`, `radius_card`, `disc`, `bubble_width`, …).
 
+**Title-safe / overscan (5% rule):** the 1920×1080 framebuffer captures show
+nothing clipped, so the "content is cut off on the left" report is display
+overscan — projectors and some HDMI paths crop the outer few percent of the
+picture. Both full-screen surfaces therefore add a **safe inset on top of the
+design gutters**: `safe_inset` 12dp / `safe_inset_v` 8dp for Bridge home
+(`bridge_pad_h` 88dp = 76+12, `bridge_pad_v` 35dp = 27+8) and
+`pair_safe_inset` 24dp / `pair_safe_inset_v` 24dp for Pairing
+(`pairing_pad_h` 56dp = 32+24 = **5.8%** of the canvas width, 44/38dp
+vertical). Rule of thumb: any new full-screen surface keeps its content at
+least **5% of the 960dp width (48dp)** from every edge — title safe = 5%,
+action safe = 10% — or reuses these tokens. Measured on the Pro:
+leftmost card edge moved 152px → 176px (+12dp) after the change.
+
 Typography (mockup px / 2): **Hero** 29dp · **H1** 17dp bold · **H2**
 10.5dp medium (9dp inside cards) · **Body** 8dp · **Muted** 7dp / 6.75dp ·
 **Label** 5.75dp, tracked +0.09em · **Mono** 7dp (addresses, codes) ·
@@ -135,6 +148,15 @@ Order: brand → status card (state dot + address/mic/accessibility/foreground)
 → **Get started** (pairing primary, then service controls as secondary/outline)
 → first-time setup steps → LAN note. One primary action per screen.
 
+The service control is one state-coloured toggle (`MainActivity.refreshStatus`):
+**green** success-tinted "Start service" (power glyph) while the bridge is
+stopped, **red** destructive "Stop service" while it is running; both variants
+carry the same 2dp focus ring. Screenshots:
+[tv-bridge-home.png](docs/screenshots/tv-bridge-home.png) (running),
+[tv-bridge-home-stopped.png](docs/screenshots/tv-bridge-home-stopped.png)
+(green start action), [tv-bridge-home-4k-plus.png](docs/screenshots/tv-bridge-home-4k-plus.png)
+(updated 1.0→2.0 on the second box).
+
 ### 2. Pairing (`PairingActivity`)
 
 ![Pairing](docs/screenshots/tv-pairing.png)
@@ -142,7 +164,7 @@ Order: brand → status card (state dot + address/mic/accessibility/foreground)
 Brandbar (lockup + `LAN · same network` pill + `READY/SCANNING/WAITING/PAIRED/ERROR`
 badge), then a two-column hero. Left: **STEP 1** chip, 58px hero "Pair this TV
 with **DSH**", subline, 318px white QR plate beside the `PAIRING CODE`, device
-chip (Living Room TV · onn. 4K Pro · IP) and expiry countdown, the disabled
+chip (`● <device_name> · <Build.MODEL> · <IP>`) and expiry countdown, the disabled
 "Waiting for DSH approval…" primary with spinner, a dark **Use a different
 Mac**, the three-step tracker and the pairing-guide line. Right: the exported
 mockup device scene (`res/drawable-nodpi/pair_scene.png` — TV + laptop, glows,
@@ -223,8 +245,16 @@ so the scene stays honest about the launcher, the app row and the Whale-chan til
 - **Step chip + hero** — `STEP 1` chip, 58px/800 headline with exactly one
   emphasised word (`DSH`), one-sentence subline.
 - **QR block** — white plate (318px, quiet zone built in), pairing code in
-  tracked monospace (44px), device chip (`● Living Room TV · onn. 4K Pro ·
-  192.168.4.58`), expiry in warning amber.
+  tracked monospace (44px), device chip (`● <device_name> · <Build.MODEL> ·
+  <IP>`), expiry in warning amber.
+  The device identity is **read from the TV**, not the mockup copy:
+  `Settings.Global.device_name` (fallback `Build.MODEL`, then "Android TV") and
+  `Build.MODEL`; when the user never named the box the two are equal and only
+  one is shown. Observed on the two demo boxes: the Pro reads
+  "Living Room TV · onn. Streaming Device 4K pro · 192.168.4.58", the 4K Plus
+  reads "onn. 4K Plus Streaming · 192.168.5.205". The Bridge-home
+  “Paired with” TV row uses the same `device_name`
+  ([DeviceInfo.java](android/tv-assistant/src/com/jp/dshtv/DeviceInfo.java)).
 - **Actions** — the waiting state is a *disabled* primary with a spinner; the
   escape hatch (`Use a different Mac`) is outline. One primary per screen.
 - **Progress** — a three-step tracker under the actions: Scan → Approve in DSH →

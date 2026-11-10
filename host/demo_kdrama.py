@@ -383,6 +383,29 @@ def play(title: str) -> dict:
     return {"ok": found, "state": dshtv("state")}
 
 
+def adb_target() -> tuple[str, str]:
+    """adb binary + serial for the TV the demo should drive.
+
+    Defaults to the dshtv bridge target (DSHTV_CONFIG / host/config.json), so
+    the demo follows whatever TV is configured - e.g. the onn. 4K Plus on a
+    different subnet. DSHTV_ADB_SERIAL / DSHTV_ADB override both.
+    """
+    adb = os.environ.get("DSHTV_ADB") or str(
+        ROOT.parent / ".tools" / "platform-tools" / "adb")
+    serial = os.environ.get("DSHTV_ADB_SERIAL", "").strip()
+    if not serial:
+        cfg_path = Path(os.environ.get(
+            "DSHTV_CONFIG", str(ROOT / "host" / "config.json")))
+        try:
+            cfg = json.loads(cfg_path.read_text())
+        except (OSError, ValueError):
+            cfg = {}
+        serial = str(cfg.get("serial") or "").strip()
+        if not serial and cfg.get("host"):
+            serial = f"{cfg['host']}:{cfg.get('port') or 5555}"
+    return adb, serial or "192.168.4.58:5555"
+
+
 def present(rec: dict) -> None:
     import shlex
     top3 = rec.get("top3") or []
@@ -392,11 +415,12 @@ def present(rec: dict) -> None:
             " · ".join(f"{i+1}. {t.get('title')}" for i, t in enumerate(top3[:3]))
     msg = (lines + ". Try " + pick + " — " + reason +
            " You have Stremio with Torrentio and yastream.")
-    adb = "/Volumes/External SSD/iptv/.tools/platform-tools/adb"
+    adb, serial = adb_target()
     shell = (f"am start -n com.jp.dshtv/.WhaleActivity --ez suggest true "
              f"--es suggest_title {shlex.quote(pick)} "
              f"--es suggest_reason {shlex.quote(msg)}")
-    subprocess.run([adb, "-s", "192.168.4.58:5555", "shell", shell],
+    print(f"reveal on {serial}", file=sys.stderr)
+    subprocess.run([adb, "-s", serial, "shell", shell],
                    capture_output=True, text=True)
 
 

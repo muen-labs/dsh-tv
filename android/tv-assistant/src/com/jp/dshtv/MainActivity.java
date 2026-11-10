@@ -109,6 +109,11 @@ public class MainActivity extends Activity {
         valueForeground = (TextView) findViewById(R.id.value_foreground);
         valueUptime = (TextView) findViewById(R.id.value_uptime);
         codeCurl = (TextView) findViewById(R.id.code_curl);
+        // "Paired with" TV row: this device's actual name, not the mockup copy.
+        TextView pairedTvName = (TextView) findViewById(R.id.paired_tv_name);
+        if (pairedTvName != null) {
+            pairedTvName.setText(DeviceInfo.name(this));
+        }
 
         Button pair = (Button) findViewById(R.id.btn_pair);
         Button pairSecond = (Button) findViewById(R.id.btn_pair_second);
@@ -274,7 +279,22 @@ public class MainActivity extends Activity {
         statusBadge.setBackgroundResource(running
                 ? R.drawable.pill_success : R.drawable.pill_danger);
 
-        btnStop.setText(running ? "Stop service" : "Start service");
+        // Service toggle: green "Start service" while stopped, red "Stop service"
+        // while running. Background + text colour + icon all follow the state;
+        // both drawables carry the 2dp focus ring so focus stays obvious.
+        if (running) {
+            btnStop.setBackgroundResource(R.drawable.btn_danger);
+            btnStop.setText("Stop service");
+            btnStop.setTextColor(getColor(R.color.danger_text));
+            btnStop.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    R.drawable.ic_stop, 0, 0, 0);
+        } else {
+            btnStop.setBackgroundResource(R.drawable.btn_success);
+            btnStop.setText("Start service");
+            btnStop.setTextColor(getColor(R.color.success_text));
+            btnStop.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    R.drawable.ic_power, 0, 0, 0);
+        }
 
         String ip = primaryIp();
         String shownIp = ip.length() > 0 ? ip : "no IPv4";
