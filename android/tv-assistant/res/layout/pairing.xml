@@ -419,7 +419,7 @@
                         style="@style/Shadcn.Button.Dark"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/button_height"
-                        android:layout_marginLeft="6dp"
+                        android:layout_marginLeft="14dp"
                         android:text="Use a different Mac" />
                 </LinearLayout>
 
@@ -455,7 +455,7 @@
                         style="@style/Shadcn.Button"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/button_height"
-                        android:layout_marginLeft="6dp"
+                        android:layout_marginLeft="14dp"
                         android:text="Pair this TV" />
                 </LinearLayout>
 
@@ -463,7 +463,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginTop="6dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -489,16 +489,16 @@
                             style="@style/Shadcn.Fine"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="4dp"
+                            android:layout_marginLeft="5dp"
                             android:text="Scan the code"
                             android:textColor="@color/foreground" />
                     </LinearLayout>
 
                     <View
-                        android:layout_width="20dp"
+                        android:layout_width="22dp"
                         android:layout_height="1dp"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
                         android:background="@color/border" />
 
                     <LinearLayout
@@ -523,16 +523,16 @@
                             style="@style/Shadcn.Fine"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="4dp"
+                            android:layout_marginLeft="5dp"
                             android:text="Approve in DSH"
                             android:textColor="@color/dim_label" />
                     </LinearLayout>
 
                     <View
-                        android:layout_width="20dp"
+                        android:layout_width="22dp"
                         android:layout_height="1dp"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
                         android:background="@color/border" />
 
                     <LinearLayout
@@ -557,7 +557,7 @@
                             style="@style/Shadcn.Fine"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="4dp"
+                            android:layout_marginLeft="5dp"
                             android:text="Connected"
                             android:textColor="@color/dim_label" />
                     </LinearLayout>
