@@ -1,8 +1,10 @@
 # DeepSeek TV Assistant
 
-`https://github.com/thuyqpham/dsh-tv` · MIT
+`https://github.com/muen-labs/dsh-tv` · MIT
 
 **Whale-chan** — the animated assistant character — turns an Android TV box into a voice terminal for DeepSeek Harness.
+
+> **Also from this account:** [Projector OSD](https://github.com/muen-labs/projector-osd) — put a projector's picture menu on the same TV remote over ADB.
 
 ![Whale-chan](docs/screenshots/pet.jpg)
 
@@ -48,7 +50,7 @@ Android TV box                            Mac mini (or any LAN host)
 ## Install from a release
 
 Download the latest `TVAssistant.apk` (and optionally `DisneyShim.apk`) from
-[Releases](https://github.com/thuyqpham/dsh-tv/releases), then:
+[Releases](https://github.com/muen-labs/dsh-tv/releases), then:
 
 ```bash
 adb connect <tv-ip>:5555

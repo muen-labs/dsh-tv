@@ -23,14 +23,14 @@
       "patch": "./cordis.patch.yml"
     }
   },
-  "author": "thuyqpham",
+  "author": "muen-labs",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thuyqpham/dsh-tv.git",
+    "url": "git+https://github.com/muen-labs/dsh-tv.git",
     "directory": "plugin"
   },
-  "homepage": "https://github.com/thuyqpham/dsh-tv#readme",
+  "homepage": "https://github.com/muen-labs/dsh-tv#readme",
   "bugs": {
-    "url": "https://github.com/thuyqpham/dsh-tv/issues"
+    "url": "https://github.com/muen-labs/dsh-tv/issues"
   }
 }
