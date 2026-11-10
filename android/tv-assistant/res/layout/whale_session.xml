@@ -22,41 +22,28 @@
         android:scaleType="fitXY"
         android:visibility="invisible" />
 
+    <!-- base dim: alpha comes from OverlayModal.SCRIM_ALPHA so the modal
+         treatment is tunable in one place -->
+    <View
+        android:id="@+id/whale_dim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#00000000" />
+
     <View
         android:id="@+id/whale_scrim"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/session_scrim" />
 
-    <!-- top-left cluster: Settings gear + the app the assistant is over -->
+    <!-- top-left: which app the assistant is over -->
     <LinearLayout
+        android:id="@+id/whale_app_chip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|start"
         android:layout_marginLeft="@dimen/app_chip_left"
         android:layout_marginTop="@dimen/app_chip_top"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <ImageButton
-            android:id="@+id/whale_settings"
-            android:layout_width="@dimen/disc_overlay"
-            android:layout_height="@dimen/disc_overlay"
-            android:background="@drawable/btn_close"
-            android:contentDescription="Settings"
-            android:focusable="true"
-            android:nextFocusDown="@id/whale_send"
-            android:nextFocusRight="@id/whale_again"
-            android:nextFocusUp="@id/whale_again"
-            android:padding="8dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_gear" />
-
-    <LinearLayout
-        android:id="@+id/whale_app_chip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="7dp"
         android:background="@drawable/app_chip"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -83,7 +70,6 @@
             android:textColor="@color/chip_text"
             android:textSize="6dp" />
     </LinearLayout>
-    </LinearLayout>
 
     <!-- controls above the composer, right-aligned with it -->
     <LinearLayout
@@ -96,12 +82,33 @@
         android:gravity="end"
         android:orientation="vertical">
 
+        <!-- Control row = exactly the composer width: Settings gear at the
+             composer's left edge, mic + close at its right edge. -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/bubble_width"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/overlay_bubble_gap"
             android:gravity="center_vertical"
             android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/whale_settings"
+                android:layout_width="@dimen/disc_overlay"
+                android:layout_height="@dimen/disc_overlay"
+                android:background="@drawable/btn_close"
+                android:contentDescription="Settings"
+                android:focusable="true"
+                android:nextFocusDown="@id/whale_send"
+                android:nextFocusRight="@id/whale_again"
+                android:nextFocusUp="@id/whale_again"
+                android:padding="8dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_gear" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
 
             <ImageButton
                 android:id="@+id/whale_again"

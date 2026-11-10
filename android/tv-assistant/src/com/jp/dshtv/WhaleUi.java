@@ -219,6 +219,13 @@ public final class WhaleUi {
         showCloseButton();
     }
 
+    /** QA-only: render an intermediate state (e.g. THINKING) without capture. */
+    public void debugState(String state, String says) {
+        pet.play(R.raw.whale_think);
+        setBubble(state, DOT_ACCENT, "", says);
+        showCloseButton();
+    }
+
     /** QA-only: render a completed exchange without capture. */
     public void demo(String heard, String reply) {
         transcript = heard == null ? "" : heard;
@@ -306,7 +313,8 @@ public final class WhaleUi {
 
     /**
      * Explicit D-pad contract for the overlay (the user asked for
-     * "left goes to the gear, up defaults back to the mic"):
+     * "left goes to the gear, up defaults back to the mic"). The gear sits at
+     * the left end of the control row above the composer:
      *   Send:   LEFT -> gear, UP -> mic
      *   gear:   RIGHT -> mic, DOWN -> Send, UP -> mic
      *   mic:    LEFT -> gear

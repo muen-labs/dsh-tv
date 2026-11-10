@@ -184,13 +184,15 @@ blank.
 A translucent window over the playing app, presented as a **modal**. The
 composer is a 360dp card (2dp state rule + eyebrow + transcript + reply) above
 the animated pet, with the 32dp round **mic** and **close** controls above it.
-The **settings gear** lives in a top-left cluster directly beside the app chip
-(same 32dp disc + focus ring; Lucide `settings` drawn *outlined* — 24×24
-viewport, 2px round stroke, no fill), and leaves the assistant for the Bridge
-home. D-pad contract (explicit `nextFocus*` ids + `WhaleUi.handleDpad`): Send
-LEFT → gear, Send UP → mic; gear RIGHT/UP → mic, gear DOWN → Send; mic LEFT →
-gear; close LEFT → mic. Initial focus stays on the composer Send while
-listening. States:
+The **settings gear** sits at the **left end of the control row above the
+composer** — that row is exactly the composer width (360dp), so the gear aligns
+with the bubble's left edge and mic + close stay at its right edge. Same 32dp
+disc + focus ring; Lucide `settings` drawn *outlined* (24×24 viewport, 2px round
+stroke, no fill). It leaves the assistant for the Bridge home. The app chip
+stays alone in the screen's top-left. D-pad contract (explicit `nextFocus*` ids
++ `WhaleUi.handleDpad`): Send LEFT → gear, Send UP → mic; gear RIGHT/UP → mic,
+gear DOWN → Send; mic LEFT → gear; close LEFT → mic. Initial focus stays on the
+composer Send while listening. States:
 
 | State | Eyebrow | Dot | Pet | Body |
 | --- | --- | --- | --- | --- |
@@ -204,10 +206,18 @@ listening. States:
 
 **Modal presentation** (`OverlayModal` + `WhaleActivity`): a captured backdrop
 of the screen behind (accessibility-service `takeScreenshot`, in `KeyService`)
-is downscaled to 160px, box-blurred and shown full-screen under a ~66%-black
-scrim with a vignette and a bottom gradient; the capture is taken before our
-window paints, so the bubble never blurs itself. If capture is unavailable
-(API < 30, accessibility off, refused) the strong scrim alone carries the
+is kept light so the app below stays clearly visible — the capture is
+downscaled to 960px of 1920, box-blurred with radius 1, and shown full-screen
+under a **20%-black dim** plus only a very subtle vignette/bottom gradient
+(history: 66% + a 160px capture was too dark/blurry, then 36%; the user asked
+to keep going lighter). Measured over a text-heavy Stremio frame: bright text
+peaks retained at ~120–143 (was ~27 under the 66% treatment) and the page title,
+description and poster row stay legible; the bubble/pet/controls remain the
+crispest elements. The capture is taken before our window paints, so the bubble
+never blurs itself. All knobs are single constants in `OverlayModal`:
+`SCRIM_ALPHA` (0.20), `DOWNSCALE_WIDTH` (960), `BOX_BLUR_RADIUS` (1),
+`RENDER_BLUR_RADIUS` (8px on API 31+). If capture is
+unavailable (API < 30, accessibility off, refused) the scrim alone carries the
 contrast. Cross-window blur is dead on the demo boxes
 (`ro.surface_flinger.supports_background_blur` is empty), so
 `WindowManager.isCrossWindowBlurEnabled()` + `setBackgroundBlurRadius` is only a

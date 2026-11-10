@@ -134,6 +134,10 @@ public class WhaleActivity extends Activity {
                     getIntent().getStringExtra("suggest_reason"));
             return;
         }
+        if (getIntent() != null && getIntent().getBooleanExtra("thinking", false)) {
+            ui.debugState("THINKING", "DSH is working on it…");
+            return;
+        }
         if (getIntent() != null && getIntent().getBooleanExtra("demo", false)) {
             ui.demo("Open Stremio and search for anime",
                     "Opening Stremio and searching for “anime”, one moment.");

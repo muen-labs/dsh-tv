@@ -102,6 +102,12 @@ adb shell pm grant com.jp.dshtv android.permission.RECORD_AUDIO
 > reads the current list, appends `com.jp.dshtv/com.jp.dshtv.KeyService` if it
 > is missing, and only ever prunes entries whose package is no longer installed
 > (`--prune`). It prints the before/after list.
+>
+> If entries keep disappearing after the helper ran, look at the vendor
+> **Projector OSD app (`com.jp.osdtrigger`)** — on these boxes it rewrites the
+> enabled-services list when it takes the foreground (it was observed dropping
+> Projectivy). Disable that app's accessibility service if you do not need it;
+> this APK never writes the settings list (it only reads it).
 
 Open the **Pair this TV with Whale-chan** tile on the TV and scan the QR with
 your phone, or approve the same request inside DSH → Settings → **Whale-chan
@@ -142,6 +148,12 @@ Open [`docs/ui-mockup.html`](docs/ui-mockup.html) in a browser — it is fully s
 1920×1080 with the real EVA tokens, the animated pet and all assistant states.
 Use the sidebar (or `#bridge`, `#pairing`, `#assistant`, `#components`) and the
 "Show focus rings" toggle to review focus treatment.
+
+Every **implemented** screen is collected in
+[`docs/ui-gallery.html`](docs/ui-gallery.html) — real 1920×1080 captures of
+Bridge home (running/stopped/4K Plus), Pairing, the assistant modal states
+(listening/answered/error/gear focus), suggestions/demo leg, the DSH pane
+phases and the launcher icon. Open it in a browser and use the rail or ←/→.
 
 ## Voice pipeline
 
@@ -212,10 +224,13 @@ steps.
    and search for anime."*
 3. The bubble shows what it heard (SenseVoice), then DSH's reply, spoken via TTS.
 4. **OK** sends early instead of waiting for the silence timeout; **Back** cancels.
-5. The **gear** at the overlay's top-left (next to the app chip) closes the
-   assistant and opens the Bridge home / settings screen. D-pad: from the
-   composer **LEFT** jumps to the gear, **UP** returns to the mic; from the gear
-   **RIGHT/UP** go to the mic and **DOWN** back to the composer.
+5. The **gear** at the left end of the control row above the composer (the row
+   is the composer's width; mic/close sit at its right end) closes the assistant
+   and opens the Bridge home / settings screen. D-pad: from the composer
+   **LEFT** jumps to the gear, **UP** returns to the mic; from the gear
+   **RIGHT/UP** go to the mic and **DOWN** back to the composer. The overlay is
+   a light modal — the app behind stays visible through a soft blur and ~36%
+   dim.
 
 ### Mapping a remote button to the bridge screen
 

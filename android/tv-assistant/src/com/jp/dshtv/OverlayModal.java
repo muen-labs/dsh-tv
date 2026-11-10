@@ -1,6 +1,7 @@
 package com.jp.dshtv;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.graphics.Bitmap;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
@@ -30,6 +31,16 @@ public final class OverlayModal {
     private static final String TAG = "WhaleOverlay";
     private static final long REVEAL_FALLBACK_MS = 900;
 
+    // ---- modal treatment tunables (single place to dial it) ----------------
+    /** Flat black dim over the backdrop; low enough to keep the app readable. */
+    private static final float SCRIM_ALPHA = 0.20f;
+    /** Resolution the screen is captured down to before blurring (1920 native). */
+    private static final int DOWNSCALE_WIDTH = 960;
+    /** Box-blur radius on the downscaled capture; 0 disables it. */
+    private static final int BOX_BLUR_RADIUS = 1;
+    /** Extra GPU blur on API 31+; small so text stays recognisable. */
+    private static final float RENDER_BLUR_RADIUS = 8f;
+
     private OverlayModal() {
     }
 
@@ -44,6 +55,12 @@ public final class OverlayModal {
         final View chip = root.findViewById(R.id.whale_app_chip);
         final Handler main = new Handler(Looper.getMainLooper());
         final AtomicBoolean revealed = new AtomicBoolean(false);
+
+        // flat dim is a runtime constant so the treatment stays tunable
+        View dim = root.findViewById(R.id.whale_dim);
+        if (dim != null) {
+            dim.setBackgroundColor(Color.argb(Math.round(SCRIM_ALPHA * 255), 6, 10, 18));
+        }
 
         // keep our layer invisible while the screen is captured so the shot
         // does not contain our own bubble
@@ -91,10 +108,11 @@ public final class OverlayModal {
                     public void run() {
                         if (blurred != null && backdrop != null) {
                             backdrop.setImageBitmap(blurred);
-                            if (Build.VERSION.SDK_INT >= 31) {
+                            if (Build.VERSION.SDK_INT >= 31 && RENDER_BLUR_RADIUS > 0f) {
                                 try {
                                     backdrop.setRenderEffect(RenderEffect.createBlurEffect(
-                                            8f, 8f, Shader.TileMode.CLAMP));
+                                            RENDER_BLUR_RADIUS, RENDER_BLUR_RADIUS,
+                                            Shader.TileMode.CLAMP));
                                 } catch (Throwable ignored) {
                                 }
                             }
@@ -127,21 +145,23 @@ public final class OverlayModal {
                 .setInterpolator(new DecelerateInterpolator(1.4f)).start();
     }
 
-    /** Heavy downscale + box blur; the ImageView scales the result up. */
+    /**
+     * Light treatment: capture down to DOWNSCALE_WIDTH (960 of 1920), apply a
+     * small box blur, and let the ImageView scale it back up. Text and blocks
+     * behind stay recognisable; edges only soften.
+     */
     private static Bitmap blurred(Bitmap src) {
         if (src == null || src.getWidth() < 8 || src.getHeight() < 8) {
             return null;
         }
         try {
-            int width = 160;
+            int width = Math.min(DOWNSCALE_WIDTH, src.getWidth());
             int height = Math.max(8, Math.round(width * (float) src.getHeight() / src.getWidth()));
             Bitmap small = Bitmap.createScaledBitmap(src, width, height, true);
-            boxBlur(small, 3);
-            Bitmap out = Bitmap.createScaledBitmap(small, width * 2, height * 2, true);
-            if (small != out) {
-                small.recycle();
+            if (BOX_BLUR_RADIUS > 0) {
+                boxBlur(small, BOX_BLUR_RADIUS);
             }
-            return out;
+            return small;
         } catch (Throwable t) {
             Log.i(TAG, "blur failed: " + t);
             return null;
@@ -153,7 +173,7 @@ public final class OverlayModal {
         }
     }
 
-    /** Naive box blur on a tiny bitmap (160x90) - cheap in a worker thread. */
+    /** Naive box blur on the downscaled capture - cheap in a worker thread. */
     private static void boxBlur(Bitmap bitmap, int radius) {
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
