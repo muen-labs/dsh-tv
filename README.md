@@ -2,11 +2,18 @@
 
 `https://github.com/muen-labs/dsh-tv` · MIT
 
+[![build-apk](https://github.com/muen-labs/dsh-tv/actions/workflows/build-apk.yml/badge.svg)](https://github.com/muen-labs/dsh-tv/actions/workflows/build-apk.yml)
+[![latest release](https://img.shields.io/github/v/release/muen-labs/dsh-tv?label=download%20APK)](https://github.com/muen-labs/dsh-tv/releases/latest)
+[![license](https://img.shields.io/github/license/muen-labs/dsh-tv)](LICENSE)
+
 **Whale-chan** — the animated assistant character — turns an Android TV box into a voice terminal for DeepSeek Harness.
 
 > **Also from this account:** [Projector OSD](https://github.com/muen-labs/projector-osd) — put a projector's picture menu on the same TV remote over ADB.
 
-![Whale-chan](docs/screenshots/pet.jpg)
+**Demo** — a real capture on the onn. 4K Plus: bridge home → QR pairing → the
+assistant modal over Stremio (the assistant answers, DSH drives the box).
+
+![DeepSeek TV Assistant demo: bridge home, QR pairing, assistant modal](docs/demo.gif)
 
 DeepSeek Whale-chan turns an Android TV box into a voice terminal for
 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). Press one
@@ -50,7 +57,7 @@ Android TV box                            Mac mini (or any LAN host)
 ## Install from a release
 
 Download the latest `TVAssistant.apk` (and optionally `DisneyShim.apk`) from
-[Releases](https://github.com/muen-labs/dsh-tv/releases), then:
+[Releases](https://github.com/muen-labs/dsh-tv/releases/latest), then:
 
 ```bash
 adb connect <tv-ip>:5555
@@ -159,6 +166,23 @@ phases and the launcher icon. Open it in a browser and use the rail or ←/→.
 The page is self-contained (every screenshot embedded as a data URI, ~5 MB), so
 it works from anywhere; regenerate it with `python3 tools/make-ui-gallery.py`
 after recapturing a screen.
+
+## Verification & tests
+
+- `build-apk` CI on every push: builds the TV APK and the Disney+ shim on a
+  clean runner (placeholder `WHALE_TOKEN=pair-me`, no secrets) and uploads them
+  as artifacts.
+- `verify-tv` CI on every push: parses the DSH client bundle, checks that every
+  copy key is used in **both** `en` and `zh`, renders every pane phase, and
+  exercises the host proxy against the live daemon when one is present.
+- Local: `cd plugin/ui && npm ci && npm run verify` (bundle + pane + host
+  routes). Device checks are manual: bridge/pairing/overlay screenshots under
+  [`docs/screenshots/`](docs/screenshots) and the gallery
+  [`docs/ui-gallery.html`](docs/ui-gallery.html) are real captures from the
+  onn. 4K Pro and the onn. 4K Plus.
+- Not covered yet (see issues): the Stremio catalog/search matcher and playback
+  health, a per-Android-version test matrix, and the voice-interaction-session
+  overlay path.
 
 ## Voice pipeline
 

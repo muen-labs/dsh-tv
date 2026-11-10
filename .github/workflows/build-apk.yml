@@ -7,6 +7,7 @@ on:
 
 jobs:
   build:
+    name: build-apk
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,3 +28,23 @@ jobs:
           path: |
             android/tv-assistant/TVAssistant.apk
             android/disney-shim/DisneyShim.apk
+
+  verify-tv:
+    name: verify-tv
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: plugin/ui/package-lock.json
+      - name: Install the plugin workspace
+        working-directory: plugin/ui
+        run: npm ci
+      - name: Build the DSH client bundle
+        working-directory: plugin/ui
+        run: node build.mjs
+      - name: Verify bundle, copy keys and every pane phase
+        working-directory: plugin/ui
+        run: node tools/verify.mjs
