@@ -391,3 +391,28 @@ store: korean-revenge  South Korean Revenge  15 picks
 
 Also raised `MAX_TURN_SECONDS` to 600 and the client read timeout to 650 s: a catalog build is
 not a question, and a 3-5 minute one was returning 504.
+
+## Conformance: Stremio's linter judges the manifest, not us
+
+`host/conformance/validate.js` runs our manifest through
+[`stremio-addon-linter`](https://www.npmjs.com/package/stremio-addon-linter) — MIT, maintained by
+the people who define the protocol — and `deploy.sh` now fails if it objects:
+
+```bash
+cd host/conformance && npm install     # once; node_modules is gitignored
+bash host/deploy.sh
+# conformance: {"ok":true,"addon":"com.muen.deepseek.tv", …, "catalogs":4,"errors":[],"warnings":[]}
+```
+
+Why it matters: two of the defects this project hit — the four-segment `skip=` pagination route
+and Nuvio refusing to persist the addon — were found by trial and error against a closed player.
+A protocol-level check catches the class of problem that does not depend on which player is
+looking.
+
+Both shapes are verified, and the gate is verified to actually fail:
+
+| Manifest | Result |
+|---|---|
+| live addon, 4 catalogs | `ok: true`, no errors, no warnings |
+| private-source shape (`catalog`+`meta`+`stream`, `dsv` ids) | `ok: true` |
+| deliberately broken (no `version`) | `ok: false` — *"manifest.version must be a valid semver string"*, exit 1 |

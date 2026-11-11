@@ -1,0 +1,7 @@
+{
+  "name": "dshtv-addon-conformance",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Validate our addon manifest with Stremio's own protocol linter",
+  "dependencies": { "stremio-addon-linter": "^1.7.0" }
+}

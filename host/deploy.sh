@@ -117,6 +117,19 @@ rows = d.get('catalogs') or []
 print(f"  manifest: {d.get('name')} v{d.get('version')} · resources={d.get('resources')}")
 print(f"  rows: {[r['name'] for r in rows] or 'none yet — the agent builds them'}")
 PY
+  # Conformance: ask Stremio's own protocol linter, not our opinion of our manifest.
+  CONF_DIR="$REPO_HOST/conformance"
+  if command -v node >/dev/null 2>&1 && [ -d "$CONF_DIR/node_modules" ]; then
+    CONF_OUT="$(node "$CONF_DIR/validate.js" "$URL" 2>&1 || true)"
+    say "conformance: $CONF_OUT"
+    case "$CONF_OUT" in
+      *'"ok":true'*) ;;
+      *) echo "manifest failed Stremio's protocol linter — see above" >&2; exit 1 ;;
+    esac
+  else
+    say "conformance: SKIPPED (need node, and: cd host/conformance && npm install)"
+  fi
+
   printf '\n  install in Stremio: Addons → Add addon → paste that URL\n'
   printf '  add a row:  %s/catalog_add.py --catalog-id my-row --catalog-name "My Row" --items items.json\n' "$LIVE_DIR"
 else
