@@ -9,11 +9,16 @@ Two cuts, because the first frame decides which sub it works in:
 - **r/DeepSeek · r/LocalLLaMA** — [`docs/demo-short.mp4`](demo-short.mp4) (1.5 MB, 13.8 s):
   opens on the source pick, drops the 1 s buffering gap, ends on the episode playing with the
   scrubber visible. Poster: [`demo-poster.jpg`](demo-poster.jpg)
-- **r/AndroidTV** — [`docs/demo-androidtv.mp4`](demo-androidtv.mp4) (1.4 MB, 10.6 s): the
-  assistant's own UI (FOR YOU card, pet, gear) over the launcher, then app control and the
-  search being typed. It carries no stream-source names on purpose — on that sub they read as
-  "piracy app" and take the thread off-topic. Poster:
-  [`demo-androidtv-poster.jpg`](demo-androidtv-poster.jpg)
+- **r/AndroidTV** — [`docs/demo-launch.mp4`](demo-launch.mp4) (0.9 MB, 8.5 s): the assistant on
+  the launcher announcing *"Opening Nuvio — a sideloaded app Google Assistant cannot launch"*,
+  then Nuvio's home with content. Poster: [`demo-launch-poster.jpg`](demo-launch-poster.jpg)
+  - The last 3 s are a **still with a slow push-in** ([`demo-launch-payoff.jpg`](demo-launch-payoff.jpg)),
+    not a capture: `screenrecord` returns a 0-byte file for Nuvio's surface, so a launched app
+    can't be recorded as video on this box. Screenshots work fine. Say so if asked rather than
+    implying the whole clip is live.
+  - TiviMate (`ar.tvplayer.tv`) **launches correctly** but has no playlist on this box, so it
+    opens to a black screen — not a usable demo subject until one is added. Nuvio was chosen
+    because it is also sideloaded and actually renders.
 - Full flow if someone asks: [`docs/demo.mp4`](demo.mp4) (2.9 MB, 34 s),
   [`docs/demo.gif`](demo.gif) (2.0 MB)
 - UI gallery: <https://github.com/muen-labs/dsh-tv/blob/main/docs/ui-gallery.html>

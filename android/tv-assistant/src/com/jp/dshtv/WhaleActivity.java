@@ -140,6 +140,15 @@ public class WhaleActivity extends Activity {
             ui.debugState("THINKING", "DSH is working on it…");
             return;
         }
+        // QA/docs hook: render any exchange without speaking, through the same renderer the
+        // canned --ez demo uses. This is what makes an honest screenshot possible for a case
+        // the fixed demo text does not cover (e.g. an app Google Assistant cannot launch).
+        String ask = getIntent() != null ? getIntent().getStringExtra("ask") : null;
+        String reply = getIntent() != null ? getIntent().getStringExtra("reply") : null;
+        if (ask != null && reply != null) {
+            ui.demo(ask, reply);
+            return;
+        }
         if (getIntent() != null && getIntent().getBooleanExtra("demo", false)) {
             ui.demo("Open Stremio and search for anime",
                     "Opening Stremio and searching for “anime”, one moment.");
