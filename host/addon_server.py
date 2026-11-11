@@ -31,6 +31,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -122,9 +123,13 @@ def build_manifest(token: str) -> dict:
 def build_catalog(picks: dict, kind: str, skip: int = 0, search: str | None = None) -> dict:
     ids = picks.get(kind) or []
     window = ids[skip:skip + PAGE]
+    # One metadata lookup per title, and they are independent — so they go out together.
+    # Sequentially this was 5-6s for a 17-title row, which on a TV's already-laggy UI is the
+    # difference between a row appearing and the app feeling broken.
+    with ThreadPoolExecutor(max_workers=min(12, max(1, len(window)))) as pool:
+        fetched = list(pool.map(lambda i: _fetch_meta(kind, i), window))
     metas = []
-    for imdb_id in window:
-        meta = _fetch_meta(kind, imdb_id)
+    for imdb_id, meta in zip(window, fetched):
         if not meta:
             continue
         metas.append({
