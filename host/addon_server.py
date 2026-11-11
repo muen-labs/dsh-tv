@@ -47,6 +47,8 @@ STORE_PATH = Path(__file__).with_name("catalogs.json")
 VERSION = "0.1.0"
 PAGE = 24
 CACHE_TTL = 900
+#: how long a player may reuse our answer before asking again
+CACHE_SECONDS = 60
 
 _cache: dict[str, tuple[float, dict]] = {}
 _lock = threading.Lock()
@@ -248,6 +250,11 @@ def direct_item(item_id: str) -> tuple[dict, dict, int] | None:
 
 
 class Handler(BaseHTTPRequestHandler):
+    # Keep-alive: a player asks for the manifest, several rows, then meta per item. On
+    # HTTP/1.0 each of those is a fresh TCP connection, which is pointless latency on a TV
+    # that is already slow. Content-Length is always set, so 1.1 is safe here.
+    protocol_version = "HTTP/1.1"
+
     picks_path: Path
     token: str
     picks_mtime: float = 0.0
@@ -271,6 +278,10 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("content-type", "application/json; charset=utf-8")
         self.send_header("access-control-allow-origin", "*")
+        # A dynamic catalog must not be cached like a static one. Without this the player
+        # serves its first copy for the session, so a row the agent builds now would not
+        # appear until the app restarts — which would quietly turn "dynamic" into "static".
+        self.send_header("cache-control", "public, max-age=%d, must-revalidate" % CACHE_SECONDS)
         self.send_header("content-length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
