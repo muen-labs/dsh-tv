@@ -416,3 +416,40 @@ Both shapes are verified, and the gate is verified to actually fail:
 | live addon, 4 catalogs | `ok: true`, no errors, no warnings |
 | private-source shape (`catalog`+`meta`+`stream`, `dsv` ids) | `ok: true` |
 | deliberately broken (no `version`) | `ok: false` — *"manifest.version must be a valid semver string"*, exit 1 |
+
+## One-command install, and the row-snapshot limit
+
+`host/install_addon.py` installs or refreshes the addon in Stremio with no typing: it launches
+Stremio, returns to the board, opens Add addons, types the URL, presses ADD and Install, and
+confirms by checking the screen offers **Uninstall**. Typing goes through adb, not the bridge —
+`/text` needs the accessibility service, which every APK update disables, so relying on it made
+installing depend on a setting.
+
+Verified: `{"ok": true, "confirmed_by": "the add-on screen offers Uninstall"}`. The assistant can
+run it on request too — asked *"install my catalog rows in stremio"* it did, in 9.7 s, and said
+so accurately.
+
+### The limit it exposed
+
+Adding a row after install does **not** make it appear, and this is not a caching problem:
+
+| | |
+|---|---|
+| live manifest | 4 catalogs (`chinese-new-wave`, `in-cinemas`, `japanese-slow`, `korean-revenge`) |
+| Stremio fetched it | `[02:42:19] 192.168.4.58 200 manifest` |
+| catalogs Stremio ever requested | only `chinese-new-wave`, `in-cinemas` |
+| board | the two original rows, never the two newer ones |
+
+Stremio snapshots the catalog list when the addon is *added*; a refreshed manifest updates an
+existing row's contents but not the set of rows. So "the agent builds a row, it appears" holds
+only for rows that existed at install time.
+
+Two ways out, and the trade is names vs steps:
+
+1. **Fixed slots** — declare e.g. six rows once; the store maps bespoke catalogs into them. Rows
+   then appear with no further interaction, but their names are fixed by the manifest, so the
+   agent cannot title them.
+2. **Automated remove + re-add** — a true rebuild of the row set, which `install_addon.py` could
+   do, giving meaningful names at the cost of running a ~40 s UI sequence after each new row.
+
+Neither is obviously right; the choice depends on whether a named row is worth 40 seconds.
