@@ -32,6 +32,7 @@ from pathlib import Path
 LIVE_DIR = Path(os.environ.get("DSHTV_ADDON_DATA")
                 or (Path.home() / "Library" / "Application Support" / "dsh-tv-addon"))
 DEFAULT_CATALOGS = str(LIVE_DIR / "catalogs.json")
+SLOT_COUNT = 6      # the manifest's fixed row set (see addon_server.SLOT_NAMES)
 
 CINEMETA = "https://v3-cinemeta.strem.io"
 
@@ -185,17 +186,21 @@ def main(argv) -> int:
             store = store if isinstance(store, list) else []
         except (FileNotFoundError, json.JSONDecodeError):
             store = []
+        used = {e.get("slot") for e in store if isinstance(e, dict)}
+        existing = next((e for e in store if isinstance(e, dict) and e.get("id") == cid), {})
+        slot = existing.get("slot") or next((n for n in range(1, SLOT_COUNT + 1) if n not in used), None)
         store = [e for e in store if not (isinstance(e, dict) and e.get("id") == cid)]
         store.append({
             "id": cid,
             "type": args.catalog_type,
+            "slot": slot,
             "name": name,
             "seed": spec.get("seed"),
             "theme": spec.get("theme"),
             "picks": out[args.catalog_type],
         })
         store_path.write_text(json.dumps(store, indent=1) + "\n")
-        print(f"  catalog '{cid}' ({name}) written to {store_path} with {len(out[args.catalog_type])} titles")
+        print(f"  catalog '{cid}' ({name}) -> slot {slot}, {len(out[args.catalog_type])} titles")
     print()
     print(json.dumps({
         "ok": True,

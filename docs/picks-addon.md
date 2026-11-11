@@ -488,3 +488,26 @@ Adopting the new row **ids** needs Stremio to re-read the catalog list, which it
 fresh add — re-adding the same URL updates the manifest but keeps the old row set. So after this
 change, the addon has to be removed and added once in Stremio. After that, filling a slot needs
 no player interaction at all, which is the point of the design.
+
+### Verified: the slots are live in Stremio
+
+After one remove-and-add (needed only to adopt the new row *ids*), Stremio requested every slot:
+
+```
+09:14:43  200 catalog slot 2
+09:14:44  200 catalog slot 1
+09:14:52  200 catalog slot 3 skip=4
+09:15:03  200 catalog slot 5 skip=14
+```
+
+and the board shows **"DeepSeek · By theme"** with Oldboy, Sympathy for Mr. Vengeance, I Saw the
+Devil, The Man from Nowhere, The Chaser — slot 5's content, rendered natively.
+
+Filling a *free* slot is instant on the server side: `picks_research.py` assigned the first free
+slot, and `slot-1` immediately served 12 Hong Kong Crime titles (Infernal Affairs, Hard Boiled,
+The Killer, Chungking Express) with no restart and no player interaction.
+
+One caveat worth keeping: Stremio holds a catalog response for the session, so a slot that was
+served **empty** at install does not fill in on the board until the player reloads its catalogs
+(app restart) — the next load shows it. Content changes inside a row that already had content
+are picked up on the usual cache expiry.
