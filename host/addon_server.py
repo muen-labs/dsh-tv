@@ -104,11 +104,22 @@ def load_store(path: Path) -> list[dict]:
             continue
         if not entry.get("id") or not entry.get("type"):
             continue
+        items = []
+        for it in (entry.get("items") or []):
+            if isinstance(it, dict) and it.get("url") and it.get("name"):
+                items.append({
+                    "name": str(it["name"]),
+                    "url": str(it["url"]),
+                    "poster": it.get("poster"),
+                    "description": it.get("description"),
+                    "releaseInfo": it.get("releaseInfo"),
+                })
         out.append({
             "id": str(entry["id"]),
             "type": str(entry["type"]),
             "name": entry.get("name") or entry["id"],
             "picks": [i for i in (entry.get("picks") or []) if str(i).startswith("tt")],
+            "items": items,
         })
     return out
 
@@ -121,12 +132,44 @@ def build_manifest(token: str) -> dict:
         "description": "Rows built on the fly. The picks come from DeepSeek TV; the streams "
                        "come from whichever stream addon you already installed.",
         "types": ["movie", "series"],
-        "resources": ["catalog"],
+        "resources": _resources(),
         "catalogs": _manifest_catalogs(),
-        # Only ids that stream addons already index are useful here.
-        "idPrefixes": ["tt"],
+        "idPrefixes": _id_prefixes(),
         "behaviorHints": {"configurable": False},
     }
+
+
+DIRECT_PREFIX = "dsv"     # ids for items the addon plays itself, never colliding with tt…
+
+
+def _has_direct() -> bool:
+    return any(e["items"] for e in load_store(STORE_PATH))
+
+
+def _resources() -> list:
+    """A catalog is always needed; meta/stream only when the addon itself carries playable
+    items that no IMDB-keyed stream addon could resolve."""
+    if _has_direct():
+        return ["catalog", "meta", "stream"]
+    return ["catalog"]
+
+
+def _id_prefixes() -> list[str]:
+    return ["tt", DIRECT_PREFIX] if _has_direct() else ["tt"]
+
+
+def direct_id(catalog_id: str, index: int) -> str:
+    return f"{DIRECT_PREFIX}:{catalog_id}:{index}"
+
+
+def parse_direct_id(item_id: str) -> tuple[str, int] | None:
+    parts = item_id.split(":")
+    if len(parts) != 3 or parts[0] != DIRECT_PREFIX:
+        return None
+    try:
+        return parts[1], int(parts[2])
+    except ValueError:
+        return None
 
 
 def _manifest_catalogs() -> list[dict]:
@@ -178,17 +221,52 @@ def build_catalog(ids: list[str], kind: str, skip: int = 0) -> dict:
     return {"metas": metas}
 
 
+def build_catalog_direct(entry: dict, kind: str, skip: int = 0) -> dict:
+    """A row of items the addon plays itself — no IMDB id involved, so no stream addon needed."""
+    metas = []
+    for index, item in enumerate(entry["items"][skip:skip + PAGE], start=skip):
+        metas.append({
+            "id": direct_id(entry["id"], index),
+            "type": kind,
+            "name": item["name"],
+            "poster": item.get("poster"),
+            "description": item.get("description"),
+            "releaseInfo": item.get("releaseInfo"),
+        })
+    return {"metas": metas}
+
+
+def direct_item(item_id: str) -> tuple[dict, dict, int] | None:
+    parsed = parse_direct_id(item_id)
+    if not parsed:
+        return None
+    catalog_id, index = parsed
+    for entry in load_store(STORE_PATH):
+        if entry["id"] == catalog_id and index < len(entry["items"]):
+            return entry, entry["items"][index], index
+    return None
+
+
 class Handler(BaseHTTPRequestHandler):
     picks_path: Path
     token: str
     picks_mtime: float = 0.0
     picks: dict = {}
 
-    def log_message(self, fmt, *args):  # quieter than the default
-        print(f'[{time.strftime("%H:%M:%S")}] {self.address_string()} {fmt % args}', flush=True)
+    def log_message(self, fmt, *args):
+        """Silence the default logger on purpose.
+
+        A private catalog is only private if its log is: the default line prints the whole
+        path, which carries the token and, for direct items, can carry nothing sensitive but
+        still names the row. So logging happens in _send as a route shape only.
+        """
+        return
 
     # ---- helpers -------------------------------------------------------
+    store_lock = threading.Lock()
+
     def _send(self, status: int, payload: dict) -> None:
+        print(f'[{time.strftime("%H:%M:%S")}] {self.address_string()} {status} {getattr(self, "summary", "?")}', flush=True)
         body = json.dumps(payload).encode("utf-8")
         self.send_response(status)
         self.send_header("content-type", "application/json; charset=utf-8")
@@ -218,6 +296,7 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- routes --------------------------------------------------------
     def do_GET(self):  # noqa: N802
+        self.summary = "request"
         parts = self._route()
         if not parts or parts[0] != self.token:
             # A bare /manifest.json is convenient while testing locally.
@@ -227,6 +306,7 @@ class Handler(BaseHTTPRequestHandler):
 
         rest = parts[1:]
         if rest == ["manifest.json"]:
+            self.summary = "manifest"
             return self._send(200, build_manifest(self.token))
 
         # Stremio/Nuvio path shapes:
@@ -257,6 +337,9 @@ class Handler(BaseHTTPRequestHandler):
             entry = next((e for e in load_store(STORE_PATH)
                           if e["id"] == cid and e["type"] == kind), None)
             if entry:
+                self.summary = f"catalog {kind}/{cid}" + (f" skip={skip}" if skip else "")
+                if entry["items"]:
+                    return self._send(200, build_catalog_direct(entry, kind, skip))
                 return self._send(200, build_catalog(entry["picks"], kind, skip))
             if cid == "deepseek":       # back-compat single row
                 return self._send(200, build_catalog(self._load_picks().get(kind) or [], kind, skip))
@@ -266,8 +349,34 @@ class Handler(BaseHTTPRequestHandler):
             _, kind, filename = rest
             if not filename.endswith(".json"):
                 return self._send(404, {"error": "not found"})
-            meta = _fetch_meta(kind, filename[:-5])
+            item_id = filename[:-5]
+            self.summary = f"meta {kind}"
+            found = direct_item(item_id)
+            if found:
+                entry, item, index = found
+                return self._send(200, {"meta": {
+                    "id": item_id, "type": kind, "name": item["name"],
+                    "poster": item.get("poster"), "description": item.get("description"),
+                    "releaseInfo": item.get("releaseInfo"),
+                }})
+            meta = _fetch_meta(kind, item_id)
             return self._send(200, {"meta": meta} if meta else {"meta": None})
+
+        if len(rest) == 3 and rest[0] == "stream":
+            _, kind, filename = rest
+            if not filename.endswith(".json"):
+                return self._send(404, {"error": "not found"})
+            item_id = filename[:-5]
+            self.summary = f"stream {kind}"
+            found = direct_item(item_id)
+            if not found:
+                return self._send(200, {"streams": []})
+            entry, item, _index = found
+            return self._send(200, {"streams": [{
+                "name": entry["name"],
+                "title": item["name"],
+                "url": item["url"],
+            }]})
 
         return self._send(404, {"error": "not found", "path": self.path})
 
@@ -308,7 +417,8 @@ def main() -> int:
     if store:
         print(f"catalogs: {len(store)} bespoke row(s) from {STORE_PATH}", flush=True)
         for e in store:
-            print(f"  {e['type']:6} {e['id']:16} {e['name'][:36]:36} {len(e['picks'])} titles", flush=True)
+            count = f"{len(e['items'])} direct items" if e["items"] else f"{len(e['picks'])} titles"
+            print(f"  {e['type']:6} {e['id']:16} {e['name'][:36]:36} {count}", flush=True)
     else:
         print(f"catalogs: none yet in {STORE_PATH} — falling back to {picks}", flush=True)
     try:

@@ -239,3 +239,43 @@ Privacy posture, stated plainly: the token is the only credential, anyone on the
 the URL can read the picks, and Stremio accepts the plain-HTTP LAN URL (Nuvio does not
 persist it). That is the right trade for a home instance and the wrong one for anything
 reachable from the internet.
+
+## Any private source, not just IMDB
+
+A catalog full of `tt…` ids is only half the idea: IMDB ids work because Torrentio/Comet
+already index them. For a source that no stream addon knows about — a personal account, a
+private archive, anything you host — the addon has to carry the URL itself.
+
+The manifest adapts: when the store holds a direct catalog, it advertises `meta` and `stream`
+alongside `catalog`, and mints ids under its own prefix so they can never collide with `tt…`:
+
+```
+"resources":   ["catalog", "meta", "stream"]
+"idPrefixes":  ["tt", "dsv"]
+```
+
+```bash
+./catalog_add.py --catalog-id private-archive --catalog-name "My Archive" --items items.json
+```
+
+`items.json` is `[{ "name", "url", "poster"?, "description"?, "releaseInfo"? }]`. The item id is
+derived (`dsv:<catalog>:<n>`), so the row is stable across restarts.
+
+Verified with two public test assets: `catalog/movie/test-direct.json` listed them under `dsv:`
+ids, `stream/movie/dsv:test-direct:0.json` returned the playable URL, and
+`meta/movie/dsv:test-direct:1.json` returned its metadata. The test row was then removed.
+
+## Logging is content-neutral by default
+
+A private catalog is only private if its log is. The server no longer logs the request path —
+that carries the token, and for direct items it would name the row. It logs the route shape
+only:
+
+```
+[00:50:54] 192.168.4.57 200 manifest
+[00:50:58] 192.168.4.57 200 catalog movie/test-direct
+[00:50:58] 192.168.4.57 200 stream movie
+```
+
+No token, no item URL, no title. This is the default rather than a flag, because the sensitive
+case is the one nobody remembers to configure.
