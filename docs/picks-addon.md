@@ -204,3 +204,38 @@ screenshot:
 The `skip=` lines are the pagination fix doing its job — without it the row stops growing
 silently. The rows required a Stremio restart before the board rebuilt; that was the only
 thing standing between "installed" and "visible".
+
+## Deployment: local and private, by design
+
+A bespoke catalog *is* the person's taste, so hosting it on shared infrastructure inverts the
+idea — the recommendations would live on someone else's server. The addon therefore belongs
+on the machine that already holds the agent, one instance per person, reachable on the LAN.
+
+That makes the deployment problem "keep a local process alive", not "find a host". Two facts
+shaped the answer:
+
+1. **It must live on the internal disk.** launchd cannot read `/Volumes/External SSD`
+   without Removable Volumes / Full Disk Access — it fails with `Operation not permitted`.
+   That is precisely what killed the old `com.jp-iptv.serve` agent. So the addon is installed
+   to `~/Library/Application Support/dsh-tv-addon/` and reads its catalogs from there.
+2. **launchd with `KeepAlive` is enough.** No tunnel, no container, no subscription.
+
+Template: `host/com.muen.dshtv-addon.plist.example`.
+
+```bash
+mkdir -p ~/Library/Application\ Support/dsh-tv-addon
+cp host/addon_server.py host/catalogs.json host/picks.json \
+   ~/Library/Application\ Support/dsh-tv-addon/
+# fill in the token and AIOmetadata uuid in the example, then:
+cp host/com.muen.dshtv-addon.plist.example ~/Library/LaunchAgents/com.muen.dshtv-addon.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.muen.dshtv-addon.plist
+```
+
+Verified: killing the process (`kill -9`) brings it back within seconds — pid 34084 → 34153,
+manifest still `200`, both rows still listed. The URL does not change, so Stremio keeps
+working across restarts.
+
+Privacy posture, stated plainly: the token is the only credential, anyone on the LAN who has
+the URL can read the picks, and Stremio accepts the plain-HTTP LAN URL (Nuvio does not
+persist it). That is the right trade for a home instance and the wrong one for anything
+reachable from the internet.

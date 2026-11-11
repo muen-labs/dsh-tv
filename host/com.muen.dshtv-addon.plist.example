@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.muen.dshtv-addon</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <!-- Keep this on the internal disk: launchd cannot read /Volumes/* without
+         Removable Volumes / Full Disk Access, and it fails with "Operation not permitted". -->
+    <string>~/Library/Application Support/dsh-tv-addon/addon_server.py</string>
+    <string>--port</string><string>8890</string>
+    <string>--token</string><string>REPLACE_WITH_TOKEN</string>
+    <string>--catalogs</string><string>~/Library/Application Support/dsh-tv-addon/catalogs.json</string>
+    <string>--picks</string><string>~/Library/Application Support/dsh-tv-addon/picks.json</string>
+    <string>--aiometadata</string><string>https://aiometadata.elfhosted.com/stremio/REPLACE_WITH_UUID</string>
+  </array>
+  <key>WorkingDirectory</key><string>~/Library/Application Support/dsh-tv-addon</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>~/Library/Logs/dshtv-addon.log</string>
+  <key>StandardErrorPath</key><string>~/Library/Logs/dshtv-addon.log</string>
+</dict>
+</plist>
