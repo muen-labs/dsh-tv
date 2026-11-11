@@ -25,3 +25,4 @@ docs/media/
 android/tv-assistant/classes.txt
 android/tv-assistant/sources.txt
 /host/catalogs.json
+/host/picks.json
