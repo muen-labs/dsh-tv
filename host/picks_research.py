@@ -26,7 +26,12 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+import os
 from pathlib import Path
+
+LIVE_DIR = Path(os.environ.get("DSHTV_ADDON_DATA")
+                or (Path.home() / "Library" / "Application Support" / "dsh-tv-addon"))
+DEFAULT_CATALOGS = str(LIVE_DIR / "catalogs.json")
 
 CINEMETA = "https://v3-cinemeta.strem.io"
 
@@ -134,7 +139,8 @@ def main(argv) -> int:
     ap.add_argument("--spec", required=True)
     ap.add_argument("--out", default=str(Path(__file__).with_name("picks.json")))
     ap.add_argument("--catalogs", default="",
-                    help="write this row into the addon's catalog store (a bespoke catalog)")
+                    help="write this row into the addon's catalog store (default: the live install)")
+    ap.set_defaults(catalogs=DEFAULT_CATALOGS)
     ap.add_argument("--catalog-id", default="", help="stable id, e.g. chinese-new-wave")
     ap.add_argument("--catalog-name", default="", help="row title shown in the player")
     ap.add_argument("--catalog-type", default="movie", choices=["movie", "series"])

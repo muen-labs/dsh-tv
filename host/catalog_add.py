@@ -21,12 +21,18 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import os
 from pathlib import Path
+
+
+LIVE_DIR = Path(os.environ.get("DSHTV_ADDON_DATA")
+                or (Path.home() / "Library" / "Application Support" / "dsh-tv-addon"))
+DEFAULT_CATALOGS = str(LIVE_DIR / "catalogs.json")
 
 
 def main(argv) -> int:
     ap = argparse.ArgumentParser(description="Publish a direct-item catalog (no IMDB ids).")
-    ap.add_argument("--catalogs", default=str(Path(__file__).with_name("catalogs.json")))
+    ap.add_argument("--catalogs", default=DEFAULT_CATALOGS)
     ap.add_argument("--catalog-id", required=True)
     ap.add_argument("--catalog-name", required=True)
     ap.add_argument("--type", default="movie", choices=["movie", "series", "other"])
@@ -78,7 +84,7 @@ def main(argv) -> int:
         "items": len(clean),
         "rejected": len(rejected),
         "wrote": str(store_path),
-        "restart": "reload the addon agent to pick up the new row (launchctl kickstart -k)",
+        "live": "the running addon reads the store per request — no restart needed",
     }, indent=1))
     return 0
 

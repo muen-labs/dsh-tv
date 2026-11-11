@@ -279,3 +279,47 @@ only:
 
 No token, no item URL, no title. This is the default rather than a flag, because the sensitive
 case is the one nobody remembers to configure.
+
+## One command to install, on any Mac
+
+No external SSD required — in fact the internal disk is mandatory, for the reason above.
+
+```bash
+cd dsh-tv/host
+DSHTV_AIO_METADATA="https://aiometadata.elfhosted.com/stremio/<your-uuid>" \
+  bash deploy.sh
+```
+
+It creates `~/Library/Application Support/dsh-tv-addon/`, copies the code, seeds an empty
+catalog store, writes and loads the launchd agent, and prints the URL to paste into Stremio:
+
+```
+running — http://192.168.x.x:8890/<token>/manifest.json
+manifest: DeepSeek Picks v0.1.0 · resources=['catalog']
+rows: ['Like The Breaking Ice', 'In Cinemas Now']
+```
+
+Re-running it is safe: the token and metadata source are kept in `config.env` so the URL never
+changes under the installed addon, and existing catalogs are left alone.
+
+### One writable copy of each thing
+
+| | lives | why |
+|---|---|---|
+| **code** | the repo, copied down by `deploy.sh` | one source of truth, and the deploy is explicit |
+| **data** (`catalogs.json`) | only in `~/Library/Application Support/dsh-tv-addon/` | the server reads it, the agent's tools write it — a second copy would be the Silt defect |
+
+`catalogs.json` is gitignored and the repo ships `catalogs.example.json` instead. The tools
+default to the live path, so `catalog_add.py` with no flags writes exactly where the server
+reads:
+
+```
+$ ./catalog_add.py --catalog-id deploy-test --catalog-name "Deploy Test" --items items.json
+  wrote: ~/Library/Application Support/dsh-tv-addon/catalogs.json
+```
+
+And the new row appears immediately — the store is read per request, so no restart:
+
+```
+rows: ['Like The Breaking Ice', 'In Cinemas Now', 'Deploy Test']
+```
