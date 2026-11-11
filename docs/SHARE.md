@@ -4,8 +4,13 @@ Links to use:
 
 - Repo: <https://github.com/muen-labs/dsh-tv>
 - Download: <https://github.com/muen-labs/dsh-tv/releases/latest>
-- Demo GIF: [`docs/demo.gif`](demo.gif) (1.4 MB) — upload this as the post image/video
-- Demo MP4: [`docs/demo.mp4`](demo.mp4) (0.6 MB, 10 s) — if you prefer video
+- **Short clip — use this**: [`docs/demo-short.mp4`](demo-short.mp4) (1.5 MB, 13.8 s,
+  1280×720, no audio) — opens on the source pick, cuts the buffering beat, ends with the
+  episode actually playing. Reddit autoplays it muted.
+- Poster still: [`docs/demo-poster.jpg`](demo-poster.jpg) — if the composer lets you pick a
+  thumbnail
+- Full demo, if someone wants the whole flow: [`docs/demo.mp4`](demo.mp4) (2.9 MB, 34 s) and
+  [`docs/demo.gif`](demo.gif) (2.0 MB)
 - UI gallery: <https://github.com/muen-labs/dsh-tv/blob/main/docs/ui-gallery.html>
 
 ## Post title options
