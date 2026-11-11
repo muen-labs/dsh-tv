@@ -188,6 +188,17 @@ Uninstall), where Nuvio fetched the manifest and then dropped it from its cache.
 addon target is Stremio — the larger audience and the player that works — and the Nuvio
 persistence problem is no longer blocking.
 
-Remaining: Stremio has not yet requested the catalogs, so the rows have not appeared on the
-board. The addon is installed and its manifest is valid; the next step is a board rebuild
-(restart) or selecting the addon's catalogs in Board settings.
+**Verified working in Stremio.** Both bespoke rows render on the board — *"Like The Breaking
+Ice"* (17 titles) and *"In Cinemas Now"* (4 titles) — and the server log is the proof, not a
+screenshot:
+
+```
+00:43:48  192.168.4.58  GET /catalog/movie/in-cinemas.json           200
+00:43:48  192.168.4.58  GET /catalog/movie/chinese-new-wave.json     200
+00:43:49  192.168.4.58  GET /catalog/movie/in-cinemas/skip=4.json    200
+00:44:02  192.168.4.58  GET /catalog/movie/chinese-new-wave/skip=17.json  200
+```
+
+The `skip=` lines are the pagination fix doing its job — without it the row stops growing
+silently. The rows required a Stremio restart before the board rebuilt; that was the only
+thing standing between "installed" and "visible".
