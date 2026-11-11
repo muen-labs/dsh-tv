@@ -133,6 +133,11 @@ def main(argv) -> int:
     ap = argparse.ArgumentParser(description="Resolve researched titles into a picks.json row.")
     ap.add_argument("--spec", required=True)
     ap.add_argument("--out", default=str(Path(__file__).with_name("picks.json")))
+    ap.add_argument("--catalogs", default="",
+                    help="write this row into the addon's catalog store (a bespoke catalog)")
+    ap.add_argument("--catalog-id", default="", help="stable id, e.g. chinese-new-wave")
+    ap.add_argument("--catalog-name", default="", help="row title shown in the player")
+    ap.add_argument("--catalog-type", default="movie", choices=["movie", "series"])
     ap.add_argument("--aiometadata", default="",
                     help="resolve through TMDB on your AIOmetadata instance, e.g. "
                          "https://aiometadata.elfhosted.com/stremio/<uuid>. Falls back to Cinemeta.")
@@ -160,6 +165,31 @@ def main(argv) -> int:
                 print(f"  MISS  {asked:40} -> no id resolved")
 
     Path(args.out).write_text(json.dumps(out, indent=1) + "\n")
+
+    # A bespoke catalog: the agent has been asked for a row, so the row becomes part of the
+    # addon's manifest and appears in the player next to any earlier ones.
+    if args.catalogs:
+        cid = args.catalog_id or (spec.get("id") or "").strip()
+        if not cid:
+            cid = "".join(ch if ch.isalnum() else "-" for ch in (spec.get("theme") or "row").lower()).strip("-")[:40]
+        name = args.catalog_name or spec.get("theme") or cid
+        store_path = Path(args.catalogs).expanduser()
+        try:
+            store = json.loads(store_path.read_text())
+            store = store if isinstance(store, list) else []
+        except (FileNotFoundError, json.JSONDecodeError):
+            store = []
+        store = [e for e in store if not (isinstance(e, dict) and e.get("id") == cid)]
+        store.append({
+            "id": cid,
+            "type": args.catalog_type,
+            "name": name,
+            "seed": spec.get("seed"),
+            "theme": spec.get("theme"),
+            "picks": out[args.catalog_type],
+        })
+        store_path.write_text(json.dumps(store, indent=1) + "\n")
+        print(f"  catalog '{cid}' ({name}) written to {store_path} with {len(out[args.catalog_type])} titles")
     print()
     print(json.dumps({
         "ok": True,

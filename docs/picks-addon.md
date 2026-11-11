@@ -156,3 +156,38 @@ the fallback when no instance is configured, and is still fine for back-catalogu
 
 This also means our addon is the thing Cinemeta structurally cannot be: a row that contains
 what is out *now*, because the agent supplies the ids and no filter vocabulary is required.
+
+## Bespoke catalogs: many rows, built on request
+
+The point is not one row — it is that the agent builds a *new* row whenever asked, and the
+earlier ones stay. The store is `host/catalogs.json`:
+
+```json
+[{ "id": "chinese-new-wave", "type": "movie", "name": "Like The Breaking Ice",
+   "seed": "The Breaking Ice + Perfect Days",
+   "theme": "quiet contemporary East Asian cinema", "picks": ["tt17052842", "..."] },
+ { "id": "in-cinemas", "type": "movie", "name": "In Cinemas Now", "picks": ["tt36586020", "..."] }]
+```
+
+The manifest is generated from that file, so every bespoke catalog becomes its own row in
+the player, and adding another never touches the server code:
+
+```bash
+./picks_research.py --spec research.json --catalogs catalogs.json \
+    --catalog-id japanese-slow --catalog-name "Japanese Slow Cinema" \
+    --aiometadata "https://aiometadata.elfhosted.com/stremio/<uuid>"
+```
+
+Verified: two rows, served independently — `chinese-new-wave` (17 titles, 0.68s) and
+`in-cinemas` (4 titles, 0.50s), each resolving its own metadata through TMDB.
+
+### Stremio installs it; Nuvio does not
+
+Stremio fetched the manifest and completed the install in-app (the screen switched to
+Uninstall), where Nuvio fetched the manifest and then dropped it from its cache. So the
+addon target is Stremio — the larger audience and the player that works — and the Nuvio
+persistence problem is no longer blocking.
+
+Remaining: Stremio has not yet requested the catalogs, so the rows have not appeared on the
+board. The addon is installed and its manifest is valid; the next step is a board rebuild
+(restart) or selecting the addon's catalogs in Board settings.

@@ -43,6 +43,7 @@ ADDON_ID = "com.muen.deepseek.tv"
 # player does, or every row is styled and described by an addon they turned off.
 # Set AIO_META_BASE to "https://aiometadata.elfhosted.com/stremio/<your-uuid>".
 AIO_META_BASE = ""
+STORE_PATH = Path(__file__).with_name("catalogs.json")
 VERSION = "0.1.0"
 PAGE = 24
 CACHE_TTL = 900
@@ -91,6 +92,27 @@ def _fetch_meta(kind: str, imdb_id: str) -> dict | None:
     return meta
 
 
+def load_store(path: Path) -> list[dict]:
+    """The agent's catalog store: one entry per bespoke row it has been asked to make."""
+    try:
+        data = json.loads(path.read_text())
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+    out = []
+    for entry in data if isinstance(data, list) else []:
+        if not isinstance(entry, dict):
+            continue
+        if not entry.get("id") or not entry.get("type"):
+            continue
+        out.append({
+            "id": str(entry["id"]),
+            "type": str(entry["type"]),
+            "name": entry.get("name") or entry["id"],
+            "picks": [i for i in (entry.get("picks") or []) if str(i).startswith("tt")],
+        })
+    return out
+
+
 def build_manifest(token: str) -> dict:
     return {
         "id": ADDON_ID,
@@ -100,28 +122,35 @@ def build_manifest(token: str) -> dict:
                        "come from whichever stream addon you already installed.",
         "types": ["movie", "series"],
         "resources": ["catalog"],
-        "catalogs": [
-            {
-                "type": "movie",
-                "id": "deepseek",
-                "name": "DeepSeek · Movies",
-                "extra": [{"name": "skip", "isRequired": False}],
-            },
-            {
-                "type": "series",
-                "id": "deepseek",
-                "name": "DeepSeek · Series",
-                "extra": [{"name": "skip", "isRequired": False}],
-            },
-        ],
+        "catalogs": _manifest_catalogs(),
         # Only ids that stream addons already index are useful here.
         "idPrefixes": ["tt"],
         "behaviorHints": {"configurable": False},
     }
 
 
-def build_catalog(picks: dict, kind: str, skip: int = 0, search: str | None = None) -> dict:
-    ids = picks.get(kind) or []
+def _manifest_catalogs() -> list[dict]:
+    """Each bespoke catalog the agent has built becomes its own row in the player."""
+    rows = []
+    for entry in load_store(STORE_PATH):
+        rows.append({
+            "type": entry["type"],
+            "id": entry["id"],
+            "name": entry["name"],
+            "extra": [{"name": "skip", "isRequired": False}],
+        })
+    if rows:
+        return rows
+    # Back-compat: a single picks.json served as one movie and one series row.
+    return [
+        {"type": "movie", "id": "deepseek", "name": "DeepSeek · Movies",
+         "extra": [{"name": "skip", "isRequired": False}]},
+        {"type": "series", "id": "deepseek", "name": "DeepSeek · Series",
+         "extra": [{"name": "skip", "isRequired": False}]},
+    ]
+
+
+def build_catalog(ids: list[str], kind: str, skip: int = 0) -> dict:
     window = ids[skip:skip + PAGE]
     # One metadata lookup per title, and they are independent — so they go out together.
     # Sequentially this was 5-6s for a 17-title row, which on a TV's already-laggy UI is the
@@ -224,7 +253,14 @@ class Handler(BaseHTTPRequestHandler):
             query_skip = (self.query.get("skip") or [None])[0]
             if query_skip:
                 skip = int(query_skip or 0)
-            return self._send(200, build_catalog(self._load_picks(), kind, skip, search))
+            cid = ids[0]
+            entry = next((e for e in load_store(STORE_PATH)
+                          if e["id"] == cid and e["type"] == kind), None)
+            if entry:
+                return self._send(200, build_catalog(entry["picks"], kind, skip))
+            if cid == "deepseek":       # back-compat single row
+                return self._send(200, build_catalog(self._load_picks().get(kind) or [], kind, skip))
+            return self._send(404, {"error": "unknown catalog", "id": cid, "type": kind})
 
         if len(rest) == 3 and rest[0] == "meta":
             _, kind, filename = rest
@@ -242,6 +278,8 @@ def main() -> int:
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--token", required=True, help="path segment that acts as the credential")
     ap.add_argument("--picks", default=str(Path(__file__).with_name("picks.json")))
+    ap.add_argument("--catalogs", default=str(Path(__file__).with_name("catalogs.json")),
+                    help="store of bespoke catalogs the agent has built")
     ap.add_argument("--aiometadata", default="",
                     help="metadata source, e.g. https://aiometadata.elfhosted.com/stremio/<uuid> "
                          "(TMDB via your own AIOmetadata). Falls back to Cinemeta when empty.")
@@ -259,11 +297,20 @@ def main() -> int:
     else:
         print("metadata: Cinemeta (pass --aiometadata <url> to use TMDB instead)", flush=True)
 
+    global STORE_PATH
+    STORE_PATH = Path(args.catalogs).expanduser()
+
     Handler.picks_path = picks
     Handler.token = args.token
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     print(f"addon serving on http://{args.host}:{args.port}/{args.token}/manifest.json", flush=True)
-    print(f"picks: {picks}  (edit it and the catalog changes, no restart)", flush=True)
+    store = load_store(STORE_PATH)
+    if store:
+        print(f"catalogs: {len(store)} bespoke row(s) from {STORE_PATH}", flush=True)
+        for e in store:
+            print(f"  {e['type']:6} {e['id']:16} {e['name'][:36]:36} {len(e['picks'])} titles", flush=True)
+    else:
+        print(f"catalogs: none yet in {STORE_PATH} — falling back to {picks}", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
