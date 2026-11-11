@@ -188,6 +188,8 @@ Uninstall), where Nuvio fetched the manifest and then dropped it from its cache.
 addon target is Stremio — the larger audience and the player that works — and the Nuvio
 persistence problem is no longer blocking.
 
+![Bespoke rows in Stremio](picks-rows-stremio.jpg)
+
 **Verified working in Stremio.** Both bespoke rows render on the board — *"Like The Breaking
 Ice"* (17 titles) and *"In Cinemas Now"* (4 titles) — and the server log is the proof, not a
 screenshot:
