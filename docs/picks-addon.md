@@ -58,3 +58,52 @@ python3 addon_server.py --port 8890 --token "$(openssl rand -hex 8)"
 - **The process is not supervised.** It runs from a shell and dies with it; a LaunchAgent
   would need Removable Volumes/FDA to read the repo on the external volume (macOS blocks
   launchd-run `python3` from `/Volumes/External SSD` — `kTCCServiceSystemPolicyRemovableVolumes`).
+
+## Status, 2026-11-11 — catalog works, install does not persist
+
+Verified working:
+
+- Nuvio fetched the manifest and **rendered the row** (Breaking Bad, Game of Thrones) —
+  server log: `192.168.4.58 "GET /<token>/catalog/series/deepseek.json" 200`.
+- The catalog serves real, confirmed IMDB ids and paginates on `/skip=N/`.
+
+Not working:
+
+- Re-adding it does not stick. Nuvio fetches the manifest (`200`, logged) and then never
+  enters it into its manifest cache — the count stays `Loaded 17 cached manifests from disk`
+  across restarts. The addon is absent from the Installed list.
+
+Two candidate causes, neither confirmed:
+
+1. **Nuvio validates more strictly than Stremio.** Our manifest lacks `addonCatalogs`
+   (Cinemeta has it, but it should be optional). Next test: serve Cinemeta's manifest
+   verbatim from this host — if *that* installs, the fault is a field in ours and can be
+   bisected.
+2. **HTTPS.** `stremio://<host>/<path>/manifest.json` resolves to `https://` and failed
+   against this HTTP server with "error sending request". If Nuvio has the same expectation
+   for persisted addons, the fix is to serve over TLS (or a tunnel), not to change the
+   manifest.
+
+Either answer is one experiment away; the addon code itself is not the suspect, since the
+row rendered from it once.
+
+## Research tool
+
+`host/picks_research.py` turns a researched list into `picks.json`:
+
+```bash
+./picks_research.py --spec research.json
+```
+
+It resolves every title through Cinemeta and **confirms the id resolves on its own** before
+writing it. Two things it caught on the first real run, which is the argument for the tool:
+
+| Asked | Naive name match | Truth |
+|---|---|---|
+| Perfect Day (2023) | tt0491100 — a 2005 British film | tt27503384 *Perfect Days* (Wenders, 2023) |
+| Balloon (2019) | tt7125774 — 2018 Germany/France/US | Pema Tseden's Balloon is not in Cinemeta; dropped |
+
+A row with the wrong film in it is worse than a short row, so unresolved titles are
+reported, never guessed. Year hints (`{"title": "Perfect Day", "year": 2023}`) filter hard,
+and the output prints year + country for every hit so a wrong match is visible rather than
+plausible.
