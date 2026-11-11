@@ -4,12 +4,17 @@ Links to use:
 
 - Repo: <https://github.com/muen-labs/dsh-tv>
 - Download: <https://github.com/muen-labs/dsh-tv/releases/latest>
-- **Short clip — use this**: [`docs/demo-short.mp4`](demo-short.mp4) (1.5 MB, 13.8 s,
-  1280×720, no audio) — opens on the source pick, cuts the buffering beat, ends with the
-  episode actually playing. Reddit autoplays it muted.
-- Poster still: [`docs/demo-poster.jpg`](demo-poster.jpg) — if the composer lets you pick a
-  thumbnail
-- Full demo, if someone wants the whole flow: [`docs/demo.mp4`](demo.mp4) (2.9 MB, 34 s) and
+Two cuts, because the first frame decides which sub it works in:
+
+- **r/DeepSeek · r/LocalLLaMA** — [`docs/demo-short.mp4`](demo-short.mp4) (1.5 MB, 13.8 s):
+  opens on the source pick, drops the 1 s buffering gap, ends on the episode playing with the
+  scrubber visible. Poster: [`demo-poster.jpg`](demo-poster.jpg)
+- **r/AndroidTV** — [`docs/demo-androidtv.mp4`](demo-androidtv.mp4) (1.4 MB, 10.6 s): the
+  assistant's own UI (FOR YOU card, pet, gear) over the launcher, then app control and the
+  search being typed. It carries no stream-source names on purpose — on that sub they read as
+  "piracy app" and take the thread off-topic. Poster:
+  [`demo-androidtv-poster.jpg`](demo-androidtv-poster.jpg)
+- Full flow if someone asks: [`docs/demo.mp4`](demo.mp4) (2.9 MB, 34 s),
   [`docs/demo.gif`](demo.gif) (2.0 MB)
 - UI gallery: <https://github.com/muen-labs/dsh-tv/blob/main/docs/ui-gallery.html>
 
