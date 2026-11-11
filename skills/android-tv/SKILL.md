@@ -14,8 +14,7 @@ below are the ones that cost time while getting it to look and feel right.
 
 | What | Where |
 | --- | --- |
-| Working APK source | `.tools/tv-assistant` (build here, install from here) |
-| Repo copy (commit this) | `dsh-tv/android/tv-assistant` |
+| APK source | `dsh-tv/android/tv-assistant` — the only copy: build here, install from here |
 | Repo root | `dsh-tv/` (`github.com/muen-labs/dsh-tv`) |
 | Android SDK / JDK | `.tools/android-sdk`, `.tools/jdk` |
 | ADB | `.tools/platform-tools/adb -s 192.168.4.58:5555` |
@@ -25,7 +24,7 @@ below are the ones that cost time while getting it to look and feel right.
 No Gradle. `build.sh` runs aapt2 → javac → d8 → zipalign → apksigner.
 
 ```bash
-cd .tools/tv-assistant
+cd android/tv-assistant                         # from dsh-tv/
 WHALE_TOKEN=$(cat ../../.auth/whale.token) bash build.sh
 adb install -r -g TVAssistant.apk
 adb exec-out screencap -p > /tmp/tv.png     # then read the image
@@ -94,8 +93,9 @@ look at the pixels**. Do not claim a UI change without a capture.
 - QA without speaking: `am start -n com.jp.dshtv/.WhaleActivity --ez demo true`
   renders a completed exchange (transcript + reply + celebrating pet).
 - Bridge server is plain HTTP on `:8765`; the app needs
-  `android:usesCleartextTraffic="true"`. Never commit `.tools/tv-assistant/res/values/config.xml`
-  (generated token) or `.auth/`.
+  `android:usesCleartextTraffic="true"`. Never commit
+  `android/tv-assistant/res/values/config.xml` (a generated token — it IS in `.gitignore`,
+  keep it there) or `.auth/`.
 
 ## Input / launcher pitfalls
 
@@ -127,8 +127,9 @@ look at the pixels**. Do not claim a UI change without a capture.
   collision silently absolutely-positioned a chip).
 - `postDelayed` auto-close hooks are easy to leave behind: delete reply/error
   `scheduleClose(...)` when the product wants persistence.
-- Keep the repo `android/tv-assistant` copy synced after AOSP changes, then
-  commit in `dsh-tv/`.
+- Edit `android/tv-assistant` directly and commit in `dsh-tv/`. There is no working
+  copy to sync: a second tree under `.tools/` silently went stale once and produced an
+  old-UI APK from a fixed source. Deleted 2026-11-10 — do not recreate it.
 
 ## Verification checklist
 
@@ -138,5 +139,4 @@ look at the pixels**. Do not claim a UI change without a capture.
 4. Exercise with `input keyevent` (send / ask again / close / back / home).
 5. Check the *physics*: readable at 1080p from ~3 m; nothing clipped at edges;
    controls not in the viewport corner unless intentional.
-6. Sync to `dsh-tv/android/tv-assistant`, update `docs/screenshots`, commit and
-   push.
+6. Update `docs/screenshots` if the visible UI changed, commit and push.
