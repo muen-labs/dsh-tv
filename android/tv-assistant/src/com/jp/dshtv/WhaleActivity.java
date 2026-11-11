@@ -28,7 +28,9 @@ public class WhaleActivity extends Activity {
         applyAppChip();
         applyBlurBehind();
         ensureBridgeRunning();
-        if (!WhaleConfig.paired(this)) {
+        // The agent is the app's home entry, so it must open. Pairing is offered once, on
+        // first run; after that an unpaired agent still opens and BACK leads to settings.
+        if (!WhaleConfig.paired(this) && WhaleConfig.takeFirstLaunch(this)) {
             startActivity(new Intent(this, PairingActivity.class));
             finish();
             return;
@@ -159,6 +161,11 @@ public class WhaleActivity extends Activity {
             return true;
         }
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            // Unpaired, there is nothing to fall back to: BACK opens the bridge settings
+            // (which owns the pairing button) instead of leaving a dead app.
+            if (!WhaleConfig.paired(this)) {
+                startActivity(new Intent(this, MainActivity.class));
+            }
             finish();
             return true;
         }

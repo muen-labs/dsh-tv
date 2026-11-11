@@ -41,38 +41,40 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!-- Bridge UI / setup screen -->
+        <!-- Bridge UI / settings screen. Reached by intent from the agent (BACK while
+             unpaired), never from the home screen: a package may declare only ONE
+             leanback-launchable activity, or Android resolves its home icon to
+             ResolverActivity and the user gets a chooser instead of the app. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:configChanges="orientation|screenSize|keyboardHidden">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:configChanges="orientation|screenSize|keyboardHidden" />
 
-        <!-- QR pairing screen -->
+        <!-- QR pairing screen. Offered automatically on first launch only; afterwards it
+             is reachable from the bridge settings. No launcher category: it was the second
+             leanback entry and made the home icon ambiguous. -->
         <activity
             android:name=".PairingActivity"
             android:exported="true"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize" />
 
-        <!-- Whale-chan assistant overlay (started by the Disney+ shim / voice key) -->
+        <!-- Whale-chan, the agent. This is the app's ONE launcher entry: the home icon and
+             a Button Mapper key both land here. Still startable by the Disney+ shim and the
+             voice key, which is why the overlay task affinity stays. -->
         <activity
             android:name=".WhaleActivity"
             android:exported="true"
             android:launchMode="singleInstance"
             android:taskAffinity="com.jp.dshtv.overlay"
             android:excludeFromRecents="true"
-            android:theme="@style/WhaleTheme" />
+            android:theme="@style/WhaleTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <service
             android:name=".BridgeService"

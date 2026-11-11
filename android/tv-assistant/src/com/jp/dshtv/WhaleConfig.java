@@ -32,6 +32,23 @@ public final class WhaleConfig {
         return prefs(ctx).getBoolean("paired", false) && t != null && !t.isEmpty();
     }
 
+    /**
+     * True only the first time the agent is opened on this install.
+     *
+     * The pairing screen is a first-run step, not a gate. Before this, an unpaired app
+     * bounced to PairingActivity on every launch, so the home icon and the agent both
+     * looked like a settings screen. After the first run the agent opens regardless, and
+     * BACK is the way to settings.
+     */
+    public static boolean takeFirstLaunch(Context ctx) {
+        android.content.SharedPreferences p = prefs(ctx);
+        if (p.getBoolean("pairingShown", false)) {
+            return false;
+        }
+        p.edit().putBoolean("pairingShown", true).apply();
+        return true;
+    }
+
     public static void save(Context ctx, String host, String port, String token) {
         prefs(ctx).edit()
                 .putString("host", host)
