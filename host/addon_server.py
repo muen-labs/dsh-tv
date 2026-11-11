@@ -36,6 +36,12 @@ from pathlib import Path
 
 CINEMETA = "https://v3-cinemeta.strem.io"
 ADDON_ID = "com.muen.deepseek.tv"
+
+# Metadata source. Cinemeta is what Stremio ships, but most people hide it and use TMDB
+# through AIOmetadata instead — so the enrichment should come from the same place their
+# player does, or every row is styled and described by an addon they turned off.
+# Set AIO_META_BASE to "https://aiometadata.elfhosted.com/stremio/<your-uuid>".
+AIO_META_BASE = ""
 VERSION = "0.1.0"
 PAGE = 24
 CACHE_TTL = 900
@@ -44,22 +50,41 @@ _cache: dict[str, tuple[float, dict]] = {}
 _lock = threading.Lock()
 
 
+def _get_meta(url: str) -> dict | None:
+    try:
+        with urllib.request.urlopen(url, timeout=12) as res:
+            return json.loads(res.read().decode("utf-8") or "{}").get("meta")
+    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, TimeoutError):
+        return None
+
+
 def _fetch_meta(kind: str, imdb_id: str) -> dict | None:
-    """Cinemeta gives us the real name/poster for an id, so nothing is invented."""
+    """Real name/poster for an id, from the source the player's users actually run.
+
+    AIOmetadata first (TMDB, the metadata most people keep), Cinemeta only as a fallback so
+    the addon still works on a box with nothing else installed. Nothing is invented either
+    way: an id that resolves nowhere is dropped rather than styled from a guess.
+    """
     key = f"{kind}:{imdb_id}"
     now = time.time()
     with _lock:
         hit = _cache.get(key)
         if hit and now - hit[0] < CACHE_TTL:
             return hit[1]
-    url = f"{CINEMETA}/meta/{kind}/{urllib.parse.quote(imdb_id)}.json"
-    try:
-        with urllib.request.urlopen(url, timeout=12) as res:
-            meta = json.loads(res.read().decode("utf-8") or "{}").get("meta")
-    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, TimeoutError):
-        return None
+
+    quoted = urllib.parse.quote(imdb_id)
+    meta = None
+    if AIO_META_BASE:
+        meta = _get_meta(f"{AIO_META_BASE.rstrip('/')}/meta/{kind}/{quoted}.json")
+        if meta:
+            meta["_source"] = "aiometadata"
+    if not meta:
+        meta = _get_meta(f"{CINEMETA}/meta/{kind}/{quoted}.json")
+        if meta:
+            meta["_source"] = "cinemeta"
     if not meta:
         return None
+
     with _lock:
         _cache[key] = (now, meta)
     return meta
@@ -212,12 +237,22 @@ def main() -> int:
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--token", required=True, help="path segment that acts as the credential")
     ap.add_argument("--picks", default=str(Path(__file__).with_name("picks.json")))
+    ap.add_argument("--aiometadata", default="",
+                    help="metadata source, e.g. https://aiometadata.elfhosted.com/stremio/<uuid> "
+                         "(TMDB via your own AIOmetadata). Falls back to Cinemeta when empty.")
     args = ap.parse_args()
 
     picks = Path(args.picks).expanduser()
     if not picks.exists():
         picks.write_text(json.dumps({"movie": [], "series": []}, indent=1))
         print(f"created an empty picks file at {picks}", flush=True)
+
+    global AIO_META_BASE
+    AIO_META_BASE = (args.aiometadata or "").strip()
+    if AIO_META_BASE:
+        print(f"metadata: AIOmetadata/TMDB via {AIO_META_BASE}", flush=True)
+    else:
+        print("metadata: Cinemeta (pass --aiometadata <url> to use TMDB instead)", flush=True)
 
     Handler.picks_path = picks
     Handler.token = args.token

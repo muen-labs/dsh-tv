@@ -107,3 +107,19 @@ A row with the wrong film in it is worse than a short row, so unresolved titles 
 reported, never guessed. Year hints (`{"title": "Perfect Day", "year": 2023}`) filter hard,
 and the output prints year + country for every hit so a wrong match is visible rather than
 plausible.
+
+## Metadata source: TMDB, not Cinemeta
+
+Stremio ships Cinemeta, and most people hide it in favour of TMDB through AIOmetadata —
+so enriching from Cinemeta would style every row with the addon they turned off. The addon
+now takes a metadata base and prefers it:
+
+```bash
+python3 addon_server.py --port 8890 --token <t> \
+  --aiometadata "https://aiometadata.elfhosted.com/stremio/<your-uuid>"
+```
+
+Verified: posters come back as `image.tmdb.org/t/p/w600_and_h900_bestv2/…` with director and
+runtime, straight from the AIOmetadata instance already installed on the player. Cinemeta
+stays only as a fallback, so the addon still works on a box with nothing else configured.
+No TMDB API key is needed on our side — the instance holds it.
