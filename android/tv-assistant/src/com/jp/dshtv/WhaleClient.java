@@ -74,7 +74,7 @@ public final class WhaleClient {
             c = (HttpURLConnection) url.openConnection();
             c.setRequestMethod("POST");
             c.setConnectTimeout(5000);
-            c.setReadTimeout(320000);
+            c.setReadTimeout(650000);
             c.setDoOutput(true);
             c.setFixedLengthStreamingMode(payload.length);
             c.setRequestProperty("Content-Type", contentType);

@@ -41,6 +41,7 @@ public final class WhaleUi {
     private final View againBtn;
     private View settingsBtn;
     private View typeBtn;
+    private EditText inputField;
     private final View sendBtn;
     private final Runnable onFinished;
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -68,7 +69,9 @@ public final class WhaleUi {
             sendBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (listening) {
+                    if (inputField != null && inputField.getVisibility() == View.VISIBLE) {
+                        submitInput();
+                    } else if (listening) {
                         commit();
                     } else {
                         askAgain();
@@ -81,11 +84,47 @@ public final class WhaleUi {
             againBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (listening) {
+                    if (isTyping()) {
+                        submitInput();          // OK on the mic sends what was typed
+                    } else if (listening) {
                         commit();
                     } else {
                         askAgain();
                     }
+                }
+            });
+        }
+        this.inputField = root.findViewById(R.id.whale_input);
+        if (this.inputField != null) {
+            this.inputField.setImeOptions(EditorInfo.IME_ACTION_DONE);
+            this.inputField.setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View v, int keyCode, android.view.KeyEvent event) {
+                    if (event.getAction() != android.view.KeyEvent.ACTION_DOWN) {
+                        return false;
+                    }
+                    if (keyCode == android.view.KeyEvent.KEYCODE_ENTER
+                            || keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER
+                            || keyCode == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER
+                            || keyCode == android.view.KeyEvent.KEYCODE_BUTTON_A) {
+                        submitInput();
+                        return true;
+                    }
+                    if (keyCode == android.view.KeyEvent.KEYCODE_BACK) {
+                        hideInput();
+                        return true;
+                    }
+                    return false;
+                }
+            });
+            this.inputField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, android.view.KeyEvent e) {
+                    if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        submitInput();
+                        return true;
+                    }
+                    return false;
                 }
             });
         }
@@ -94,7 +133,11 @@ public final class WhaleUi {
             this.typeBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    openTypeEntry();
+                    if (isTyping()) {
+                        submitInput();
+                    } else {
+                        showInput();
+                    }
                 }
             });
         }
@@ -288,83 +331,83 @@ public final class WhaleUi {
     }
 
     /**
-     * Typing exists because voice capture fails in a noisy room and recognition errors are
-     * worse than a typo the person can see. The TV's on-screen keyboard is driven by the
-     * same remote, so this is not a fallback for "no remote" — it is for "no microphone".
+     * Typing exists because voice capture fails in a noisy room, and recognition errors are
+     * worse than a typo the person can see. The field is part of this window rather than a
+     * dialog: a dialog is a separate window that never received D-pad events, so OK could not
+     * submit and the remote was useless.
      */
-    private void openTypeEntry() {
-        final EditText input = new EditText(ctx);
-        input.setSingleLine(true);
-        input.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        input.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, android.view.KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE
-                        || (event != null && event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER)) {
-                    submitTyped(v.getText().toString());
-                    if (dialogRef != null && dialogRef.isShowing()) {
-                        dialogRef.dismiss();
-                    }
-                    return true;
-                }
-                return false;
-            }
-        });
-        // A TV remote has no "Done": OK on the field must submit. Hardware keys do not fire
-        // the IME action, so they are handled explicitly.
-        input.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, android.view.KeyEvent event) {
-                if (event.getAction() != android.view.KeyEvent.ACTION_DOWN) {
-                    return false;
-                }
-                if (keyCode == android.view.KeyEvent.KEYCODE_ENTER
-                        || keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER
-                        || keyCode == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER) {
-                    submitTyped(input.getText().toString());
-                    if (dialogRef != null && dialogRef.isShowing()) {
-                        dialogRef.dismiss();
-                    }
-                    return true;
-                }
-                return false;
-            }
-        });
-        input.setHint("Ask Whale-chan…");
-        input.setPadding(28, 14, 28, 14);
-
-        final AlertDialog dialog = new AlertDialog.Builder(ctx)
-                .setTitle("Type a request")
-                .setView(input)
-                .setPositiveButton("Ask", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface d, int which) {
-                        submitTyped(input.getText().toString());
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .create();
-
-        dialogRef = dialog;
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface d) {
-                input.requestFocus();
-                if (dialog.getWindow() != null) {
-                    dialog.getWindow().setSoftInputMode(
-                            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-                }
-                InputMethodManager ime = (InputMethodManager)
-                        ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (ime != null) {
-                    ime.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
-                }
-            }
-        });
-        dialog.show();
+    private void showInput() {
+        if (inputField == null) {
+            return;
+        }
+        inputField.setVisibility(View.VISIBLE);
+        inputField.setText("");
+        inputField.requestFocus();
+        setBubble("TYPE", DOT_ACCENT, "", "Type a request, then press OK.");
+        InputMethodManager ime = (InputMethodManager)
+                ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (ime != null) {
+            ime.showSoftInput(inputField, InputMethodManager.SHOW_IMPLICIT);
+        }
     }
 
-    private AlertDialog dialogRef;
+    private void hideInput() {
+        if (inputField == null) {
+            return;
+        }
+        InputMethodManager ime = (InputMethodManager)
+                ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (ime != null && inputField.getWindowToken() != null) {
+            ime.hideSoftInputFromWindow(inputField.getWindowToken(), 0);
+        }
+        inputField.setText("");
+        inputField.setVisibility(View.GONE);
+    }
+
+    /** True while the typed-request field is on screen. */
+    public boolean isTyping() {
+        return inputField != null && inputField.getVisibility() == View.VISIBLE;
+    }
+
+    /**
+     * The activity's onKeyDown sees OK/ENTER before any view does, so it must offer those keys
+     * here first — otherwise the remote can open the field but never submit it. This was the
+     * reason a dialog could not work: the dialog was not in this window's key path at all.
+     */
+    public boolean handleTypedKey(int keyCode) {
+        if (!isTyping()) {
+            return false;
+        }
+        if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER
+                || keyCode == android.view.KeyEvent.KEYCODE_ENTER
+                || keyCode == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER
+                || keyCode == android.view.KeyEvent.KEYCODE_BUTTON_A) {
+            submitInput();
+            return true;
+        }
+        if (keyCode == android.view.KeyEvent.KEYCODE_BACK) {
+            if (inputField.getText().toString().trim().length() > 0) {
+                submitInput();
+            } else {
+                hideInput();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void submitInput() {
+        if (inputField == null) {
+            return;
+        }
+        String text = inputField.getText().toString().trim();
+        hideInput();
+        if (text.length() == 0) {
+            fail(ctx.getString(R.string.empty));
+            return;
+        }
+        submitTyped(text);
+    }
 
     private void submitTyped(String raw) {
         final String said = raw == null ? "" : raw.trim();

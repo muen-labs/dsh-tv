@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import queue
 import json
+import re
 import os
 import re
 import subprocess
@@ -58,7 +59,14 @@ PAIR_TTL_SECONDS = 300
 PAIR_MAX = 64
 PAIRS: dict = {}
 DEFAULT_MODEL = "mlx-community/whisper-base.en-mlx"
-MAX_TURN_SECONDS = 300
+MAX_TURN_SECONDS = 600
+
+# The voice brain runs as a sandboxed DSH turn, so it can only write inside the workspace.
+# It therefore DRAFTS a catalog; the daemon (an ordinary process, outside that sandbox)
+# applies it. Handing the sandbox the live path directly fails with "Operation not permitted",
+# which is exactly what the first attempts did.
+PENDING_CATALOGS = ROOT / ".dsh-voice" / "pending-catalogs"
+INSTALLER = Path.home() / "Library" / "Application Support" / "dsh-tv-addon" / "install_catalog.py"
 
 # The voice agent's standing brief. Kept short: it is prepended to every
 # utterance and also costs tokens, but without it the agent does not know that
@@ -81,16 +89,15 @@ BRIEF = (
     "a step. "
     "You can also BUILD A CATALOG ROW for the player when the user asks for one - e.g. "
     "\"make me a catalog of films like X\". The row is not a filter: you choose the titles. "
-    "First choose 10-18 real films that share a reason to sit together, and use their REAL "
-    "IMDB ids (tt...). Never invent an id. Then write a JSON file to /tmp/<slug>.json shaped "
-    "as a list of one entry: [{\"id\":\"<slug>\",\"type\":\"movie\",\"name\":\"<row title>\","
+    "Choose 10-18 real films that share a reason to sit together, using their REAL IMDB ids "
+    "(tt...); never invent an id. Write a JSON file to "
+    ".dsh-voice/pending-catalogs/<slug>.json shaped as a list with one entry: "
+    "[{\"id\":\"<slug>\",\"type\":\"movie\",\"name\":\"<row title>\","
     "\"seed\":\"<what the user said>\",\"theme\":\"<one line>\",\"picks\":[\"tt...\", ...]}]. "
-    "Then run exactly this one command: python3 \"$HOME/Library/Application Support/"
-    "dsh-tv-addon/install_catalog.py\" /tmp/<slug>.json "
-    "It merges the row into the live addon, drops any id that does not resolve, and checks the "
-    "row really appears in the manifest. Its last line is the truth: if it starts with OK the "
-    "row is live and you may say so; if it starts with FAIL you must say it failed and give "
-    "the reason. NEVER claim a catalog was made unless you saw an OK line from that command. "
+    "That directory is inside the workspace, which is the only place you can write. The host "
+    "applies it after your turn and checks it against the live addon - you cannot see the live "
+    "store, so do NOT claim the row is live and do NOT run any installer yourself. Say what you "
+    "put in the row; the host adds the confirmation. If writing the file fails, say that plainly. "
     "The user's request below is a speech transcript and may contain recognition "
     "errors; use judgment. Then reply with ONE short spoken sentence (no lists, "
     "no tool narration). If the request is unclear or dangerous, ask a short "
@@ -645,8 +652,53 @@ class DshVoice:
             self._save_session(sid)
         if error and not final:
             final = "Sorry, my brain is not connected right now."
-        return {"reply": final.strip(), "sessionId": sid,
+
+        installed = apply_pending_catalogs()
+        reply = final.strip()
+        if installed:
+            ok_rows = [ln for ln in installed if ln.startswith("OK")]
+            if ok_rows and reply:
+                names = []
+                for ln in ok_rows:
+                    m = re.search(r'name="([^"]+)"', ln)
+                    count = re.search(r"picks=(\d+)", ln)
+                    if m:
+                        names.append(m.group(1) + (f", {count.group(1)} titles" if count else ""))
+                if names:
+                    reply = f"{reply} ({'; '.join(names)} is live.)"
+            elif not ok_rows:
+                reply = f"{(reply + ' ') if reply else ''}The catalog did not install: {installed[-1]}"
+        return {"reply": reply, "sessionId": sid, "installed": installed,
                 "stderr": (proc.stderr or "").strip()[-400:]}
+
+
+def apply_pending_catalogs() -> list[str]:
+    """Install anything the assistant drafted, and return one factual line per file.
+
+    This is the whole reason the assistant cannot be trusted to announce its own success: it
+    cannot see the live store at all. So the applying happens here, and the result is appended
+    to whatever it said.
+    """
+    results: list[str] = []
+    if not PENDING_CATALOGS.is_dir() or not INSTALLER.is_file():
+        return results
+    for path in sorted(PENDING_CATALOGS.glob("*.json")):
+        try:
+            proc = subprocess.run([sys.executable, str(INSTALLER), str(path)],
+                                  capture_output=True, text=True, timeout=180)
+        except Exception as exc:  # noqa: BLE001 - never fail the turn on the installer
+            results.append(f"installer-error({exc.__class__.__name__})")
+            continue
+        lines = [ln.strip() for ln in (proc.stdout or "").splitlines() if ln.strip()]
+        verdict = lines[-1] if lines else f"installer-exit-{proc.returncode}"
+        results.append(verdict)
+        done_dir = PENDING_CATALOGS / "done"
+        done_dir.mkdir(exist_ok=True)
+        try:
+            path.rename(done_dir / path.name)
+        except OSError:
+            path.unlink(missing_ok=True)
+    return results
 
 
 def tv_health() -> dict:

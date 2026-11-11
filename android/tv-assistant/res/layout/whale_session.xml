@@ -151,6 +151,32 @@
                 android:src="@drawable/ic_close_overlay" />
         </LinearLayout>
 
+        <!-- Typed request. This lives in the overlay window on purpose: the dialogs tried
+             before are their own window and never received D-pad events, so the remote's OK
+             could not submit. Here it inherits the overlay's focus handling. -->
+        <EditText
+            android:id="@+id/whale_input"
+            android:layout_width="@dimen/bubble_width"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/overlay_bubble_gap"
+            android:background="@drawable/bubble"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:hint="Type a request, then press OK"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:maxLines="1"
+            android:nextFocusDown="@id/whale_send"
+            android:paddingLeft="14dp"
+            android:paddingTop="12dp"
+            android:paddingRight="14dp"
+            android:paddingBottom="12dp"
+            android:singleLine="true"
+            android:textColor="#FFFFFFFF"
+            android:textColorHint="#99FFFFFF"
+            android:textSize="15sp"
+            android:visibility="gone" />
+
         <!-- Speech bubble: accent rule + eyebrow (state / send) + heard + say -->
         <LinearLayout
             android:layout_width="@dimen/bubble_width"

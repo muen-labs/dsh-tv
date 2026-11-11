@@ -159,6 +159,11 @@ public class WhaleActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // Typed requests own OK/ENTER while the field is open; otherwise the overlay would
+        // treat OK as "commit a recording" and the text could never be sent.
+        if (ui != null && ui.handleTypedKey(keyCode)) {
+            return true;
+        }
         if (ui != null && ui.handleDpad(keyCode)) {
             return true;
         }

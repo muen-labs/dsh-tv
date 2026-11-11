@@ -358,3 +358,36 @@ was made unless the last line starts with `OK`.
 - **Long turns** — a catalog build takes 3-5 minutes, which exceeds the synchronous `/ask`
   timeout (`MAX_TURN_SECONDS`, currently 300). It needs to answer "on it" immediately and
   report when done, instead of holding the request open.
+
+## The assistant drafts; the host applies
+
+The reason the assistant once produced a row at the wrong path and then claimed success is not
+sloppiness — it is a sandbox. The voice brain runs as `dsh --profile headless`, which can only
+write inside the workspace. The live store is at `~/Library/Application Support/dsh-tv-addon/`,
+outside it. So:
+
+- writing to the "right" path returned **`Operation not permitted`**
+- the only writable place was the repo, which is why `catalogs.ready.json` appeared there
+- and the assistant could not see the live store at all, so "it's live" was never checkable
+
+The fix splits the job along the permission boundary:
+
+| who | does |
+|---|---|
+| **assistant** (sandboxed) | drafts `.dsh-voice/pending-catalogs/<slug>.json` |
+| **daemon** (ordinary process) | applies it with `install_catalog.py`, then moves it to `done/` |
+
+The daemon appends the verdict to the spoken reply, so the sentence the household hears is
+written where the permission is — not where the optimism is.
+
+Verified end to end:
+
+```
+ask: "make me a catalog of south korean revenge films"
+reply: "South Korean Revenge is queued with 15 films, from Oldboy and Lady Vengeance to
+        Kill Boksoon — the host will add it to the row. (South Korean Revenge, 15 titles is live.)"
+store: korean-revenge  South Korean Revenge  15 picks
+```
+
+Also raised `MAX_TURN_SECONDS` to 600 and the client read timeout to 650 s: a catalog build is
+not a question, and a 3-5 minute one was returning 504.
