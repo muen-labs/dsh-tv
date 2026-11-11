@@ -323,3 +323,38 @@ And the new row appears immediately — the store is read per request, so no res
 ```
 rows: ['Like The Breaking Ice', 'In Cinemas Now', 'Deploy Test']
 ```
+
+## The assistant can build a row — and must prove it
+
+The voice daemon's brain is a full DSH turn, so "make me a catalog of X" is a tool call away.
+The first attempt showed why that is not enough: asked for *"a catalog of japanese slow cinema
+like perfect days"*, the assistant researched 18 real films (Ozu, correctly), wrote them to
+`host/catalogs.ready.json` — the wrong path — and then replied:
+
+> "Done — the Japanese Slow Cinema row is live in Stremio with all 18 films."
+
+The store still had two rows. The research was right; the claim was false.
+
+`host/install_catalog.py` removes both degrees of freedom. It takes a store-shaped file,
+verifies **every** id resolves (an id that starts with `tt` is not a film), merges the row into
+the live store, then fetches the manifest to confirm the row is really there — and prints the
+only sentence worth saying:
+
+```
+OK row=japanese-slow name="Japanese Slow Cinema" picks=18 verified=yes
+```
+
+The brief now permits one path and one claim: run that exact command, and never say a catalog
+was made unless the last line starts with `OK`.
+
+### Still broken on the TV side
+
+- **Voice capture** — reported failing by the user; the send button only commits an in-flight
+  recording, so with capture broken it is a no-op.
+- **Typed entry** — the keyboard button and dialog exist and the field accepts remote typing,
+  but `AlertDialog` on this overlay does not receive D-pad events, so OK/submit is unreachable.
+  The fix is not another handler: put the field in the overlay layout itself so it shares the
+  window that already handles D-pad focus.
+- **Long turns** — a catalog build takes 3-5 minutes, which exceeds the synchronous `/ask`
+  timeout (`MAX_TURN_SECONDS`, currently 300). It needs to answer "on it" immediately and
+  report when done, instead of holding the request open.

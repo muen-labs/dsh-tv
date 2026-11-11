@@ -51,7 +51,7 @@ chmod 600 "$ENV_FILE"
 
 # ------------------------------------------------------------------ code
 say "code  → $LIVE_DIR"
-for f in addon_server.py catalog_add.py picks_research.py; do
+for f in addon_server.py catalog_add.py picks_research.py install_catalog.py; do
   [ -f "$REPO_HOST/$f" ] || { echo "missing $f in $REPO_HOST" >&2; exit 1; }
   cp "$REPO_HOST/$f" "$LIVE_DIR/$f"
   say "  $f"

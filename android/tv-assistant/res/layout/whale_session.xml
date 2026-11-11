@@ -99,8 +99,8 @@
                 android:contentDescription="Settings"
                 android:focusable="true"
                 android:nextFocusDown="@id/whale_send"
-                android:nextFocusRight="@id/whale_again"
-                android:nextFocusUp="@id/whale_again"
+                android:nextFocusRight="@id/whale_type"
+                android:nextFocusUp="@id/whale_type"
                 android:padding="8dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_gear" />
@@ -111,13 +111,27 @@
                 android:layout_weight="1" />
 
             <ImageButton
+                android:id="@+id/whale_type"
+                android:layout_width="@dimen/disc_overlay"
+                android:layout_height="@dimen/disc_overlay"
+                android:layout_marginRight="@dimen/overlay_actions_gap"
+                android:background="@drawable/btn_close"
+                android:contentDescription="Type a request"
+                android:focusable="true"
+                android:nextFocusLeft="@id/whale_settings"
+                android:nextFocusRight="@id/whale_again"
+                android:padding="9dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_keyboard" />
+
+            <ImageButton
                 android:id="@+id/whale_again"
                 android:layout_width="@dimen/disc_overlay"
                 android:layout_height="@dimen/disc_overlay"
                 android:background="@drawable/btn_close"
                 android:contentDescription="Send / ask another question"
                 android:focusable="true"
-                android:nextFocusLeft="@id/whale_settings"
+                android:nextFocusLeft="@id/whale_type"
                 android:nextFocusRight="@id/whale_close"
                 android:padding="9dp"
                 android:scaleType="centerInside"

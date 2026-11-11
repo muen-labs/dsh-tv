@@ -58,7 +58,7 @@ PAIR_TTL_SECONDS = 300
 PAIR_MAX = 64
 PAIRS: dict = {}
 DEFAULT_MODEL = "mlx-community/whisper-base.en-mlx"
-MAX_TURN_SECONDS = 150
+MAX_TURN_SECONDS = 300
 
 # The voice agent's standing brief. Kept short: it is prepended to every
 # utterance and also costs tokens, but without it the agent does not know that
@@ -79,6 +79,18 @@ BRIEF = (
     "host/tv-apps.json; prefer their key steps over guessing. Use "
     "`python3 host/dshtv.py ui` to read on-screen labels/focus before and after "
     "a step. "
+    "You can also BUILD A CATALOG ROW for the player when the user asks for one - e.g. "
+    "\"make me a catalog of films like X\". The row is not a filter: you choose the titles. "
+    "First choose 10-18 real films that share a reason to sit together, and use their REAL "
+    "IMDB ids (tt...). Never invent an id. Then write a JSON file to /tmp/<slug>.json shaped "
+    "as a list of one entry: [{\"id\":\"<slug>\",\"type\":\"movie\",\"name\":\"<row title>\","
+    "\"seed\":\"<what the user said>\",\"theme\":\"<one line>\",\"picks\":[\"tt...\", ...]}]. "
+    "Then run exactly this one command: python3 \"$HOME/Library/Application Support/"
+    "dsh-tv-addon/install_catalog.py\" /tmp/<slug>.json "
+    "It merges the row into the live addon, drops any id that does not resolve, and checks the "
+    "row really appears in the manifest. Its last line is the truth: if it starts with OK the "
+    "row is live and you may say so; if it starts with FAIL you must say it failed and give "
+    "the reason. NEVER claim a catalog was made unless you saw an OK line from that command. "
     "The user's request below is a speech transcript and may contain recognition "
     "errors; use judgment. Then reply with ONE short spoken sentence (no lists, "
     "no tool narration). If the request is unclear or dangerous, ask a short "

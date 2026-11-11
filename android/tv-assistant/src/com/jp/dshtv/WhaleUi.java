@@ -1,12 +1,18 @@
 package com.jp.dshtv;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -34,6 +40,7 @@ public final class WhaleUi {
     private final View closeBtn;
     private final View againBtn;
     private View settingsBtn;
+    private View typeBtn;
     private final View sendBtn;
     private final Runnable onFinished;
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -79,6 +86,15 @@ public final class WhaleUi {
                     } else {
                         askAgain();
                     }
+                }
+            });
+        }
+        this.typeBtn = root.findViewById(R.id.whale_type);
+        if (this.typeBtn != null) {
+            this.typeBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openTypeEntry();
                 }
             });
         }
@@ -269,6 +285,109 @@ public final class WhaleUi {
             }
         } catch (Throwable ignored) {
         }
+    }
+
+    /**
+     * Typing exists because voice capture fails in a noisy room and recognition errors are
+     * worse than a typo the person can see. The TV's on-screen keyboard is driven by the
+     * same remote, so this is not a fallback for "no remote" — it is for "no microphone".
+     */
+    private void openTypeEntry() {
+        final EditText input = new EditText(ctx);
+        input.setSingleLine(true);
+        input.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        input.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, android.view.KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE
+                        || (event != null && event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER)) {
+                    submitTyped(v.getText().toString());
+                    if (dialogRef != null && dialogRef.isShowing()) {
+                        dialogRef.dismiss();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+        // A TV remote has no "Done": OK on the field must submit. Hardware keys do not fire
+        // the IME action, so they are handled explicitly.
+        input.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, android.view.KeyEvent event) {
+                if (event.getAction() != android.view.KeyEvent.ACTION_DOWN) {
+                    return false;
+                }
+                if (keyCode == android.view.KeyEvent.KEYCODE_ENTER
+                        || keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER
+                        || keyCode == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER) {
+                    submitTyped(input.getText().toString());
+                    if (dialogRef != null && dialogRef.isShowing()) {
+                        dialogRef.dismiss();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+        input.setHint("Ask Whale-chan…");
+        input.setPadding(28, 14, 28, 14);
+
+        final AlertDialog dialog = new AlertDialog.Builder(ctx)
+                .setTitle("Type a request")
+                .setView(input)
+                .setPositiveButton("Ask", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        submitTyped(input.getText().toString());
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+
+        dialogRef = dialog;
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface d) {
+                input.requestFocus();
+                if (dialog.getWindow() != null) {
+                    dialog.getWindow().setSoftInputMode(
+                            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                }
+                InputMethodManager ime = (InputMethodManager)
+                        ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (ime != null) {
+                    ime.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+                }
+            }
+        });
+        dialog.show();
+    }
+
+    private AlertDialog dialogRef;
+
+    private void submitTyped(String raw) {
+        final String said = raw == null ? "" : raw.trim();
+        if (said.length() == 0) {
+            fail(ctx.getString(R.string.empty));
+            return;
+        }
+        transcript = said;
+        pet.play(R.raw.whale_think);
+        setBubble("THINKING", DOT_ACCENT, "“" + said + "”", "DSH is working on it…");
+        scheduleBusyPose();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final WhaleClient.Answer answer = WhaleClient.ask(ctx, said);
+                main.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        deliver(answer);
+                    }
+                });
+            }
+        }, "whale-brain").start();
     }
 
     private void deliver(WhaleClient.Answer answer) {
