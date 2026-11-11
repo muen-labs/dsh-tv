@@ -30,13 +30,25 @@ from pathlib import Path
 
 CINEMETA = "https://v3-cinemeta.strem.io"
 
+# Resolution source. Cinemeta can FIND a current film by name but cannot SURFACE one: its
+# eight catalogs are Popular/New/Featured with no release-status or upcoming vocabulary, so
+# films in cinemas never appear in a row unless you already know the title. TMDB through the
+# player's own AIOmetadata instance has a search catalog and a meta endpoint, so resolution
+# goes there first when configured. "https://aiometadata.elfhosted.com/stremio/<uuid>"
+AIO_BASE = ""
+SEARCH_CATALOG = {"movie": "search.movie", "series": "search.series"}
+
 
 def search(kind: str, title: str) -> list[dict]:
     # Apostrophes and quotes are the difference between a hit and a miss:
     # "Long Day's Journey Into Night" returns nothing, the same title without the
     # apostrophe returns the film. Strip them from the QUERY, keep them in the report.
     query = " ".join(title.replace("'", "").replace("\u2019", "").replace('"', "").split())
-    url = f"{CINEMETA}/catalog/{kind}/top/search={urllib.parse.quote(query)}.json"
+    if AIO_BASE:
+        cat = SEARCH_CATALOG.get(kind, "search.movie")
+        url = f"{AIO_BASE.rstrip('/')}/catalog/{kind}/{cat}/search={urllib.parse.quote(query)}.json"
+    else:
+        url = f"{CINEMETA}/catalog/{kind}/top/search={urllib.parse.quote(query)}.json"
     try:
         with urllib.request.urlopen(url, timeout=15) as res:
             return (json.loads(res.read().decode("utf-8") or "{}").get("metas") or [])
@@ -45,7 +57,8 @@ def search(kind: str, title: str) -> list[dict]:
 
 
 def meta(kind: str, imdb_id: str) -> dict | None:
-    url = f"{CINEMETA}/meta/{kind}/{imdb_id}.json"
+    base = AIO_BASE.rstrip("/") if AIO_BASE else CINEMETA
+    url = f"{base}/meta/{kind}/{urllib.parse.quote(imdb_id)}.json"
     try:
         with urllib.request.urlopen(url, timeout=15) as res:
             return json.loads(res.read().decode("utf-8") or "{}").get("meta")
@@ -120,7 +133,14 @@ def main(argv) -> int:
     ap = argparse.ArgumentParser(description="Resolve researched titles into a picks.json row.")
     ap.add_argument("--spec", required=True)
     ap.add_argument("--out", default=str(Path(__file__).with_name("picks.json")))
+    ap.add_argument("--aiometadata", default="",
+                    help="resolve through TMDB on your AIOmetadata instance, e.g. "
+                         "https://aiometadata.elfhosted.com/stremio/<uuid>. Falls back to Cinemeta.")
     args = ap.parse_args(argv)
+
+    global AIO_BASE
+    AIO_BASE = (args.aiometadata or "").strip()
+    print(f"  source: {'TMDB via AIOmetadata' if AIO_BASE else 'Cinemeta'}")
 
     spec = json.loads(Path(args.spec).read_text())
     out: dict[str, list[str]] = {"movie": [], "series": []}

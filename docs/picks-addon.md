@@ -123,3 +123,36 @@ Verified: posters come back as `image.tmdb.org/t/p/w600_and_h900_bestv2/…` wit
 runtime, straight from the AIOmetadata instance already installed on the player. Cinemeta
 stays only as a fallback, so the addon still works on a box with nothing else configured.
 No TMDB API key is needed on our side — the instance holds it.
+
+## Resolution source: TMDB, because Cinemeta can't surface current films
+
+The complaint about Cinemeta is not that it is old — it is that films in cinemas never
+appear. Measured, that is precise and it is not about the data:
+
+| Title (TMDB trending, 2026) | Cinemeta search | TMDB search |
+|---|---|---|
+| Other Mommy | tt36586020 | tt36586020 |
+| Model Citizen | tt13884466 | tt13884466 |
+| The Odyssey | tt33764258 | tt33764258 |
+| The Good Lawyer | tt39453578 | tt39453578 |
+
+Cinemeta **can find** every current film by name. It cannot **surface** one: its manifest is
+eight catalogs — Popular / New / Featured for movie and series — whose only extras are
+`genre`, `search`, `skip`. There is no release-status, no upcoming, no "in cinemas". Unless
+you already know the title, current releases never reach a row. That is why MDBList's builder
+carries *Release Status*, *Has Release*, *Release From/To* and *Upcoming* as first-class
+filters — vocabulary Cinemeta does not have.
+
+So resolution now prefers TMDB on the player's own AIOmetadata instance:
+
+```bash
+./picks_research.py --spec research.json \
+  --aiometadata "https://aiometadata.elfhosted.com/stremio/<uuid>"
+```
+
+Verified on four 2026 releases: all resolved with year and production country
+(`The Odyssey` → tt33764258, UK/US; `The Good Lawyer` → tt39453578, France). Cinemeta stays as
+the fallback when no instance is configured, and is still fine for back-catalogue work.
+
+This also means our addon is the thing Cinemeta structurally cannot be: a row that contains
+what is out *now*, because the agent supplies the ids and no filter vocabulary is required.
