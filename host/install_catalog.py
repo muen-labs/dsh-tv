@@ -33,6 +33,7 @@ from pathlib import Path
 LIVE_DIR = Path(os.environ.get("DSHTV_ADDON_DATA")
                 or (Path.home() / "Library" / "Application Support" / "dsh-tv-addon"))
 STORE = LIVE_DIR / "catalogs.json"
+SLOT_COUNT = 6      # must match addon_server.SLOT_COUNT: the manifest's fixed row set
 
 
 def live_config() -> dict:
@@ -63,20 +64,38 @@ def id_resolves(imdb_id: str, kind: str) -> bool:
 
 
 def verify(entry: dict) -> tuple[bool, str]:
+    """Confirm the slot actually serves this catalog's titles.
+
+    The manifest always lists every slot, so "the row exists" proves nothing. What matters is
+    that asking for the slot returns this catalog's ids, which is the only thing that shows the
+    agent's row reached the player.
+    """
     cfg = live_config()
     port, token = cfg.get("PORT", "8890"), cfg.get("TOKEN", "")
     if not token:
         return False, "no-token-in-config.env"
+    if not entry.get("slot"):
+        return False, "no-free-slot"
     try:
-        with urllib.request.urlopen(
-                f"http://127.0.0.1:{port}/{token}/manifest.json", timeout=10) as res:
-            manifest = json.loads(res.read().decode() or "{}")
+        url = f"http://127.0.0.1:{port}/{token}/catalog/movie/slot-{entry['slot']}.json"
+        with urllib.request.urlopen(url, timeout=25) as res:
+            metas = json.loads(res.read().decode() or "{}").get("metas") or []
     except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, TimeoutError) as exc:
         return False, f"addon-unreachable({exc.__class__.__name__})"
-    for row in manifest.get("catalogs") or []:
-        if row.get("id") == entry["id"] and row.get("name") == entry["name"]:
-            return True, "yes"
-    return False, "not-in-manifest"
+    if not metas:
+        return False, f"slot-{entry['slot']}-served-nothing"
+    ids = {m.get("id") for m in metas}
+    if not ids & set(entry["picks"]):
+        return False, f"slot-{entry['slot']}-served-other-content"
+    return True, "yes"
+
+
+def free_slot(store: list[dict]) -> int | None:
+    used = {e.get("slot") for e in store if isinstance(e, dict)}
+    for n in range(1, SLOT_COUNT + 1):
+        if n not in used:
+            return n
+    return None
 
 
 def main(argv) -> int:
@@ -123,9 +142,13 @@ def main(argv) -> int:
         if not picks:
             print(f"FAIL row={raw['id']} reason=no-id-resolves")
             return 1
+        # Keep the slot this catalog already had; otherwise take the first free one.
+        existing = next((e for e in store if isinstance(e, dict) and e.get("id") == raw["id"]), {})
+        slot = raw.get("slot") or existing.get("slot") or free_slot(store)
         entry = {
             "id": str(raw["id"]),
             "type": str(raw["type"]),
+            "slot": int(slot) if slot else None,
             "name": str(raw.get("name") or raw["id"]),
             "seed": raw.get("seed", ""),
             "theme": raw.get("theme", ""),
@@ -143,7 +166,7 @@ def main(argv) -> int:
         live, detail = verify(entry)
         ok = ok and live
         if live:
-            print(f'OK row={entry["id"]} name="{entry["name"]}" picks={len(entry["picks"])} verified=yes')
+            print(f'OK slot={entry["slot"]} name="{entry["name"]}" picks={len(entry["picks"])} verified=yes')
         else:
             print(f'FAIL row={entry["id"]} reason={detail}')
     return 0 if ok else 1

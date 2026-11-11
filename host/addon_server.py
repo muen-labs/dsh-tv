@@ -38,6 +38,21 @@ from pathlib import Path
 CINEMETA = "https://v3-cinemeta.strem.io"
 ADDON_ID = "com.muen.deepseek.tv"
 
+# Stremio snapshots the catalog list when an addon is ADDED: a refreshed manifest updates an
+# existing row's contents but never adds a row. So the row set is fixed at install and the
+# agent writes INTO slots instead of creating rows. The names are therefore fixed too — they
+# are what the manifest said at install time — so they read as categories, and the agent puts
+# each bespoke catalog where its meaning fits best.
+SLOT_COUNT = 6
+SLOT_NAMES = [
+    "DeepSeek · Tonight",
+    "DeepSeek · More like this",
+    "DeepSeek · In cinemas",
+    "DeepSeek · Deep cuts",
+    "DeepSeek · By theme",
+    "DeepSeek · Newest",
+]
+
 # Metadata source. Cinemeta is what Stremio ships, but most people hide it and use TMDB
 # through AIOmetadata instead — so the enrichment should come from the same place their
 # player does, or every row is styled and described by an addon they turned off.
@@ -116,9 +131,11 @@ def load_store(path: Path) -> list[dict]:
                     "description": it.get("description"),
                     "releaseInfo": it.get("releaseInfo"),
                 })
+        slot = entry.get("slot")
         out.append({
             "id": str(entry["id"]),
             "type": str(entry["type"]),
+            "slot": int(slot) if isinstance(slot, int) and 1 <= slot <= SLOT_COUNT else None,
             "name": entry.get("name") or entry["id"],
             "picks": [i for i in (entry.get("picks") or []) if str(i).startswith("tt")],
             "items": items,
@@ -175,24 +192,24 @@ def parse_direct_id(item_id: str) -> tuple[str, int] | None:
 
 
 def _manifest_catalogs() -> list[dict]:
-    """Each bespoke catalog the agent has built becomes its own row in the player."""
-    rows = []
-    for entry in load_store(STORE_PATH):
-        rows.append({
-            "type": entry["type"],
-            "id": entry["id"],
-            "name": entry["name"],
-            "extra": [{"name": "skip", "isRequired": False}],
-        })
-    if rows:
-        return rows
-    # Back-compat: a single picks.json served as one movie and one series row.
+    """The row set is fixed: exactly SLOT_COUNT rows, always. Nothing the agent does changes
+    this list, which is what makes a new catalog appear without touching the player."""
     return [
-        {"type": "movie", "id": "deepseek", "name": "DeepSeek · Movies",
-         "extra": [{"name": "skip", "isRequired": False}]},
-        {"type": "series", "id": "deepseek", "name": "DeepSeek · Series",
-         "extra": [{"name": "skip", "isRequired": False}]},
+        {
+            "type": "movie",
+            "id": f"slot-{n}",
+            "name": SLOT_NAMES[n - 1],
+            "extra": [{"name": "skip", "isRequired": False}],
+        }
+        for n in range(1, SLOT_COUNT + 1)
     ]
+
+
+def slot_entry(slot: int) -> dict | None:
+    for entry in load_store(STORE_PATH):
+        if entry.get("slot") == slot:
+            return entry
+    return None
 
 
 def build_catalog(ids: list[str], kind: str, skip: int = 0) -> dict:
@@ -345,6 +362,19 @@ class Handler(BaseHTTPRequestHandler):
             if query_skip:
                 skip = int(query_skip or 0)
             cid = ids[0]
+            if cid.startswith("slot-"):
+                try:
+                    n = int(cid.split("-", 1)[1])
+                except ValueError:
+                    return self._send(404, {"error": "bad slot", "id": cid})
+                self.summary = f"catalog slot {n}" + (f" skip={skip}" if skip else "")
+                entry = slot_entry(n)
+                if entry is None:
+                    return self._send(200, {"metas": []})   # a slot the agent has not filled
+                if entry["items"]:
+                    return self._send(200, build_catalog_direct(entry, kind, skip))
+                return self._send(200, build_catalog(entry["picks"], kind, skip))
+
             entry = next((e for e in load_store(STORE_PATH)
                           if e["id"] == cid and e["type"] == kind), None)
             if entry:

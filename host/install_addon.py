@@ -287,7 +287,9 @@ def main(argv) -> int:
     ap = argparse.ArgumentParser(description="Install or refresh the addon in Stremio.")
     ap.add_argument("url", nargs="?", help="manifest URL (default: the live addon's own URL)")
     ap.add_argument("--token", help="token, when not reading it from config.env")
-    ap.add_argument("--steps", type=int, default=40, help="safety cap on actions")
+    ap.add_argument("--steps", type=int, default=60, help="safety cap on actions")
+    ap.add_argument("--keep", action="store_true",
+                    help="re-add without removing first (keeps the row set Stremio snapshotted)")
     args = ap.parse_args(argv)
 
     url = args.url or default_url(args.token)
@@ -302,13 +304,27 @@ def main(argv) -> int:
         return 1
 
     url_typed = False
+    removed = False
     for _ in range(args.steps):
         labels = texts()
         screen = classify(labels)
         if screen == "installed":
-            print(json.dumps({"ok": True, "url": url,
-                              "confirmed_by": "the add-on screen offers Uninstall"}))
-            return 0
+            # Stremio snapshots the row set at add time and re-adding does NOT refresh it, so a
+            # changed manifest (e.g. new row ids) needs a remove first.
+            if args.keep or removed:
+                print(json.dumps({"ok": True, "url": url,
+                                  "confirmed_by": "the add-on screen offers Uninstall",
+                                  "row_set": "kept (--keep)"}))
+                return 0
+            if click("Uninstall"):
+                removed = True
+                time.sleep(3.0)
+                for candidate in ("Remove", "Confirm", "Yes"):
+                    if any(t.strip() == candidate for t in texts()):
+                        click(candidate)
+                        break
+                time.sleep(4.0)
+                continue
         if screen == "board":
             key("left", 1.2)
             try:

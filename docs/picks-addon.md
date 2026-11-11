@@ -453,3 +453,38 @@ Two ways out, and the trade is names vs steps:
    do, giving meaningful names at the cost of running a ~40 s UI sequence after each new row.
 
 Neither is obviously right; the choice depends on whether a named row is worth 40 seconds.
+
+## Fixed slots — the design the row snapshot forces
+
+Because Stremio snapshots the catalog list at add time, the manifest now declares a **fixed set
+of six rows** and the agent writes catalogs *into slots* instead of creating rows:
+
+```
+slot-1  DeepSeek · Tonight        (free)
+slot-2  DeepSeek · More like this ← Like The Breaking Ice (17)
+slot-3  DeepSeek · In cinemas     ← In Cinemas Now (4)
+slot-4  DeepSeek · Deep cuts      ← Japanese Slow Cinema (18)
+slot-5  DeepSeek · By theme       ← South Korean Revenge (14)
+slot-6  DeepSeek · Newest         (free)
+```
+
+`install_catalog.py` assigns the first free slot (or keeps the slot a catalog already had) and
+verifies by **fetching that slot** and checking it returns this catalog's ids:
+
+```
+OK slot=5 name="South Korean Revenge" picks=14 verified=yes
+```
+
+Slot names are categories, not titles, because the names live in the manifest too — that is the
+price of rows appearing without touching the player. The agent picks the slot whose meaning fits
+the row it built.
+
+Verified: conformance passes with six catalogs; slots 2–5 each serve their own titles and slots
+1 and 6 serve nothing (correctly, as empty rows).
+
+### The one-time step that is still manual
+
+Adopting the new row **ids** needs Stremio to re-read the catalog list, which it only does on a
+fresh add — re-adding the same URL updates the manifest but keeps the old row set. So after this
+change, the addon has to be removed and added once in Stremio. After that, filling a slot needs
+no player interaction at all, which is the point of the design.
