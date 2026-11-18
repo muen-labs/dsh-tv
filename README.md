@@ -50,8 +50,8 @@ does the thinking; the TV is the microphone, the screen and the remote.
   backdrop on boxes without system blur), state rule, animated pet, TTS replies.
 - **A real DSH plugin** — Settings → **DeepSeek TV**: daemon/TV-bridge health, LAN
   discovery, and Approve/Deny for pairing requests inside DSH.
-- **Google Assistant intact** — the mic button stays Google's; the Disney+ button
-  becomes Whale-chan via an optional shim.
+- **Google Assistant intact** — the mic button stays Google's; map any spare remote
+  button to Whale-chan with a button-mapping app.
 - **MIT** — fork it, port it, ship it.
 
 ## How it works
@@ -154,16 +154,11 @@ Restart DSH. The MCP half lets you drive the same voice session from DSH; the
 client half adds the settings pane (status, TV discovery, pairing approval).
 `install-ui.sh --copy` installs a copy instead of a symlink.
 
-### 5. The Disney+ button (optional)
+### 5. A remote button for Whale-chan (optional)
 
-Google Assistant keeps the mic button. To get a dedicated whale button, install the
-shim at the package the vendor remote service launches and make sure the real
-Disney+ app is absent:
-
-```bash
-bash android/disney-shim/build.sh
-adb install -r -g android/disney-shim/DisneyShim.apk
-```
+Google Assistant keeps the mic button. To get a dedicated whale button, map a spare
+remote button to `com.jp.dshtv/.MainActivity` with a button-mapping app such as
+Button Mapper or tvQuickActions.
 
 ## Screens
 
@@ -179,7 +174,7 @@ Every implemented screen and state is in the self-contained
 
 ## Using it
 
-1. Press the whale button (Disney+ shim) or open the assistant tile.
+1. Press your mapped whale button or open the assistant tile.
 2. Say e.g. *“Open Stremio and search for anime.”*
 3. The bubble shows what it heard, then DSH's reply, spoken via TTS.
 4. **OK** sends early instead of waiting for the silence timeout; **Back** cancels.
@@ -237,7 +232,7 @@ Compatibility reports are welcome — see
 | Assistant hears nothing / *TRY AGAIN* | microphone permission missing, or the daemon/STT failed; check `host/whale_voice.py` logs. |
 | Keys don't reach the app | the bridge accessibility service must be enabled; some vendor overlays grab input — check *Accessibility: Connected*. |
 | Demo playback stops at *Ow! That stings!* | known stream-health gap ([issue #1](https://github.com/muen-labs/dsh-tv/issues/1)). |
-| Remote button opens the wrong app | re-map it (tvQuickActions/Button Mapper) to `com.jp.dshtv/.MainActivity`; reinstall the Disney shim only if the real Disney+ app is absent. |
+| Remote button opens the wrong app | re-map it (tvQuickActions/Button Mapper) to `com.jp.dshtv/.MainActivity`. |
 
 Debug:
 
@@ -253,7 +248,6 @@ No Gradle: `build.sh` is `aapt2 → javac → d8 → zipalign → apksigner`.
 export ANDROID_SDK_ROOT=/path/to/android-sdk   # build-tools + platform 33
 export JAVA_HOME=/path/to/jdk                  # JDK 8+
 bash android/tv-assistant/build.sh             # needs WHALE_TOKEN or .auth/whale.token
-bash android/disney-shim/build.sh
 ```
 
 The DSH plugin has its own build (`cd plugin/ui && npm ci && node build.mjs`); CI

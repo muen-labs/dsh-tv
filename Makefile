@@ -1,21 +1,15 @@
 REPO := $(shell cd "$(dir $(lastword $(MAKEFILE_LIST)))" && pwd)
 
-.PHONY: all apk shim install-apk install-shim daemon plugin pet-assets clean
+.PHONY: all apk install-apk daemon plugin pet-assets clean
 
-all: apk shim
+all: apk
 
 apk:
 	bash android/tv-assistant/build.sh
 
-shim:
-	bash android/disney-shim/build.sh
-
 install-apk: apk
 	adb install -r -g android/tv-assistant/TVAssistant.apk
 	adb shell pm grant com.jp.dshtv android.permission.RECORD_AUDIO
-
-install-shim: shim
-	adb install -r -g android/disney-shim/DisneyShim.apk
 
 daemon:
 	python3 host/whale_voice.py --serve --port 8766

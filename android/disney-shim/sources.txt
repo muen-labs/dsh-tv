@@ -1,2 +1,0 @@
-src/com/disney/disneyplus/MainActivity.java
-gen/com/disney/disneyplus/R.java

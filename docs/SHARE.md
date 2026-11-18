@@ -37,7 +37,7 @@ Two cuts, because the first frame decides which sub it works in:
 > I built **DeepSeek TV Assistant** — it turns an Android TV / Google TV box
 > into a voice terminal for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 >
-> Press the Disney+ button (or open the tile), talk, and DSH on my Mac drives
+> Press a mapped remote button (or open the tile), talk, and DSH on my Mac drives
 > the TV: it launches apps, moves the D-pad, types, searches, reads the screen.
 > Replies come back through an animated whale-girl pet and TTS.
 >
@@ -49,8 +49,8 @@ Two cuts, because the first frame decides which sub it works in:
 >   goes to the model.
 > - **DSH does the thinking** in one persistent voice session; the TV is the
 >   mic, screen and remote.
-> - Works with Google Assistant kept intact: the mic button stays Google's, the
->   Disney+ button becomes the assistant (optional shim).
+> - Works with Google Assistant kept intact: the mic button stays Google's, any
+>   spare remote button can be mapped to the assistant.
 > - Also a small DSH plugin: Settings → **DeepSeek TV** shows the daemon and TV
 >   bridge, finds TVs on the LAN, and approves pairing requests in the GUI.
 >

@@ -30,8 +30,7 @@ and `mlx-community/whisper-base.en-mlx`.
 
 - The DeepSeek Harness plugin itself is not bundled; the companion reads its
   `dsh` CLI and its SenseVoice cache.
-- The Disney+ button shim is an original stub; it contains no Disney code,
-  marks, or assets.
+
 
 
 ## App icon — DeepSeek whale emblem

@@ -54,7 +54,7 @@
     <rect x="76" y="198" width="196" height="34" rx="17" fill="#1B2338" stroke="#2E3A59"/>
     <circle cx="96" cy="215" r="5" fill="#3DFFA8"/>
     <text class="t chip" x="110" y="219">REMOTE BUTTON</text>
-    <text class="t micro muted" x="286" y="219">Disney+ / mapped</text>
+    <text class="t micro muted" x="286" y="219">mapped button</text>
   </g>
 
   <!-- APK sub cards -->

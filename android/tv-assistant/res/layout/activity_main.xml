@@ -58,7 +58,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1.5dp"
-                android:text="Press the Disney+ button and talk" />
+                android:text="Press your whale button and talk" />
         </LinearLayout>
 
         <View
@@ -744,7 +744,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="7dp"
                         android:layout_weight="1"
-                        android:text="Press Disney+ and talk." />
+                        android:text="Press your whale button and talk." />
                 </LinearLayout>
 
                 <TextView

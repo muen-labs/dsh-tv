@@ -46,13 +46,6 @@
    "notes": "This app: bridge + Whale-chan overlay + pairing. MainActivity = control panel."
   },
   {
-   "package": "com.disney.disneyplus",
-   "label": "Whale-chan (assistant shortcut)",
-   "component": "com.disney.disneyplus/.MainActivity",
-   "category": "assistant",
-   "notes": "Whale-chan shortcut shim (claims the Disney+ button package). Opens com.jp.dshtv/.WhaleActivity."
-  },
-  {
    "package": "com.spocky.projengmenu",
    "label": "Projectivy Launcher",
    "component": "com.spocky.projengmenu/.ui.home.MainActivity",
