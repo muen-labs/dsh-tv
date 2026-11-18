@@ -323,6 +323,20 @@
    },
    "notes": "Long ads; DRM may black out captures.",
    "playbook": "host/playbooks/youtube.md"
+  },
+  {
+   "package": "com.nuvio.tv.agent",
+   "label": "Nuvio Agent",
+   "component": "com.nuvio.tv.agent/com.nuvio.tv.MainActivity",
+   "category": "movies & series",
+   "search": {
+    "verified": false,
+    "steps": [
+     "launch --package com.nuvio.tv.agent"
+    ]
+   },
+   "notes": "Agent-first fork with an HTTP control plane on :8899; use agent-addons/agentctl.py instead of the D-pad.",
+   "playbook": "host/playbooks/nuvio-agent.md"
   }
  ],
  "playbooks_index": "host/playbooks/README.md"
