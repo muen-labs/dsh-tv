@@ -33,6 +33,11 @@ does the thinking; the TV is the microphone, the screen and the remote.
 > Also from this account: **[Projector OSD](https://github.com/muen-labs/projector-osd)**
 > — put an Android projector's picture menu on the same TV remote.
 
+> **Not affiliated with or endorsed by DeepSeek, Google or any TV maker.** "DeepSeek"
+> names the [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) this
+> project drives; all trademarks belong to their owners. You bring your own DSH setup
+> and model access; nothing in this repo includes keys, accounts or content.
+
 ## Features
 
 - **One APK** — the bridge (key injection, launch, screenshots, screen dumps) and
@@ -302,6 +307,17 @@ overlay are testable over adb.
 - Keep ports 8765/8766 inside your home network. Never forward them to the internet.
 - The APK requests only network + microphone + accessibility access; no credentials
   are stored on the TV beyond the paired host/token.
+
+## Privacy
+
+| What | Where it goes |
+|---|---|
+| Your voice (audio) | stays on your LAN: TV → the daemon on your Mac, transcribed locally (SenseVoice / Whisper) |
+| The transcript and what the TV shows (screen text, screenshots the agent asks for) | to your DSH session, and from there to whichever model provider *you* configured in DSH |
+| Research the assistant does (e.g. AniList, TMDB) | ordinary web requests from your Mac |
+| Pairing token | stored on the TV and in `.auth/` on your Mac; never in git |
+
+Nothing is sent to this project's authors. There is no telemetry.
 
 ## Project status
 
