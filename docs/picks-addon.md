@@ -46,7 +46,7 @@ python3 addon_server.py --port 8890 --token "$(openssl rand -hex 8)"
 - Nuvio fetched the manifest from the LAN and rendered a native **DeepSeek · Series** row
   showing Breaking Bad and Game of Thrones.
 - Server log is the proof, not a screenshot:
-  `192.168.4.58 "GET /<token>/catalog/series/deepseek.json" 200`
+  `192.168.1.50 "GET /<token>/catalog/series/deepseek.json" 200`
 
 ## Known gaps
 
@@ -64,7 +64,7 @@ python3 addon_server.py --port 8890 --token "$(openssl rand -hex 8)"
 Verified working:
 
 - Nuvio fetched the manifest and **rendered the row** (Breaking Bad, Game of Thrones) —
-  server log: `192.168.4.58 "GET /<token>/catalog/series/deepseek.json" 200`.
+  server log: `192.168.1.50 "GET /<token>/catalog/series/deepseek.json" 200`.
 - The catalog serves real, confirmed IMDB ids and paginates on `/skip=N/`.
 
 Not working:
@@ -195,10 +195,10 @@ Ice"* (17 titles) and *"In Cinemas Now"* (4 titles) — and the server log is th
 screenshot:
 
 ```
-00:43:48  192.168.4.58  GET /catalog/movie/in-cinemas.json           200
-00:43:48  192.168.4.58  GET /catalog/movie/chinese-new-wave.json     200
-00:43:49  192.168.4.58  GET /catalog/movie/in-cinemas/skip=4.json    200
-00:44:02  192.168.4.58  GET /catalog/movie/chinese-new-wave/skip=17.json  200
+00:43:48  192.168.1.50  GET /catalog/movie/in-cinemas.json           200
+00:43:48  192.168.1.50  GET /catalog/movie/chinese-new-wave.json     200
+00:43:49  192.168.1.50  GET /catalog/movie/in-cinemas/skip=4.json    200
+00:44:02  192.168.1.50  GET /catalog/movie/chinese-new-wave/skip=17.json  200
 ```
 
 The `skip=` lines are the pagination fix doing its job — without it the row stops growing
@@ -272,9 +272,9 @@ that carries the token, and for direct items it would name the row. It logs the 
 only:
 
 ```
-[00:50:54] 192.168.4.57 200 manifest
-[00:50:58] 192.168.4.57 200 catalog movie/test-direct
-[00:50:58] 192.168.4.57 200 stream movie
+[00:50:54] 192.168.1.20 200 manifest
+[00:50:58] 192.168.1.20 200 catalog movie/test-direct
+[00:50:58] 192.168.1.20 200 stream movie
 ```
 
 No token, no item URL, no title. This is the default rather than a flag, because the sensitive
@@ -436,7 +436,7 @@ Adding a row after install does **not** make it appear, and this is not a cachin
 | | |
 |---|---|
 | live manifest | 4 catalogs (`chinese-new-wave`, `in-cinemas`, `japanese-slow`, `korean-revenge`) |
-| Stremio fetched it | `[02:42:19] 192.168.4.58 200 manifest` |
+| Stremio fetched it | `[02:42:19] 192.168.1.50 200 manifest` |
 | catalogs Stremio ever requested | only `chinese-new-wave`, `in-cinemas` |
 | board | the two original rows, never the two newer ones |
 

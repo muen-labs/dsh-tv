@@ -13,7 +13,7 @@
 # Usage:
 #   host/tv-accessibility.sh [<serial-or-ip>] [--prune]
 #
-#   <serial-or-ip>  adb serial, e.g. 192.168.4.58:5555 (optional if exactly one
+#   <serial-or-ip>  adb serial, e.g. 192.168.1.50:5555 (optional if exactly one
 #                   device is connected)
 #   --prune         also drop entries whose package is no longer installed
 #                   (only such stale entries are ever removed)

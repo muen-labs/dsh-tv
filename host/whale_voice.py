@@ -78,7 +78,7 @@ BRIEF = (
     "`python3 dshtv/agent_nuvio.py ensure \"<title>\"` — it searches, picks a 1080p "
     "non-DV stream, starts playback and verifies it. Speak its `say` field. If it fails, "
     "retry once with a shorter title; details are in host/playbooks/nuvio-agent.md. "
-    "The device is the onn 4K Pro at 192.168.4.58. "
+    "The device is the TV set in host/config.json. "
     "Work out the shortest key sequence, run it, check `state` when you need to "
     "know what happened, and never assume an app is open. "
     "The user's request below is a speech transcript and may contain recognition "
@@ -128,7 +128,7 @@ def discover_devices(timeout: float = 0.45) -> list:
 def lan_ip() -> str:
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.connect(("192.168.4.1", 80))
+        sock.connect(("10.255.255.255", 1))  # no packet is sent; picks the LAN interface
         ip = sock.getsockname()[0]
         sock.close()
         return ip

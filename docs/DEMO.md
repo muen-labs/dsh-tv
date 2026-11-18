@@ -28,12 +28,12 @@ adb pull /sdcard/dsh-demo.mp4 docs/media/dsh-demo.mp4
 
 The bridge CLI follows `host/config.json` by default (the onn. 4K Pro, “Living
 Room TV”). To drive the second box — the **onn. 4K Plus Streaming** on
-`192.168.5.205`, different subnet, so it needs its own target — point
+`192.168.1.51`, different subnet, so it needs its own target — point
 `DSHTV_CONFIG` at a config for it; the reveal intent follows the same config:
 
 ```bash
 cat > /tmp/plus-tv.json <<'JSON'
-{"host":"192.168.5.205","port":8765,"token":"","serial":"192.168.5.205:5555"}
+{"host":"192.168.1.51","port":8765,"token":"","serial":"192.168.1.51:5555"}
 JSON
 DSHTV_CONFIG=/tmp/plus-tv.json python3 host/demo_kdrama.py --recommend --reveal
 ```

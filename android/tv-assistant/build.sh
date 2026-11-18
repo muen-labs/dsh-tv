@@ -20,7 +20,9 @@ PLAT="$(ls -d "$SDK"/platforms/* | head -1)"
 AJ="$PLAT/android.jar"
 cd "$APP"
 
-HOST="${WHALE_HOST:-192.168.4.57}"
+# The Mac running the daemon. Defaults to this machine's Wi-Fi/Ethernet address.
+HOST="${WHALE_HOST:-$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || true)}"
+[ -n "$HOST" ] || { echo "set WHALE_HOST to the LAN address of the machine running the daemon" >&2; exit 1; }
 PORT="${WHALE_PORT:-8766}"
 TOKEN="${WHALE_TOKEN:-}"
 if [ -z "$TOKEN" ] && [ -f "$ROOT/.auth/whale.token" ]; then TOKEN="$(cat "$ROOT/.auth/whale.token")"; fi

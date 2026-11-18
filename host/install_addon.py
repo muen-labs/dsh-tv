@@ -275,7 +275,7 @@ def live_lan_ip() -> str:
     import socket
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.connect(("192.168.4.1", 80))
+        sock.connect(("10.255.255.255", 1))  # no packet is sent; picks the LAN interface
         ip = sock.getsockname()[0]
         sock.close()
         return ip

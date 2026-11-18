@@ -35,7 +35,7 @@ SCREENS = [
     dict(g="Bridge home", t="Bridge home — STOPPED (green action)", s="stopped", f="screenshots/tv-bridge-home-stopped.png",
          c="Bridge stopped: the service action turns <b>green “Start service”</b> with a power glyph; the status chip reads STOPPED. Tapping it starts the bridge and flips back to red “Stop service”."),
     dict(g="Bridge home", t="Bridge home — 4K Plus", s="running", f="screenshots/tv-bridge-home-4k-plus.png",
-         c="Second box (onn. 4K Plus, 192.168.5.205): same UI at its own IP; the “Paired with” row uses the device’s real name."),
+         c="Second box (onn. 4K Plus, 192.168.1.51): same UI at its own IP; the “Paired with” row uses the device’s real name."),
 
     dict(g="Pairing", t="Pairing — waiting for DSH approval", s="waiting", f="screenshots/tv-pairing.png",
          c="STEP 1 hero, real daemon QR, tracked mono code and countdown, device chip, waiting spinner, three-step tracker, exported TV+laptop scene, LAN footer."),

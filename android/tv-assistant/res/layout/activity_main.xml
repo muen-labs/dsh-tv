@@ -392,7 +392,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="monospace"
-                                android:text="192.168.4.58" />
+                                android:text="192.168.1.50" />
 
                             <TextView
                                 android:id="@+id/value_port"
@@ -785,7 +785,7 @@
                         style="@style/Shadcn.MonoChip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="curl 192.168.4.58:8765/ping" />
+                        android:text="curl 192.168.1.50:8765/ping" />
                 </LinearLayout>
 
                 <LinearLayout

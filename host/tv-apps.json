@@ -2,7 +2,7 @@
  "device": {
   "model": "onn. Streaming Device 4K pro",
   "android": "14",
-  "host": "192.168.4.58",
+  "host": "192.168.1.50",
   "bridge_port": 8765
  },
  "navigation": {
