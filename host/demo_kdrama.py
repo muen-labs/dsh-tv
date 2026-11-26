@@ -403,7 +403,9 @@ def adb_target() -> tuple[str, str]:
         serial = str(cfg.get("serial") or "").strip()
         if not serial and cfg.get("host"):
             serial = f"{cfg['host']}:{cfg.get('port') or 5555}"
-    return adb, serial or "192.168.4.58:5555"
+    if not serial:
+        sys.exit('demo_kdrama: set "host" or "serial" in host/config.json')
+    return adb, serial
 
 
 def present(rec: dict) -> None:

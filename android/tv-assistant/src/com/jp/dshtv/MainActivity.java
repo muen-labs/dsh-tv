@@ -177,7 +177,7 @@ public class MainActivity extends Activity {
         // the mockup bolds the product/device names inside the setup steps
         boldPart(R.id.step_text_1, "DSH TV Bridge");
         boldPart(R.id.step_text_3, "Mac");
-        boldPart(R.id.step_text_4, "Disney+");
+        boldPart(R.id.step_text_4, "whale button");
 
         for (View b : new View[]{pair, pairSecond, testMic, btnStop, accessibility, mic,
                 refresh}) {

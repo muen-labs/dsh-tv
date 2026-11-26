@@ -293,8 +293,8 @@ so the scene stays honest about the launcher, the app row and the Whale-chan til
   `Settings.Global.device_name` (fallback `Build.MODEL`, then "Android TV") and
   `Build.MODEL`; when the user never named the box the two are equal and only
   one is shown. Observed on the two demo boxes: the Pro reads
-  "Living Room TV · onn. Streaming Device 4K pro · 192.168.4.58", the 4K Plus
-  reads "onn. 4K Plus Streaming · 192.168.5.205". The Bridge-home
+  "Living Room TV · onn. Streaming Device 4K pro · 192.168.1.50", the 4K Plus
+  reads "onn. 4K Plus Streaming · 192.168.1.51". The Bridge-home
   “Paired with” TV row uses the same `device_name`
   ([DeviceInfo.java](android/tv-assistant/src/com/jp/dshtv/DeviceInfo.java)).
 - **Actions** — the waiting state is a *disabled* primary with a spinner; the
@@ -305,7 +305,7 @@ so the scene stays honest about the launcher, the app row and the Whale-chan til
   chin) sits *behind* a 442px Mac laptop. The TV screen uses a real grab of the
   Projectivy launcher, with Whale-chan and a listening bubble overlaid inside
   the TV. The laptop in front runs DSH, with the Whale-chan TV pane open on
-  “Living Room TV · onn. 4K Plus · 192.168.4.58” and an Approve button.
+  “Living Room TV · onn. 4K Plus · 192.168.1.50” and an Approve button.
 - **Footer** — Wi-Fi icon + “Both devices on the same Wi-Fi” + “LAN only”.
 
 **Derived into the other screens**

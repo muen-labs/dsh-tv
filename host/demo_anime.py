@@ -14,20 +14,18 @@ Usage (the TV and daemon are configured through DSHTV_CONFIG as for dshtv.py):
 
     python3 host/demo_anime.py --recommend            # print top 3 + pick
     python3 host/demo_anime.py --recommend --reveal   # + show the FOR YOU overlay
-    python3 host/demo_anime.py --play "The Apothecary Diaries"
+    python3 host/demo_anime.py --play "<title>"
     python3 host/demo_anime.py --demo --record /tmp/anime-demo.mp4
         # full run: reveal the pick, drive Stremio, play ~10 s, record the TV
 
 The play leg targets the box used for the demo: it expects Stremio with
-Torrentio (PM+ debrid cached sources) and picks the second source card, which is
+a stream addon installed and picks the second source card, which is
 the H.264 release on that box (the first is HEVC: it plays, but hardware
 overlay planes are not captured by screencap/screenrecord, so it looks black).
 The source row also contains a "support the project" card; the script clamps
 left before moving right so it can never open the donation page by accident.
 
-The published demo video (docs/demo.mp4) is a real capture from the 4K Plus,
-edited from three takes — on this box screenrecord stops when a video player
-takes the display, so the UI legs and the playback were captured separately.
+Only record content you are allowed to publish (see docs/DEMO.md).
 """
 from __future__ import annotations
 

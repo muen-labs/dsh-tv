@@ -20,13 +20,14 @@ import hashlib
 import json
 import shutil
 import subprocess
+import tempfile
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 OUT = DOCS / "ui-gallery.html"
-CACHE = Path("/tmp/dsh-ui-gallery-cache")
+CACHE = Path(tempfile.gettempdir()) / "dsh-ui-gallery-cache"
 
 # One entry per implemented screen. `f` is relative to docs/.
 SCREENS = [
@@ -35,7 +36,7 @@ SCREENS = [
     dict(g="Bridge home", t="Bridge home — STOPPED (green action)", s="stopped", f="screenshots/tv-bridge-home-stopped.png",
          c="Bridge stopped: the service action turns <b>green “Start service”</b> with a power glyph; the status chip reads STOPPED. Tapping it starts the bridge and flips back to red “Stop service”."),
     dict(g="Bridge home", t="Bridge home — 4K Plus", s="running", f="screenshots/tv-bridge-home-4k-plus.png",
-         c="Second box (onn. 4K Plus, 192.168.5.205): same UI at its own IP; the “Paired with” row uses the device’s real name."),
+         c="Second box (onn. 4K Plus, 192.168.1.51): same UI at its own IP; the “Paired with” row uses the device’s real name."),
 
     dict(g="Pairing", t="Pairing — waiting for DSH approval", s="waiting", f="screenshots/tv-pairing.png",
          c="STEP 1 hero, real daemon QR, tracked mono code and countdown, device chip, waiting spinner, three-step tracker, exported TV+laptop scene, LAN footer."),
@@ -61,12 +62,6 @@ SCREENS = [
     dict(g="Assistant modal", t="Modal over the launcher", s="modal", f="screenshots/tv-assistant-modal.png",
          c="Listening modal over the Projectivy launcher; the bubble, pet and controls stay the crispest elements."),
 
-    dict(g="Suggestions & demo", t="FOR YOU suggestion", s="suggestion", f="screenshots/tv-suggestion.png",
-         c="Proactive suggestion overlay: research-backed pick with the “Want to watch it here?” question."),
-    dict(g="Suggestions & demo", t="K-drama demo — recommend+reveal (4K Plus)", s="demo", f="screenshots/tv-demo-plus-reveal.png",
-         c="The demo run on the onn. 4K Plus: top-3 research from r/kdrama/MyDramaList + the FOR YOU overlay."),
-    dict(g="Suggestions & demo", t="K-drama demo — Stremio streams (4K Plus)", s="demo", f="screenshots/tv-demo-plus-stremio.png",
-         c="The play leg on the 4K Plus: Stremio stream list. The catalog/search matcher is still the known gap (see docs/DEMO.md)."),
 
     dict(g="DSH pane", t="Whale-chan TV pane (light)", s="ready", f="screenshots/pane-live.png",
          c="The DSH settings section: daemon + TV bridge state, the TV it found, and live pairing requests with Approve / Deny inside DSH."),

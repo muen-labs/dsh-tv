@@ -4,23 +4,9 @@ Links to use:
 
 - Repo: <https://github.com/muen-labs/dsh-tv>
 - Download: <https://github.com/muen-labs/dsh-tv/releases/latest>
-Two cuts, because the first frame decides which sub it works in:
+Demo video: **withdrawn and being re-recorded** with a legal source (see docs/DEMO.md).
+Until then, link the screenshots and the UI gallery only.
 
-- **r/DeepSeek · r/LocalLLaMA** — [`docs/demo-short.mp4`](demo-short.mp4) (1.5 MB, 13.8 s):
-  opens on the source pick, drops the 1 s buffering gap, ends on the episode playing with the
-  scrubber visible. Poster: [`demo-poster.jpg`](demo-poster.jpg)
-- **r/AndroidTV** — [`docs/demo-launch.mp4`](demo-launch.mp4) (0.9 MB, 8.5 s): the assistant on
-  the launcher announcing *"Opening Nuvio — a sideloaded app Google Assistant cannot launch"*,
-  then Nuvio's home with content. Poster: [`demo-launch-poster.jpg`](demo-launch-poster.jpg)
-  - The last 3 s are a **still with a slow push-in** ([`demo-launch-payoff.jpg`](demo-launch-payoff.jpg)),
-    not a capture: `screenrecord` returns a 0-byte file for Nuvio's surface, so a launched app
-    can't be recorded as video on this box. Screenshots work fine. Say so if asked rather than
-    implying the whole clip is live.
-  - TiviMate (`ar.tvplayer.tv`) **launches correctly** but has no playlist on this box, so it
-    opens to a black screen — not a usable demo subject until one is added. Nuvio was chosen
-    because it is also sideloaded and actually renders.
-- Full flow if someone asks: [`docs/demo.mp4`](demo.mp4) (2.9 MB, 34 s),
-  [`docs/demo.gif`](demo.gif) (2.0 MB)
 - UI gallery: <https://github.com/muen-labs/dsh-tv/blob/main/docs/ui-gallery.html>
 
 ## Post title options
@@ -37,7 +23,7 @@ Two cuts, because the first frame decides which sub it works in:
 > I built **DeepSeek TV Assistant** — it turns an Android TV / Google TV box
 > into a voice terminal for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 >
-> Press the Disney+ button (or open the tile), talk, and DSH on my Mac drives
+> Press a mapped remote button (or open the tile), talk, and DSH on my Mac drives
 > the TV: it launches apps, moves the D-pad, types, searches, reads the screen.
 > Replies come back through an animated whale-girl pet and TTS.
 >
@@ -49,8 +35,8 @@ Two cuts, because the first frame decides which sub it works in:
 >   goes to the model.
 > - **DSH does the thinking** in one persistent voice session; the TV is the
 >   mic, screen and remote.
-> - Works with Google Assistant kept intact: the mic button stays Google's, the
->   Disney+ button becomes the assistant (optional shim).
+> - Works with Google Assistant kept intact: the mic button stays Google's, any
+>   spare remote button can be mapped to the assistant.
 > - Also a small DSH plugin: Settings → **DeepSeek TV** shows the daemon and TV
 >   bridge, finds TVs on the LAN, and approves pairing requests in the GUI.
 >
@@ -62,7 +48,7 @@ Two cuts, because the first frame decides which sub it works in:
 > It's not a standalone IPTV app — you need a Mac/Linux host on the same LAN
 > running DSH (credentialed) plus the APK on the TV.
 >
-> Demo GIF: <https://github.com/muen-labs/dsh-tv/blob/main/docs/demo.gif>
+> UI gallery: <https://github.com/muen-labs/dsh-tv/blob/main/docs/ui-gallery.html>
 > Repo (MIT, build from source or grab the release APK):
 > <https://github.com/muen-labs/dsh-tv>
 > Everything I could test is in the repo: real 1920×1080 screenshots of every

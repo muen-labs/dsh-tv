@@ -23,6 +23,9 @@ PROTOCOL_VERSION = "2024-11-05"
 SERVER_INFO = {"name": "whale-chan", "version": "1.0.0"}
 ROOT = Path(os.environ.get("WHALE_REPO") or Path(__file__).resolve().parents[2]).resolve()
 DAEMON = ROOT / "host" / "whale_voice.py"
+if not DAEMON.exists():
+    DAEMON = ROOT / "dshtv" / "whale_voice.py"
+VENV_PY = ROOT / "dshtv" / "venv" / "bin" / "python"
 TOKEN_FILE = ROOT / ".auth" / "whale.token"
 PORT = int(os.environ.get("WHALE_PORT") or 8766)
 BASE = os.environ.get("WHALE_DAEMON_URL") or f"http://127.0.0.1:{PORT}"
@@ -72,8 +75,9 @@ def ensure_daemon() -> dict:
     logs = ROOT / "logs"
     logs.mkdir(exist_ok=True)
     log = open(logs / "whale-voice.log", "ab")
+    interpreter = str(VENV_PY) if VENV_PY.exists() else sys.executable
     subprocess.Popen(
-        [sys.executable, str(DAEMON), "--serve", "--port", str(PORT)],
+        [interpreter, str(DAEMON), "--serve", "--port", str(PORT)],
         cwd=str(ROOT), env=env, stdout=log, stderr=log,
         start_new_session=True,
     )

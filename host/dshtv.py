@@ -12,7 +12,7 @@ Transport selection:
   auto - try app, fall back to adb for operations adb can do (default)
 
 Config file:  dshtv/config.json
-  {"host": "192.168.4.55", "port": 8765, "token": "", "serial": "192.168.4.55:5555"}
+  {"host": "192.168.1.50", "port": 8765, "token": "", "serial": "192.168.1.50:5555"}
 
 Exit codes: 0 ok, 1 runtime failure, 2 usage/config problem.
 """

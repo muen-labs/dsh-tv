@@ -47,7 +47,7 @@ DSH prompt, so the agent reasons with habits instead of hard-coded intents.
 
 ## Surface on the TV
 
-![FOR YOU suggestion on the TV](screenshots/tv-suggestion.png)
+The FOR YOU card appears in the assistant overlay; see the [UI gallery](ui-gallery.html).
 
 ## Current implementation
 

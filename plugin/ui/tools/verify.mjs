@@ -58,13 +58,13 @@ const status = {
   ok: true,
   daemon: { reachable: true, url: 'http://127.0.0.1:8766', status: 200, sessionId: 's' },
   token: { present: true },
-  target: { host: '192.168.4.58', port: 8765 },
-  bridge: { alive: true, host: '192.168.4.58', port: 8765, ok: true, app: 'dshtv', version: 1 },
+  target: { host: '192.168.1.50', port: 8765 },
+  bridge: { alive: true, host: '192.168.1.50', port: 8765, ok: true, app: 'dshtv', version: 1 },
 }
 const statusDown = { ...status, daemon: { reachable: false, url: 'http://127.0.0.1:8766', error: 'ECONNREFUSED' } }
-const devices = [{ host: '192.168.4.58', port: 8765, alive: true, model: null, app: 'dshtv', version: 1 }]
+const devices = [{ host: '192.168.1.50', port: 8765, alive: true, model: null, app: 'dshtv', version: 1 }]
 const scanned = { mode: 'configured+sweep', candidates: 253, answered: 0, tookMs: 264 }
-const pending = [{ id: 'p1', code: 'BM7U23', createdAt: now, ageSeconds: 12, host: '192.168.4.58' }]
+const pending = [{ id: 'p1', code: 'BM7U23', createdAt: now, ageSeconds: 12, host: '192.168.1.50' }]
 const fixtures = {
   loading: { phase: 'loading' },
   'route error': { phase: 'error', status: null, error: 'Failed to fetch' },
@@ -86,7 +86,7 @@ check('daemon-down copy + start command', markup['daemon down'].includes(en.daem
 check('empty copy', markup.empty.includes(en.noTvsTitle))
 check('ready has a named radiogroup', /role="radiogroup"/.test(markup.ready) && /aria-label="[^"]+"/.test(markup.ready))
 check('ready rows are radios with one checked', /role="radio"[^>]*aria-checked="true"/.test(markup.ready) && (markup.ready.match(/role="radio"/g) || []).length === 1)
-check('device host is drawn', markup.ready.includes('192.168.4.58'))
+check('device host is drawn', markup.ready.includes('192.168.1.50'))
 check('pending shows the tracked code', markup.pending.includes('BM7U23') && markup.pending.includes(en.codeLabel))
 check('pending has both actions', markup.pending.includes(`>${en.approve}<`) && markup.pending.includes(`>${en.deny}<`))
 check('pending has a live region', /aria-live="polite"/.test(markup.pending) && /role="status"/.test(markup.pending))

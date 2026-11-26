@@ -2,7 +2,7 @@
  "device": {
   "model": "onn. Streaming Device 4K pro",
   "android": "14",
-  "host": "192.168.4.58",
+  "host": "192.168.1.50",
   "bridge_port": 8765
  },
  "navigation": {
@@ -44,13 +44,6 @@
    "component": "com.jp.dshtv/.MainActivity",
    "category": "assistant",
    "notes": "This app: bridge + Whale-chan overlay + pairing. MainActivity = control panel."
-  },
-  {
-   "package": "com.disney.disneyplus",
-   "label": "Whale-chan (assistant shortcut)",
-   "component": "com.disney.disneyplus/.MainActivity",
-   "category": "assistant",
-   "notes": "Whale-chan shortcut shim (claims the Disney+ button package). Opens com.jp.dshtv/.WhaleActivity."
   },
   {
    "package": "com.spocky.projengmenu",
@@ -323,6 +316,20 @@
    },
    "notes": "Long ads; DRM may black out captures.",
    "playbook": "host/playbooks/youtube.md"
+  },
+  {
+   "package": "com.nuvio.tv.agent",
+   "label": "Nuvio Agent",
+   "component": "com.nuvio.tv.agent/com.nuvio.tv.MainActivity",
+   "category": "movies & series",
+   "search": {
+    "verified": false,
+    "steps": [
+     "launch --package com.nuvio.tv.agent"
+    ]
+   },
+   "notes": "Agent-first fork with an HTTP control plane on :8899; use agent-addons/agentctl.py instead of the D-pad.",
+   "playbook": "host/playbooks/nuvio-agent.md"
   }
  ],
  "playbooks_index": "host/playbooks/README.md"

@@ -105,9 +105,11 @@ check('status daemon reachable', status.body.daemon?.reachable === true, JSON.st
 check('status bridge shape', status.body.bridge === null || typeof status.body.bridge.alive === 'boolean', JSON.stringify(status.body.bridge))
 if (status.body.bridge?.alive !== true) console.log('note: TV bridge unreachable — device/bridge liveness checks are skipped, shape is still asserted')
 check('status token present', status.body.token?.present === true)
-check('status target host', status.body.target?.host === '192.168.4.58', JSON.stringify(status.body.target))
+// The TV this machine is configured for (DSHTV_TV_HOST); without it, only the shape is checked.
+const TV_HOST = process.env.DSHTV_TV_HOST
+check('status target host', TV_HOST ? status.body.target?.host === TV_HOST : typeof status.body.target?.host === 'string', JSON.stringify(status.body.target))
 check('devices 200', devices.status === 200)
-check('devices found the TV', status.body.bridge?.alive !== true || (Array.isArray(devices.body.devices) && devices.body.devices.some((d) => d.host === '192.168.4.58' && d.alive)))
+check('devices found the TV', status.body.bridge?.alive !== true || (Array.isArray(devices.body.devices) && devices.body.devices.some((d) => (!TV_HOST || d.host === TV_HOST) && d.alive)))
 check('device contract keys', devices.body.devices.every((d) => ['host', 'port', 'alive', 'model', 'app', 'version'].every((k) => k in d)))
 check('pair/new ok', created.status === 200 && created.body.ok === true && typeof created.body.id === 'string')
 check('pair/new QR is a PNG data URL', typeof created.body.qr === 'string' && Buffer.from(created.body.qr, 'base64').subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])))

@@ -10,14 +10,9 @@ and answers through an animated whale-girl pet. Over the LAN. No cloud in the au
 [![Runtime: LAN only](https://img.shields.io/badge/runtime-LAN%20only-FFAA00)](#security)
 [![Status: alpha](https://img.shields.io/badge/status-alpha-FF3D71)](#project-status)
 
-**Demo** — a real capture on the onn. 4K Plus. The ask: *“Suggest an anime that
-is trending.”* The assistant researches AniList, shows the pick in the FOR YOU
-card, opens Stremio, searches, opens the currently-airing season, picks an H.264
-source and plays it on the TV.
+![The assistant listening over Stremio on an onn. TV box](docs/screenshots/tv-assistant-listening.png)
 
-![DeepSeek TV Assistant demo: AniList research, FOR YOU card, Stremio search, source pick, playback](docs/demo.gif)
-
-[▶ Watch the MP4](docs/demo.mp4) · [every screen in the UI gallery](docs/ui-gallery.html)
+Every implemented screen is in the [UI gallery](docs/ui-gallery.html). A demo video is being re-recorded.
 
 One APK contains the **TV bridge** (accessibility key injection, app launch,
 screenshots) and the **Whale-chan assistant UI**. A small daemon on the Mac keeps a
@@ -32,6 +27,11 @@ does the thinking; the TV is the microphone, the screen and the remote.
 >
 > Also from this account: **[Projector OSD](https://github.com/muen-labs/projector-osd)**
 > — put an Android projector's picture menu on the same TV remote.
+
+> **Not affiliated with or endorsed by DeepSeek, Google or any TV maker.** "DeepSeek"
+> names the [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) this
+> project drives; all trademarks belong to their owners. You bring your own DSH setup
+> and model access; nothing in this repo includes keys, accounts or content.
 
 ## Features
 
@@ -50,8 +50,8 @@ does the thinking; the TV is the microphone, the screen and the remote.
   backdrop on boxes without system blur), state rule, animated pet, TTS replies.
 - **A real DSH plugin** — Settings → **DeepSeek TV**: daemon/TV-bridge health, LAN
   discovery, and Approve/Deny for pairing requests inside DSH.
-- **Google Assistant intact** — the mic button stays Google's; the Disney+ button
-  becomes Whale-chan via an optional shim.
+- **Google Assistant intact** — the mic button stays Google's; map any spare remote
+  button to Whale-chan with a button-mapping app.
 - **MIT** — fork it, port it, ship it.
 
 ## How it works
@@ -154,16 +154,11 @@ Restart DSH. The MCP half lets you drive the same voice session from DSH; the
 client half adds the settings pane (status, TV discovery, pairing approval).
 `install-ui.sh --copy` installs a copy instead of a symlink.
 
-### 5. The Disney+ button (optional)
+### 5. A remote button for Whale-chan (optional)
 
-Google Assistant keeps the mic button. To get a dedicated whale button, install the
-shim at the package the vendor remote service launches and make sure the real
-Disney+ app is absent:
-
-```bash
-bash android/disney-shim/build.sh
-adb install -r -g android/disney-shim/DisneyShim.apk
-```
+Google Assistant keeps the mic button. To get a dedicated whale button, map a spare
+remote button to `com.jp.dshtv/.MainActivity` with a button-mapping app such as
+Button Mapper or tvQuickActions.
 
 ## Screens
 
@@ -179,7 +174,7 @@ Every implemented screen and state is in the self-contained
 
 ## Using it
 
-1. Press the whale button (Disney+ shim) or open the assistant tile.
+1. Press your mapped whale button or open the assistant tile.
 2. Say e.g. *“Open Stremio and search for anime.”*
 3. The bubble shows what it heard, then DSH's reply, spoken via TTS.
 4. **OK** sends early instead of waiting for the silence timeout; **Back** cancels.
@@ -237,7 +232,7 @@ Compatibility reports are welcome — see
 | Assistant hears nothing / *TRY AGAIN* | microphone permission missing, or the daemon/STT failed; check `host/whale_voice.py` logs. |
 | Keys don't reach the app | the bridge accessibility service must be enabled; some vendor overlays grab input — check *Accessibility: Connected*. |
 | Demo playback stops at *Ow! That stings!* | known stream-health gap ([issue #1](https://github.com/muen-labs/dsh-tv/issues/1)). |
-| Remote button opens the wrong app | re-map it (tvQuickActions/Button Mapper) to `com.jp.dshtv/.MainActivity`; reinstall the Disney shim only if the real Disney+ app is absent. |
+| Remote button opens the wrong app | re-map it (tvQuickActions/Button Mapper) to `com.jp.dshtv/.MainActivity`. |
 
 Debug:
 
@@ -253,7 +248,6 @@ No Gradle: `build.sh` is `aapt2 → javac → d8 → zipalign → apksigner`.
 export ANDROID_SDK_ROOT=/path/to/android-sdk   # build-tools + platform 33
 export JAVA_HOME=/path/to/jdk                  # JDK 8+
 bash android/tv-assistant/build.sh             # needs WHALE_TOKEN or .auth/whale.token
-bash android/disney-shim/build.sh
 ```
 
 The DSH plugin has its own build (`cd plugin/ui && npm ci && node build.mjs`); CI
@@ -308,6 +302,17 @@ overlay are testable over adb.
 - Keep ports 8765/8766 inside your home network. Never forward them to the internet.
 - The APK requests only network + microphone + accessibility access; no credentials
   are stored on the TV beyond the paired host/token.
+
+## Privacy
+
+| What | Where it goes |
+|---|---|
+| Your voice (audio) | stays on your LAN: TV → the daemon on your Mac, transcribed locally (SenseVoice / Whisper) |
+| The transcript and what the TV shows (screen text, screenshots the agent asks for) | to your DSH session, and from there to whichever model provider *you* configured in DSH |
+| Research the assistant does (e.g. AniList, TMDB) | ordinary web requests from your Mac |
+| Pairing token | stored on the TV and in `.auth/` on your Mac; never in git |
+
+Nothing is sent to this project's authors. There is no telemetry.
 
 ## Project status
 

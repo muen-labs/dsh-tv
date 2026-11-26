@@ -60,7 +60,7 @@
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize" />
 
         <!-- Whale-chan, the agent. This is the app's ONE launcher entry: the home icon and
-             a Button Mapper key both land here. Still startable by the Disney+ shim and the
+             a Button Mapper key both land here. Still startable by a mapped remote button and the
              voice key, which is why the overlay task affinity stays. -->
         <activity
             android:name=".WhaleActivity"

@@ -50,12 +50,12 @@ config is stripped to `hasToken`).
 
 | Route | Verified response (live daemon) |
 | --- | --- |
-| `GET /whale-chan/status` | `{"ok":true,"daemon":{"reachable":true,"url":"http://127.0.0.1:8766","sessionId":"…","tv":{…}},"token":{"present":true},"target":{"host":"192.168.4.58","port":8765},"bridge":{"alive":true,"host":"192.168.4.58","port":8765,"ok":true,"app":"dshtv","version":1,"ms":9}}` |
-| `GET /whale-chan/devices` | `{"ok":true,"devices":[{"host":"192.168.4.58","port":8765,"alive":true,"model":null,"app":"dshtv","version":1}],"scanned":{"mode":"configured+sweep","candidates":253,"answered":0,"tookMs":260}}` |
-| `GET /whale-chan/pending` | `{"ok":true,"pending":[{"id":"…","code":"QSYBBE","createdAt":1794262334758,"ageSeconds":0,"host":"192.168.4.57"}],"daemon":true}` |
+| `GET /whale-chan/status` | `{"ok":true,"daemon":{"reachable":true,"url":"http://127.0.0.1:8766","sessionId":"…","tv":{…}},"token":{"present":true},"target":{"host":"192.168.1.50","port":8765},"bridge":{"alive":true,"host":"192.168.1.50","port":8765,"ok":true,"app":"dshtv","version":1,"ms":9}}` |
+| `GET /whale-chan/devices` | `{"ok":true,"devices":[{"host":"192.168.1.50","port":8765,"alive":true,"model":null,"app":"dshtv","version":1}],"scanned":{"mode":"configured+sweep","candidates":253,"answered":0,"tookMs":260}}` |
+| `GET /whale-chan/pending` | `{"ok":true,"pending":[{"id":"…","code":"QSYBBE","createdAt":1794262334758,"ageSeconds":0,"host":"192.168.1.20"}],"daemon":true}` |
 | `POST /whale-chan/pair/approve` `{id}` | `{"ok":true,"approved":true,"id":"…"}` (and the daemon's `/pair/status` then returns `approved:true` + config) |
 | `POST /whale-chan/pair/deny` `{id}` | `{"ok":true,"denied":true,"id":"…"}` |
-| `POST /whale-chan/pair/new` | `{"ok":true,"daemon":true,"id":"…","code":"…","url":"http://192.168.4.57:8766/pair?id=…","qr":"iVBORw0…","expiresIn":300}` |
+| `POST /whale-chan/pair/new` | `{"ok":true,"daemon":true,"id":"…","code":"…","url":"http://192.168.1.20:8766/pair?id=…","qr":"iVBORw0…","expiresIn":300}` |
 | `GET /whale-chan/pair/status?id=` | compatibility proxy; token stripped from the returned config |
 
 Errors are JSON too: `400` missing `id`, `405` wrong method, `404/502` expired

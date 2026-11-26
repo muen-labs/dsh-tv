@@ -35,10 +35,10 @@ const OUT_PNG = path.resolve('docs/screenshots/pane-preview.png')
 
 const status = {
   ok: true,
-  daemon: { reachable: true, url: 'http://127.0.0.1:8766', status: 200, sessionId: 'session-a180288b', tv: { ok: true, host: '192.168.4.58', port: 8765 } },
+  daemon: { reachable: true, url: 'http://127.0.0.1:8766', status: 200, sessionId: 'session-a180288b', tv: { ok: true, host: '192.168.1.50', port: 8765 } },
   token: { present: true },
-  target: { host: '192.168.4.58', port: 8765 },
-  bridge: { alive: true, host: '192.168.4.58', port: 8765, ok: true, app: 'dshtv', version: 1, ms: 8 },
+  target: { host: '192.168.1.50', port: 8765 },
+  bridge: { alive: true, host: '192.168.1.50', port: 8765, ok: true, app: 'dshtv', version: 1, ms: 8 },
 }
 const statusDown = {
   ...status,
@@ -46,11 +46,11 @@ const statusDown = {
 }
 const statusNoTarget = { ...status, target: null, bridge: null }
 const devices = [
-  { host: '192.168.4.58', port: 8765, alive: true, model: null, app: 'dshtv', version: 1 },
+  { host: '192.168.1.50', port: 8765, alive: true, model: null, app: 'dshtv', version: 1 },
 ]
 const scanned = { mode: 'configured+sweep', candidates: 253, answered: 0, tookMs: 264, cached: false }
 const pending = [
-  { id: '91231a1c98c93927', code: 'BM7U23', createdAt: Date.now(), ageSeconds: 12, host: '192.168.4.58' },
+  { id: '91231a1c98c93927', code: 'BM7U23', createdAt: Date.now(), ageSeconds: 12, host: '192.168.1.50' },
 ]
 
 const cases = [

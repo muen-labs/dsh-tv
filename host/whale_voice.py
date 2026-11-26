@@ -6,7 +6,7 @@ Pipeline:  TV mic WAV  ->  Whisper STT  ->  DSH headless (persistent session)
 
 The voice session is a normal DSH Session resumed with `--session-id`, so the
 assistant keeps context between utterances. The agent has the workspace bash
-tool, which is how it controls the TV: `python3 host/dshtv.py ...` (keys,
+tool, which is how it controls the TV: `python3 dshtv/dshtv.py ...` (keys,
 launch any app, typing, screenshots, TTS).
 
 Run (daemon):
@@ -23,14 +23,13 @@ reach it on the LAN; keep it on the LAN, never expose it to the internet.
 from __future__ import annotations
 
 import argparse
-import queue
 import json
-import re
 import os
 import re
 import subprocess
 import sys
 import base64
+import io
 import secrets
 import socket
 import tempfile
@@ -40,15 +39,12 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import tv_memory  # noqa: E402
-
 ROOT = Path(__file__).resolve().parent.parent
 DSH_HOME = ROOT / ".dsh-voice"
 KEY_FILE = ROOT / ".auth" / "deepseek.key"
 TOKEN_FILE = ROOT / ".auth" / "whale.token"
 SESSION_FILE = DSH_HOME / "whale-session.json"
-TV_CONFIG = ROOT / "host" / "config.json"
+TV_CONFIG = ROOT / "dshtv" / "config.json"
 
 try:
     import qrcode
@@ -56,17 +52,9 @@ except Exception:  # optional: pair via URL/code without a QR image
     qrcode = None
 
 PAIR_TTL_SECONDS = 300
-PAIR_MAX = 64
 PAIRS: dict = {}
 DEFAULT_MODEL = "mlx-community/whisper-base.en-mlx"
-MAX_TURN_SECONDS = 600
-
-# The voice brain runs as a sandboxed DSH turn, so it can only write inside the workspace.
-# It therefore DRAFTS a catalog; the daemon (an ordinary process, outside that sandbox)
-# applies it. Handing the sandbox the live path directly fails with "Operation not permitted",
-# which is exactly what the first attempts did.
-PENDING_CATALOGS = ROOT / ".dsh-voice" / "pending-catalogs"
-INSTALLER = Path.home() / "Library" / "Application Support" / "dsh-tv-addon" / "install_catalog.py"
+MAX_TURN_SECONDS = 150
 
 # The voice agent's standing brief. Kept short: it is prepended to every
 # utterance and also costs tokens, but without it the agent does not know that
@@ -74,35 +62,25 @@ INSTALLER = Path.home() / "Library" / "Application Support" / "dsh-tv-addon" / "
 BRIEF = (
     "You are Whale-chan, the voice assistant for the TV in this house. "
     "You control the TV with the bash tool by running commands from the "
-    "workspace, e.g. `python3 host/dshtv.py state` (foreground app + volume), "
-    "`python3 host/dshtv.py apps` (installed apps), "
-    "`python3 host/dshtv.py launch <app>`, "
-    "`python3 host/dshtv.py key up|down|left|right|ok|back|home|recents|playpause|next|prev|rewind|fastforward|volup|voldown|mute`, "
-    "`python3 host/dshtv.py text \"...\"`, `python3 host/dshtv.py screenshot --out /tmp/tv.jpg`. "
-    "The device is the onn 4K Pro at 192.168.4.58. "
+    "workspace, e.g. `python3 dshtv/dshtv.py state` (foreground app + volume), "
+    "`python3 dshtv/dshtv.py apps` (installed apps), "
+    "`python3 dshtv/dshtv.py launch <app>`, "
+    "`python3 dshtv/dshtv.py key up|down|left|right|ok|back|home|recents|playpause|next|prev|rewind|fastforward|volup|voldown|mute`, "
+    "`python3 dshtv/dshtv.py text \"...\"`, `python3 dshtv/dshtv.py screenshot --out /tmp/tv.jpg`. "
+    "For live TV (channels, the guide) use the IPTV player instead of "
+    "remote keys: `python3 dshtv/agent_tv.py ensure \"<what they asked for>\"` searches the "
+    "TV guide and either switches to the channel if it is on now or sets a reminder if it is "
+    "later. It prints JSON with an `action` and a `say` sentence — speak that sentence. If it "
+    "answers \"could not find\", try `python3 dshtv/agent_tv.py find \"<words>\"` once with a "
+    "shorter query before giving up. If what it found is plainly the wrong show (the "
+    "transcript was misheard), try one sound-alike spelling with `find` before answering. "
+    "For movies and series (not live TV) the player is Nuvio Agent. Run "
+    "`python3 dshtv/agent_nuvio.py ensure \"<title>\"` — it searches, picks a 1080p "
+    "non-DV stream, starts playback and verifies it. Speak its `say` field. If it fails, "
+    "retry once with a shorter title; details are in host/playbooks/nuvio-agent.md. "
+    "The device is the TV set in host/config.json. "
     "Work out the shortest key sequence, run it, check `state` when you need to "
     "know what happened, and never assume an app is open. "
-    "Before driving an app you have not used this turn, read its playbook from "
-    "host/playbooks/ (index: host/playbooks/README.md) and the app catalog "
-    "host/tv-apps.json; prefer their key steps over guessing. Use "
-    "`python3 host/dshtv.py ui` to read on-screen labels/focus before and after "
-    "a step. "
-    "You can also BUILD A CATALOG ROW for the player when the user asks for one - e.g. "
-    "\"make me a catalog of films like X\". The row is not a filter: you choose the titles. "
-    "Choose 10-18 real films that share a reason to sit together, using their REAL IMDB ids "
-    "(tt...); never invent an id. Write a JSON file to "
-    ".dsh-voice/pending-catalogs/<slug>.json shaped as a list with one entry: "
-    "[{\"id\":\"<slug>\",\"type\":\"movie\",\"name\":\"<row title>\","
-    "\"seed\":\"<what the user said>\",\"theme\":\"<one line>\",\"picks\":[\"tt...\", ...]}]. "
-    "That directory is inside the workspace, which is the only place you can write. The host "
-    "applies it after your turn and checks it against the live addon - you cannot see the live "
-    "store, so do NOT claim the row is live and do NOT run any installer yourself. Say what you "
-    "put in the row; the host adds the confirmation. If writing the file fails, say that plainly. "
-    "To INSTALL or REFRESH the catalog add-on in Stremio (e.g. the user says \"install my "
-    "catalogs\", \"add the rows to Stremio\", or the rows are missing after new ones were "
-    "built), run: python3 host/install_addon.py - it types the addon URL into Stremio itself, "
-    "with no typing by the user, and prints ok:true when the add-on screen offers Uninstall. "
-    "It takes up to a minute and drives the TV, so do not also try to do it with keys. "
     "The user's request below is a speech transcript and may contain recognition "
     "errors; use judgment. Then reply with ONE short spoken sentence (no lists, "
     "no tool narration). If the request is unclear or dangerous, ask a short "
@@ -110,10 +88,47 @@ BRIEF = (
 )
 
 
+def discover_devices(timeout: float = 0.45) -> list:
+    """Scan the LAN for TVs running the DSH TV Bridge (HTTP :8765)."""
+    import concurrent.futures
+    import urllib.request
+    base = lan_ip().rsplit(".", 1)[0]
+    hosts = [f"{base}.{i}" for i in range(1, 255)]
+    try:
+        cfg = json.loads(TV_CONFIG.read_text(encoding="utf-8"))
+        if cfg.get("host"):
+            hosts.append(cfg["host"])
+    except Exception:
+        pass
+
+    def probe(host: str):
+        try:
+            with urllib.request.urlopen(f"http://{host}:8765/ping", timeout=timeout) as resp:
+                if not json.loads(resp.read().decode()).get("ok"):
+                    return None
+            model = ""
+            try:
+                with urllib.request.urlopen(f"http://{host}:8765/info", timeout=timeout) as resp:
+                    model = json.loads(resp.read().decode()).get("model", "")
+            except Exception:
+                pass
+            return {"host": host, "port": 8765, "model": model,
+                    "label": (model or "Android TV").replace("Streaming Device", "").strip()}
+        except Exception:
+            return None
+
+    found = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=64) as pool:
+        for result in pool.map(probe, hosts):
+            if result:
+                found[result["host"]] = result
+    return sorted(found.values(), key=lambda d: d["host"])
+
+
 def lan_ip() -> str:
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.connect(("192.168.4.1", 80))
+        sock.connect(("10.255.255.255", 1))  # no packet is sent; picks the LAN interface
         ip = sock.getsockname()[0]
         sock.close()
         return ip
@@ -121,101 +136,22 @@ def lan_ip() -> str:
         return "127.0.0.1"
 
 
-def _png_from_matrix(matrix: list, box_size: int = 8) -> bytes:
-    """Encode a QR module matrix as an 8-bit greyscale PNG using stdlib only.
-
-    The `qrcode` package is pure Python, but its convenience `.save()` path
-    needs Pillow, which the daemon's interpreter does not ship. Get the module
-    matrix from `qrcode` and write the PNG chunks directly: black modules are
-    byte 0, light modules byte 255, one filter-0 byte per scanline, zlib for
-    IDAT. `matrix` already includes the QR quiet-zone border.
-    """
-    import struct
-    import zlib
-
-    modules = len(matrix[0]) if matrix else 0
-    if modules == 0 or len(matrix) != modules:
-        raise ValueError("qr matrix must be square and non-empty")
-    width = modules * box_size
-    raw = bytearray()
-    for row in matrix:
-        line = bytearray()
-        for cell in row:
-            line.extend(b"\x00" * box_size if cell else b"\xff" * box_size)
-        for _ in range(box_size):
-            raw.append(0)  # PNG filter type 0 (None)
-            raw.extend(line)
-    compressed = zlib.compress(bytes(raw), 9)
-
-    def chunk(kind: bytes, data: bytes) -> bytes:
-        body = kind + data
-        return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body) & 0xFFFFFFFF)
-
-    ihdr = struct.pack(">IIBBBBB", width, width, 8, 0, 0, 0, 0)  # 8-bit greyscale
-    return (b"\x89PNG\r\n\x1a\n"
-            + chunk(b"IHDR", ihdr)
-            + chunk(b"IDAT", compressed)
-            + chunk(b"IEND", b""))
-
-
 def qr_png_b64(text: str) -> str | None:
-    """Base64 PNG of a QR code for `text`, or None when the QR path is broken."""
     if qrcode is None:
         return None
     try:
-        code = qrcode.QRCode(
-            version=None,
-            error_correction=qrcode.constants.ERROR_CORRECT_M,
-            box_size=8,
-            border=4,
-        )
-        code.add_data(text)
-        code.make(fit=True)
-        return base64.b64encode(_png_from_matrix(code.get_matrix(), box_size=8)).decode()
+        image = qrcode.make(text)
+        buf = io.BytesIO()
+        image.save(buf, format="PNG")
+        return base64.b64encode(buf.getvalue()).decode()
     except Exception:
         return None
 
 
-def prune_pairs(now: float | None = None) -> None:
-    """Drop expired pairing sessions. Safe to call from any handler."""
-    now = time.time() if now is None else now
-    for pid in [p for p, e in PAIRS.items() if now - e["created"] > PAIR_TTL_SECONDS]:
-        PAIRS.pop(pid, None)
-
-
-def pending_pairs() -> list[dict]:
-    """Unapproved, unexpired pairing sessions, oldest first.
-
-    `createdAt` is epoch milliseconds (the same clock as /health `now`) so the
-    DSH pane can format the age without knowing the daemon's clock.
-    """
-    now = time.time()
-    prune_pairs(now)
-    pending = [
-        {
-            "id": pid,
-            "code": entry["code"],
-            "createdAt": int(entry["created"] * 1000),
-            "ageSeconds": max(0, int(now - entry["created"])),
-            # The TV's LAN address (best effort): the request source address.
-            "host": entry.get("remote") or None,
-        }
-        for pid, entry in PAIRS.items()
-        if not entry.get("approved")
-    ]
-    pending.sort(key=lambda item: item["createdAt"])
-    return pending
-
-
-def new_pair(remote: str = "") -> tuple[str, str]:
-    prune_pairs()
-    if len(PAIRS) >= PAIR_MAX:
-        oldest = min(PAIRS, key=lambda pid: PAIRS[pid]["created"])
-        PAIRS.pop(oldest, None)
+def new_pair() -> tuple[str, str]:
     pid = secrets.token_hex(8)
     code = "".join(secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(6))
-    PAIRS[pid] = {"code": code, "created": time.time(), "approved": False,
-                  "remote": remote or ""}
+    PAIRS[pid] = {"code": code, "created": time.time(), "approved": False}
     return pid, code
 
 
@@ -309,192 +245,9 @@ def _clean_transcript(text: str) -> str:
     return t
 
 
-def _node_path() -> str:
-    home = Path.home()
-    candidates = [
-        os.environ.get("DSH_NODE_PATH"),
-        os.environ.get("NODE_PATH"),
-        str(home / ".local/share/dsh-superagent-runtime/node_modules/.pnpm/node_modules"),
-        str(home / ".local/share/dsh-superagent-runtime/node_modules"),
-        str(ROOT / "node_modules"),
-        str(ROOT / "host" / "node_modules"),
-    ]
-    for profile in sorted((home / ".dsh/profiles").glob("*/node_modules/.pnpm/node_modules")):
-        candidates.append(str(profile))
-    seen, parts = set(), []
-    for c in candidates:
-        if c and c not in seen and Path(c).exists():
-            seen.add(c)
-            parts.append(c)
-    return ":".join(parts)
-
-
-def _node_env() -> dict:
-    env = dict(os.environ)
-    np = _node_path()
-    if np:
-        env["NODE_PATH"] = np
-    return env
-
-
-class _DshWorker:
-    """Persistent sherpa-onnx worker: model loads once, ~0.1s per utterance."""
-
-    def __init__(self, model_dir: str | None = None):
-        self.model_dir = model_dir
-        self.proc: subprocess.Popen | None = None
-        self.queue: queue.Queue = queue.Queue()
-        self.lock = threading.Lock()
-        self.next_id = 0
-        self.reader: threading.Thread | None = None
-
-    def _start(self) -> None:
-        cmd = [os.environ.get("WHALE_NODE") or "node",
-               str(ROOT / "host" / "stt_worker.mjs")]
-        if self.model_dir:
-            cmd += ["--model-dir", self.model_dir]
-        self.proc = subprocess.Popen(
-            cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, text=True, bufsize=1,
-            cwd=str(ROOT), env=_node_env())
-        self.queue = queue.Queue()
-
-        def pump(stream):
-            for line in stream:
-                self.queue.put(line)
-
-        self.reader = threading.Thread(target=pump, args=(self.proc.stdout,), daemon=True)
-        self.reader.start()
-        # wait for the ready line
-        deadline = time.time() + 20
-        while time.time() < deadline:
-            try:
-                line = self.queue.get(timeout=max(0.1, deadline - time.time()))
-            except queue.Empty:
-                break
-            try:
-                msg = json.loads(line)
-            except ValueError:
-                continue
-            if msg.get("ready"):
-                return
-            if msg.get("ready") is False:
-                raise RuntimeError(msg.get("error") or "stt worker failed to start")
-        raise RuntimeError("stt worker did not become ready")
-
-    def transcribe(self, wav: Path, timeout: float = 30.0) -> dict:
-        with self.lock:
-            if self.proc is None or self.proc.poll() is not None:
-                self._start()
-            self.next_id += 1
-            rid = self.next_id
-            try:
-                self.proc.stdin.write(json.dumps({"id": rid, "wav": str(wav)}) + "\n")
-                self.proc.stdin.flush()
-            except Exception:
-                self._stop()
-                raise
-            deadline = time.time() + timeout
-            while time.time() < deadline:
-                try:
-                    line = self.queue.get(timeout=max(0.05, deadline - time.time()))
-                except queue.Empty:
-                    break
-                try:
-                    msg = json.loads(line)
-                except ValueError:
-                    continue
-                if msg.get("id") != rid:
-                    continue
-                if not msg.get("ok"):
-                    raise RuntimeError(msg.get("error") or "stt failed")
-                return msg
-            self._stop()
-            raise RuntimeError("stt worker timeout")
-
-    def _stop(self) -> None:
-        try:
-            if self.proc:
-                self.proc.kill()
-        except Exception:
-            pass
-        self.proc = None
-
-    def close(self) -> None:
-        self._stop()
-
-
 def _transcribe_dsh(wav: Path, model_dir: str | None = None) -> dict:
-    """Transcribe with DSH's own SenseVoice model (sherpa-onnx)."""
-    script = ROOT / "host" / "dsh_stt.mjs"
-    node = os.environ.get("WHALE_NODE") or "node"
-    cmd = [node, str(script), "--wav", str(wav)]
-    if model_dir:
-        cmd += ["--model-dir", model_dir]
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=90,
-                          cwd=str(ROOT), env=_node_env())
-    line = (proc.stdout or "").strip().splitlines()
-    if not line:
-        raise RuntimeError(f"dsh_stt empty output: {(proc.stderr or '').strip()[:200]}")
-    result = json.loads(line[-1])
-    if not result.get("ok"):
-        raise RuntimeError(str(result.get("error") or "dsh stt failed"))
-    return result
-
-
-
-_APP_CANON = ["Stremio", "TiviMate", "Nuvio", "CloudStream", "YouTube", "Netflix",
-              "Prime Video", "Disney+", "Projectivy", "OwnTV", "JapanTV",
-              "Haystack News", "Amazon Music"]
-_APP_ALIASES = {
-    "netflicks": "Netflix", "netflex": "Netflix", "prime": "Prime Video",
-    "disney": "Disney+", "you tube": "YouTube", "youtube": "YouTube",
-    "stremio": "Stremio", "streemo": "Stremio", "streemio": "Stremio",
-    "streio": "Stremio", "stremo": "Stremio", "tivimate": "TiviMate",
-    "tivimates": "TiviMate", "nuvio": "Nuvio", "nubio": "Nuvio",
-    "cloudstream": "CloudStream", "cloud stream": "CloudStream",
-}
-_CANON_LOWER = {c.lower(): c for c in _APP_CANON}
-
-
-def _app_name_match(word: str) -> str | None:
-    import difflib
-    w = word.lower()
-    if w in _APP_ALIASES:
-        return _APP_ALIASES[w]
-    if w in _CANON_LOWER:
-        return _CANON_LOWER[w]
-    if len(w) >= 5:
-        hit = difflib.get_close_matches(w, _CANON_LOWER.keys(), n=1, cutoff=0.82)
-        if hit:
-            return _CANON_LOWER[hit[0]]
-    return None
-
-
-def _correct_app_names(text: str) -> str:
-    """Repair STT slips for the app names people actually say on this TV."""
-    if not text:
-        return text
-
-    def repl(match):
-        word = match.group(0)
-        low = word.lower()
-        if low == "open":
-            return word
-        if low.startswith("open") and len(low) > 6:
-            rest = low[4:]
-            name = _app_name_match(rest)
-            if name:
-                return "open " + name
-        name = _app_name_match(low)
-        return name or word
-
-    return re.sub(r"[A-Za-z]{4,}", repl, text)
-
-
-def _transcribe_dsh_oneshot(wav: Path, model_dir: str | None = None) -> dict:
-    """One-shot fallback (kept for CLI/tests)."""
-    script = ROOT / "host" / "dsh_stt.mjs"
+    """Transcribe with DSH's own SenseVoice worker (sherpa-onnx)."""
+    script = ROOT / "dshtv" / "dsh_stt.mjs"
     node = os.environ.get("WHALE_NODE") or "node"
     cmd = [node, str(script), "--wav", str(wav)]
     if model_dir:
@@ -518,7 +271,6 @@ class Transcriber:
         self.dsh_model_dir = dsh_model_dir
         self.model = model
         self._lock = threading.Lock()
-        self._worker = _DshWorker(dsh_model_dir) if engine == "dsh" else None
         os.environ.setdefault("HF_HOME", str(ROOT / ".tools" / "hf-cache"))
         os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 
@@ -528,37 +280,38 @@ class Transcriber:
             return {"text": "", "model": self.engine,
                     "note": f"near-silence rms={rms:.0f}"}
         if self.engine == "dsh":
-            prepared = normalize_wav(wav)
             try:
-                result = None
-                if self._worker is not None:
-                    try:
-                        result = self._worker.transcribe(prepared)
-                    except Exception as exc:  # noqa: BLE001
-                        print(f"warm stt worker failed ({exc}); one-shot retry", flush=True)
-                if result is None:
-                    result = _transcribe_dsh_oneshot(prepared, self.dsh_model_dir)
-                text = _correct_app_names(_clean_transcript(result.get("text", "")))
-                if text and not re.search(r"[a-zA-Z0-9]", text):
-                    text = ""
-                return {"text": text, "model": "sensevoice-dsh", "engine": "dsh",
-                        "ms": result.get("ms")}
-            except Exception as exc:  # noqa: BLE001
-                print(f"dsh stt failed: {exc}", flush=True)
-            finally:
-                if prepared != wav:
-                    try:
-                        prepared.unlink()
-                    except OSError:
-                        pass
+                prepared = normalize_wav(wav)
+                try:
+                    result = _transcribe_dsh(prepared, self.dsh_model_dir)
+                finally:
+                    if prepared != wav:
+                        try:
+                            prepared.unlink()
+                        except OSError:
+                            pass
+                text = _clean_transcript(result.get("text", ""))
+                # The far-field model is tuned for quiet speech and loses short words
+                # ("sumo" -> "Zo"). Ask Whisper as a second opinion and keep whichever read
+                # more words; on a tie the far-field model wins, since that is the one this
+                # house tuned. Costs about a second and only runs in dsh mode.
+                second = self._whisper(wav)
+                other = second.get("text", "")
+                # Prefer the second reading when it disagrees, unless it collapsed (Whisper
+                # sometimes returns almost nothing on a noisy clip, and then the far-field
+                # model is the better answer after all).
+                if other and other != text and len(other) >= len(text) * 0.6:
+                    second["engine"] = "whisper(second-opinion)"
+                    return second
+                return {"text": text, "model": "sensevoice-dsh", "engine": "dsh"}
+            except Exception as exc:  # fall back to Whisper if the DSH worker fails
+                print(f"dsh stt failed, falling back to whisper: {exc}", flush=True)
+        return self._whisper(wav)
+
+    def _whisper(self, wav: Path) -> dict:
         prepared = normalize_wav(wav)
         try:
-            try:
-                import mlx_whisper
-            except ImportError as exc:
-                raise RuntimeError(
-                    "no STT engine available: DSH worker failed and mlx_whisper "
-                    "is not installed") from exc
+            import mlx_whisper
 
             with self._lock:
                 result = mlx_whisper.transcribe(
@@ -572,8 +325,7 @@ class Transcriber:
                     verbose=None,
                 )
             text = (result.get("text") or "").strip()
-            return {"text": _correct_app_names(_clean_transcript(text)),
-                    "model": self.model, "engine": "whisper"}
+            return {"text": _clean_transcript(text), "model": self.model, "engine": "whisper"}
         finally:
             if prepared != wav:
                 try:
@@ -604,28 +356,7 @@ class DshVoice:
         os.chmod(SESSION_FILE, 0o600)
 
     def ask(self, utterance: str) -> dict:
-        try:
-            tv_memory.log_event("command", query=utterance)
-        except Exception:
-            pass
-        habits = ""
-        try:
-            habits = tv_memory.taste_text()
-        except Exception:
-            pass
-        context = ""
-        try:
-            context = (Path(__file__).resolve().parent / "tv-apps.json").read_text(encoding="utf-8")
-            context = context[:6000]
-        except Exception:
-            pass
-        prompt = (f"{BRIEF}\n\n"
-                  f"REPO: {ROOT} — the shell may start in the workspace parent; "
-                  f"cd {ROOT} first or use absolute paths like "
-                  f"`python3 {ROOT}/host/dshtv.py state`.\n\n"
-                  f"## Household taste (learned locally)\n{habits}\n\n"
-                  f"## App catalog (truncated JSON; full file host/tv-apps.json)\n{context}\n\n"
-                  f"Transcript: {utterance}")
+        prompt = f"{BRIEF}\n\nTranscript: {utterance}"
         cmd = ["dsh", "--profile", "headless", "--json"]
         if self.session_id:
             cmd += ["--session-id", self.session_id]
@@ -657,53 +388,8 @@ class DshVoice:
             self._save_session(sid)
         if error and not final:
             final = "Sorry, my brain is not connected right now."
-
-        installed = apply_pending_catalogs()
-        reply = final.strip()
-        if installed:
-            ok_rows = [ln for ln in installed if ln.startswith("OK")]
-            if ok_rows and reply:
-                names = []
-                for ln in ok_rows:
-                    m = re.search(r'name="([^"]+)"', ln)
-                    count = re.search(r"picks=(\d+)", ln)
-                    if m:
-                        names.append(m.group(1) + (f", {count.group(1)} titles" if count else ""))
-                if names:
-                    reply = f"{reply} ({'; '.join(names)} is live.)"
-            elif not ok_rows:
-                reply = f"{(reply + ' ') if reply else ''}The catalog did not install: {installed[-1]}"
-        return {"reply": reply, "sessionId": sid, "installed": installed,
+        return {"reply": final.strip(), "sessionId": sid,
                 "stderr": (proc.stderr or "").strip()[-400:]}
-
-
-def apply_pending_catalogs() -> list[str]:
-    """Install anything the assistant drafted, and return one factual line per file.
-
-    This is the whole reason the assistant cannot be trusted to announce its own success: it
-    cannot see the live store at all. So the applying happens here, and the result is appended
-    to whatever it said.
-    """
-    results: list[str] = []
-    if not PENDING_CATALOGS.is_dir() or not INSTALLER.is_file():
-        return results
-    for path in sorted(PENDING_CATALOGS.glob("*.json")):
-        try:
-            proc = subprocess.run([sys.executable, str(INSTALLER), str(path)],
-                                  capture_output=True, text=True, timeout=180)
-        except Exception as exc:  # noqa: BLE001 - never fail the turn on the installer
-            results.append(f"installer-error({exc.__class__.__name__})")
-            continue
-        lines = [ln.strip() for ln in (proc.stdout or "").splitlines() if ln.strip()]
-        verdict = lines[-1] if lines else f"installer-exit-{proc.returncode}"
-        results.append(verdict)
-        done_dir = PENDING_CATALOGS / "done"
-        done_dir.mkdir(exist_ok=True)
-        try:
-            path.rename(done_dir / path.name)
-        except OSError:
-            path.unlink(missing_ok=True)
-    return results
 
 
 def tv_health() -> dict:
@@ -741,6 +427,7 @@ class Handler(BaseHTTPRequestHandler):
         body = json.dumps(payload, ensure_ascii=False).encode()
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Connection", "close")
         self.end_headers()
@@ -752,7 +439,7 @@ class Handler(BaseHTTPRequestHandler):
         ip = lan_ip()
         port = self.server.server_address[1]
         if path == "/pair/new":
-            pid, code = new_pair(self.client_address[0])
+            pid, code = new_pair()
             url = f"http://{ip}:{port}/pair?id={pid}"
             return self._json(200, {"ok": True, "id": pid, "code": code,
                                     "url": url, "qr": qr_png_b64(url),
@@ -781,66 +468,16 @@ class Handler(BaseHTTPRequestHandler):
         return self._json(404, {"ok": False, "error": "not found"})
 
     def _pair_approve(self) -> None:
-        pid, parsed = self._pair_id_from_body()
-        json_reply = self._wants_json()
-        if not parsed:
-            return self._pair_error(400, "bad request body", json_reply)
+        from urllib.parse import parse_qs
+        length = int(self.headers.get("Content-Length") or 0)
+        body = self.rfile.read(length).decode("utf-8", "replace")
+        fields = parse_qs(body)
+        pid = (fields.get("id") or [""])[0]
         entry = PAIRS.get(pid)
         if not entry or time.time() - entry["created"] > PAIR_TTL_SECONDS:
-            return self._pair_error(404, "expired", json_reply)
+            return self._html(404, "<h1>Pairing link expired</h1>")
         entry["approved"] = True
-        if json_reply:
-            return self._json(200, {"ok": True, "approved": True, "id": pid})
         return self._html(200, "<h1>Approved</h1><p>The TV will pick up its settings now.</p>")
-
-    def _pair_deny(self) -> None:
-        pid, parsed = self._pair_id_from_body()
-        json_reply = self._wants_json()
-        if not parsed:
-            return self._pair_error(400, "bad request body", json_reply)
-        if PAIRS.pop(pid, None) is None:
-            return self._pair_error(404, "expired", json_reply)
-        if json_reply:
-            return self._json(200, {"ok": True, "denied": True, "id": pid})
-        return self._html(200, "<h1>Denied</h1><p>This pairing request was cancelled.</p>")
-
-    def _pair_pending(self) -> None:
-        """Token-authenticated list for the DSH GUI (never on the public /pair page)."""
-        return self._json(200, {"ok": True, "pending": pending_pairs(),
-                                "now": int(time.time() * 1000)})
-
-    def _pair_error(self, code: int, error: str, json_reply: bool) -> None:
-        if json_reply:
-            return self._json(code, {"ok": False, "error": error})
-        return self._html(code, f"<h1>{error.capitalize()}</h1>")
-
-    def _request_body(self) -> bytes:
-        length = int(self.headers.get("Content-Length") or 0)
-        if length <= 0:
-            return b""
-        return self.rfile.read(length)
-
-    def _wants_json(self) -> bool:
-        """True when the caller asked for machine-readable output (GUI, curl, scripts)."""
-        accept = (self.headers.get("Accept") or "").lower()
-        ctype = (self.headers.get("Content-Type") or "").lower()
-        return "application/json" in accept or "application/json" in ctype
-
-    def _pair_id_from_body(self) -> tuple[str, bool]:
-        """Read the pairing id from a JSON `{id}` body or a form field `id`."""
-        raw = self._request_body()
-        ctype = (self.headers.get("Content-Type") or "").lower()
-        if "application/json" in ctype:
-            try:
-                data = json.loads(raw.decode("utf-8") or "{}")
-            except (ValueError, UnicodeDecodeError):
-                return "", False
-            if not isinstance(data, dict):
-                return "", False
-            return str(data.get("id") or "").strip(), True
-        from urllib.parse import parse_qs
-        fields = parse_qs(raw.decode("utf-8", "replace"))
-        return (fields.get("id") or [""])[0].strip(), True
 
     def _html(self, code: int, body: str) -> None:
         data = ("<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>"
@@ -848,6 +485,7 @@ class Handler(BaseHTTPRequestHandler):
                 + body).encode()
         self.send_response(code)
         self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Connection", "close")
         self.end_headers()
@@ -855,10 +493,17 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?", 1)[0]
-        if path == "/pair/pending":
-            if not self._auth():
-                return self._json(401, {"ok": False, "error": "unauthorized"})
-            return self._pair_pending()
+        if path == "/discover":
+            return self._json(200, {"ok": True, "devices": discover_devices()})
+        if path == "/ui/status":
+            tvhost = ""
+            try:
+                tvhost = json.loads(TV_CONFIG.read_text(encoding="utf-8")).get("host", "")
+            except Exception:
+                pass
+            return self._json(200, {"ok": True, "daemon": True,
+                                    "tvHost": tvhost,
+                                    "pairing": len([p for p in PAIRS.values() if not p["approved"]])})
         if path.startswith("/pair"):
             return self._pair_get(path)
         if not self._auth():
@@ -866,61 +511,14 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.startswith("/health"):
             return self._json(200, {"ok": True, "sessionId": self.brain.session_id,
                                     "tv": tv_health(), "now": int(time.time() * 1000)})
-        if path == "/apps":
-            try:
-                catalog = json.loads((Path(__file__).resolve().parent / "tv-apps.json")
-                                     .read_text(encoding="utf-8"))
-                return self._json(200, {"ok": True, **catalog})
-            except Exception as exc:  # noqa: BLE001
-                return self._json(500, {"ok": False, "error": str(exc)})
-        if path == "/memory/summary":
-            try:
-                return self._json(200, {"ok": True, "summary": tv_memory.summary()})
-            except Exception as exc:  # noqa: BLE001
-                return self._json(500, {"ok": False, "error": str(exc)})
-        if path == "/suggest":
-            try:
-                return self._json(200, {"ok": True, "suggestion": tv_memory.latest_suggestion()})
-            except Exception as exc:  # noqa: BLE001
-                return self._json(500, {"ok": False, "error": str(exc)})
         return self._json(404, {"ok": False, "error": "not found"})
 
     def do_POST(self):
         path = self.path.split("?", 1)[0]
         if path == "/pair/approve":
             return self._pair_approve()
-        if path == "/pair/deny":
-            return self._pair_deny()
         if not self._auth():
             return self._json(401, {"ok": False, "error": "unauthorized"})
-        if path == "/feedback":
-            length = int(self.headers.get("Content-Length") or 0)
-            try:
-                body = json.loads(self.rfile.read(length).decode("utf-8"))
-                subject = str(body.get("subject") or "").strip()
-                verdict = str(body.get("verdict") or "").strip()
-            except Exception:
-                return self._json(400, {"ok": False, "error": "bad json"})
-            if not subject or verdict not in ("like", "dislike", "not_interested", "watched"):
-                return self._json(400, {"ok": False, "error": "subject/verdict required"})
-            tv_memory.feedback(subject, verdict, body.get("detail"))
-            return self._json(200, {"ok": True})
-        if path == "/suggest/generate":
-            length = int(self.headers.get("Content-Length") or 0)
-            try:
-                body = json.loads(self.rfile.read(length).decode("utf-8"))
-            except Exception:
-                body = {}
-            topic = str(body.get("topic") or "something new and talked about this week")
-            proc = subprocess.run(
-                [sys.executable, str(Path(__file__).resolve().parent / "suggest.py"),
-                 "--topic", topic],
-                capture_output=True, text=True, cwd=str(ROOT), timeout=240)
-            try:
-                out = json.loads(proc.stdout.strip().splitlines()[-1])
-            except Exception:
-                out = {"ok": False, "error": proc.stderr[-400:] or "suggest failed"}
-            return self._json(200 if out.get("ok") else 502, out)
         if self.path.startswith("/ask"):
             length = int(self.headers.get("Content-Length") or 0)
             try:

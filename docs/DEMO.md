@@ -4,11 +4,11 @@ Target narrative:
 
 1. User: “I’m in the mood for K-drama.”
 2. Assistant researches r/kdrama, MyDramaList, 2026 rankings → answers with **top 3**
-   → recommends one with a reason and notes the available Stremio addons
-   (Torrentio/yastream) → asks **“Want to watch it here?”**
+   → recommends one with a reason and notes the user's installed Stremio addons
+   → asks **“Want to watch it here?”**
 3. User: “Yes.”
 4. Assistant opens Stremio, looks in the **catalog rows first**, then searches the
-   title, opens it, picks the best Torrentio/yastream stream and plays it.
+   title, opens it, picks the best stream from the user’s addons and plays it.
 
 ## How to run
 
@@ -28,12 +28,12 @@ adb pull /sdcard/dsh-demo.mp4 docs/media/dsh-demo.mp4
 
 The bridge CLI follows `host/config.json` by default (the onn. 4K Pro, “Living
 Room TV”). To drive the second box — the **onn. 4K Plus Streaming** on
-`192.168.5.205`, different subnet, so it needs its own target — point
+`192.168.1.51`, different subnet, so it needs its own target — point
 `DSHTV_CONFIG` at a config for it; the reveal intent follows the same config:
 
 ```bash
 cat > /tmp/plus-tv.json <<'JSON'
-{"host":"192.168.5.205","port":8765,"token":"","serial":"192.168.5.205:5555"}
+{"host":"192.168.1.51","port":8765,"token":"","serial":"192.168.1.51:5555"}
 JSON
 DSHTV_CONFIG=/tmp/plus-tv.json python3 host/demo_kdrama.py --recommend --reveal
 ```
@@ -43,8 +43,7 @@ not discoverable from the config. The TV has to be paired with the Mac (Settings
 → Whale-chan TV in DSH, or the phone approval page) and its bridge running
 (green **Start service** on Bridge home) before key injection works.
 
-Latest run on the 4K Plus: recommendation + “FOR YOU” overlay worked
-([screenshot](screenshots/tv-demo-plus-reveal.png)); the `--play` leg still stops
+Latest run on the 4K Plus: recommendation + “FOR YOU” overlay worked; the `--play` leg still stops
 at the known search/catalog matcher gap (below) — recording:
 `docs/media/plus-demo.mp4`.
 
@@ -56,37 +55,20 @@ at the known search/catalog matcher gap (below) — recording:
 | Recommendation overlay (“FOR YOU”, addons, watch question) | ✅ working |
 | Catalog-first scan of Stremio Home/Discover | ✅ rows visible via `ui`; matcher being hardened |
 | Search fallback | ⚠️ addon rows can show “Search unavailable”; the search picker depends on addon health. On the 4K Plus run, “The Remarried Empress” was not matched and Stremio ended up on another title’s stream list |
-| Open title + list streams | ✅ Torrentio/Comet sources appear (verified on the 4K Plus) |
+| Open title + list streams | ✅ the installed addons’ sources appear (verified on the 4K Plus) |
 | Playback | ❌ first sources exit the player with “Ow! That stings!” — likely VPN/P2P/debrid or codec; needs stream-health selection |
 
 The next milestone is the playback leg: filter stream cards by addon + seeders,
 skip failing sources, verify playback with `state`/`ui`, then record the demo.
 
-## Trending-anime demo (recorded 2026-11)
+## Recording a public demo
 
-Ask: *"Suggest an anime that is trending."*
+The earlier published demo was withdrawn: it showed third-party stream addons and a commercial
+episode. Record new demos against content you are allowed to show, such as a free channel
+from the public [iptv-org](https://github.com/iptv-org/iptv) lists or a public-domain film,
+on a plain launcher wallpaper and with an empty watch history.
 
-1. **Research** — `host/demo_anime.py --recommend` asks AniList for currently
-   airing anime sorted by `TRENDING_DESC` (a legit anime database, same data
-   MAL-style sites show). The pick is #5 on that list on the recording day:
-   *The Apothecary Diaries Season 3* (score 85, 111,488 followers).
-2. **Recommend** — the assistant's FOR YOU card shows the title and the reason
-   (rank, score, episode count, genres), then closes.
-3. **Drive Stremio** — launch → Search → type the title → open the series → the
-   currently-airing season (S03) → episode E01 → wait for addons → pick the
-   H.264 Torrentio source → play.
-4. **Playback** — the episode plays on the box (the player controls show
-   `The Apothecary Diaries – S03E01 – Locusts`, 00:10/24:00).
-
-The published video ([`docs/demo.mp4`](demo.mp4), [`docs/demo.gif`](demo.gif))
-is a real capture from the onn. 4K Plus, edited from three takes: this box's
-`screenrecord` stops when the video player takes the display, so the overlay,
-the Stremio UI and the playback were captured separately and cut together.
-Everything else on screen (search, seasons, sources, playback) is the actual
-device.
-
-**Capture notes for anyone redoing it:** the first Torrentio source is HEVC —
-it plays, but hardware overlay planes do not appear in `screencap`/`screenrecord`
-(black video), so pick the H.264 release. The source row also contains a
-"support the project" card that opens a donation page in the TV browser; clamp
-left before stepping right or you will open it by accident.
+Capture notes: on these boxes hardware-decoded HEVC does not appear in
+`screencap`/`screenrecord` (black video), so pick an H.264 stream, and `screenrecord`
+stops when a video player takes the display, so the UI and the playback may need
+separate takes.

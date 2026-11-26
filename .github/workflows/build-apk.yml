@@ -29,14 +29,11 @@ jobs:
           WHALE_TOKEN: pair-me
           WHALE_HOST: 192.168.1.10
         run: bash android/tv-assistant/build.sh
-      - name: Build the Disney+ button shim
-        run: bash android/disney-shim/build.sh
       - uses: actions/upload-artifact@v4
         with:
           name: whale-chan-apks
           path: |
             android/tv-assistant/TVAssistant.apk
-            android/disney-shim/DisneyShim.apk
 
   verify-tv:
     name: verify-tv

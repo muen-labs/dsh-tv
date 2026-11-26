@@ -17,7 +17,7 @@ below are the ones that cost time while getting it to look and feel right.
 | APK source | `dsh-tv/android/tv-assistant` — the only copy: build here, install from here |
 | Repo root | `dsh-tv/` (`github.com/muen-labs/dsh-tv`) |
 | Android SDK / JDK | `.tools/android-sdk`, `.tools/jdk` |
-| ADB | `.tools/platform-tools/adb -s 192.168.4.58:5555` |
+| ADB | `.tools/platform-tools/adb -s 192.168.1.50:5555` |
 | Host voice daemon | `.tools`-independent: `host/whale_voice.py --serve` on `:8766` |
 | Design reference | `dsh-tv/DESIGN.md`, `dsh-tv/docs/ui-mockup.html` |
 
