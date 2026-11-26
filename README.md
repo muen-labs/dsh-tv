@@ -10,14 +10,9 @@ and answers through an animated whale-girl pet. Over the LAN. No cloud in the au
 [![Runtime: LAN only](https://img.shields.io/badge/runtime-LAN%20only-FFAA00)](#security)
 [![Status: alpha](https://img.shields.io/badge/status-alpha-FF3D71)](#project-status)
 
-**Demo** — a real capture on the onn. 4K Plus. The ask: *“Suggest an anime that
-is trending.”* The assistant researches AniList, shows the pick in the FOR YOU
-card, opens Stremio, searches, opens the currently-airing season, picks an H.264
-source and plays it on the TV.
+![The assistant listening over Stremio on an onn. TV box](docs/screenshots/tv-assistant-listening.png)
 
-![DeepSeek TV Assistant demo: AniList research, FOR YOU card, Stremio search, source pick, playback](docs/demo.gif)
-
-[▶ Watch the MP4](docs/demo.mp4) · [every screen in the UI gallery](docs/ui-gallery.html)
+Every implemented screen is in the [UI gallery](docs/ui-gallery.html). A demo video is being re-recorded.
 
 One APK contains the **TV bridge** (accessibility key injection, app launch,
 screenshots) and the **Whale-chan assistant UI**. A small daemon on the Mac keeps a

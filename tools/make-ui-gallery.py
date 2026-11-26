@@ -20,13 +20,14 @@ import hashlib
 import json
 import shutil
 import subprocess
+import tempfile
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 OUT = DOCS / "ui-gallery.html"
-CACHE = Path("/tmp/dsh-ui-gallery-cache")
+CACHE = Path(tempfile.gettempdir()) / "dsh-ui-gallery-cache"
 
 # One entry per implemented screen. `f` is relative to docs/.
 SCREENS = [
@@ -61,12 +62,6 @@ SCREENS = [
     dict(g="Assistant modal", t="Modal over the launcher", s="modal", f="screenshots/tv-assistant-modal.png",
          c="Listening modal over the Projectivy launcher; the bubble, pet and controls stay the crispest elements."),
 
-    dict(g="Suggestions & demo", t="FOR YOU suggestion", s="suggestion", f="screenshots/tv-suggestion.png",
-         c="Proactive suggestion overlay: research-backed pick with the “Want to watch it here?” question."),
-    dict(g="Suggestions & demo", t="K-drama demo — recommend+reveal (4K Plus)", s="demo", f="screenshots/tv-demo-plus-reveal.png",
-         c="The demo run on the onn. 4K Plus: top-3 research from r/kdrama/MyDramaList + the FOR YOU overlay."),
-    dict(g="Suggestions & demo", t="K-drama demo — Stremio streams (4K Plus)", s="demo", f="screenshots/tv-demo-plus-stremio.png",
-         c="The play leg on the 4K Plus: Stremio stream list. The catalog/search matcher is still the known gap (see docs/DEMO.md)."),
 
     dict(g="DSH pane", t="Whale-chan TV pane (light)", s="ready", f="screenshots/pane-live.png",
          c="The DSH settings section: daemon + TV bridge state, the TV it found, and live pairing requests with Approve / Deny inside DSH."),

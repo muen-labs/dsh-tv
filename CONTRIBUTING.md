@@ -48,7 +48,7 @@ skills/                 agent skill(s) that ship with the repo
 
 | Area | Why it matters |
 | --- | --- |
-| **Stremio stream selection** | Pick healthy Torrentio/yastream/debrid sources instead of the first card (current playback blocker: player exits with “Ow! That stings!”). |
+| **Stremio stream selection** | Pick a healthy source from the user’s stream addons instead of the first card (current playback blocker: player exits with “Ow! That stings!”). |
 | **Catalog-first navigation** | Reliably scan Home/Discover rows via `uiautomator` text, then fall back to search. |
 | **Voice UX** | Streaming partial transcripts, barge-in, multi-turn “yes” without losing overlay state. |
 | **App playbooks** | TiviMate M3U/EPG, Nuvio, CloudStream, OwnTV verification on real devices. |
